@@ -16,7 +16,7 @@ router.post('/forgot-pass-send-otp', validationMiddleware(forgotPassSendOtpSchem
 router.post('/forgot-pass-verify-otp', validationMiddleware(forgotPassVerifyOtpSchema), AuthController.forgotPassVerifyOtp);
 router.post('/forgot-pass-create-new-pass', validationMiddleware(forgotPassCreateNewPassSchema), AuthController.forgotPassCreateNewPass);
 
-router.put('/change-password', AuthMiddleware(UserRole.admin, UserRole.user), validationMiddleware(changePasswordSchema), AuthController.changePassword);
+router.put('/change-password', AuthMiddleware(UserRole.admin, UserRole.super_admin, UserRole.user), validationMiddleware(changePasswordSchema), AuthController.changePassword);
 
 
 

@@ -7,6 +7,7 @@ export interface IUser {
   address?: string; //for admin
   gender: 'male' | 'female',
   password: string;
+  passwordChangedAt?: Date;
   role: "user" | "admin" | "super_admin";
   status: "blocked" | "unblocked";
   profileImg?: string

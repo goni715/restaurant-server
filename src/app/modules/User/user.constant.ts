@@ -3,6 +3,7 @@
 export const UserRole = {
     user: 'user',
     admin: 'admin',
+    super_admin: 'super_admin'
 } as const;
 
 

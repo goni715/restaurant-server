@@ -29,6 +29,9 @@ const userSchema = new Schema<IUser>({
         required: [true, 'password is required'],
         select:0
     },
+    passwordChangedAt: {
+        type: Date,
+    },
     role: {
         type: String,
         enum: ["user", "admin", "super_admin"],

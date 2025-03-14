@@ -163,7 +163,7 @@ const forgotPassCreateNewPassService = async (payload: INewPassword) => {
 
          //update the password
         const hashPass = await hashedPassword(password);//hashedPassword
-        const result = await UserModel.updateOne({email: email},{password: hashPass})
+        const result = await UserModel.updateOne({email: email},{password: hashPass, passwordChangedAt: new Date()})
 
       return result;
 }
@@ -191,7 +191,7 @@ const changePasswordService = async (loginUserId: string, payload: IChangePass) 
    //update the password
    const result = await UserModel.updateOne(
      { _id: new ObjectId(loginUserId) },
-     { password: hashPass }
+     { password: hashPass, passwordChangedAt: new Date() }
    );
    
    return result;

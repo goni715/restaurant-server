@@ -21,7 +21,8 @@ router.post(
 
 
 router.get('/get-users', AuthMiddleware(UserRole.super_admin), UserController.getUsers)
-
+router.get('/get-single-user/:id', AuthMiddleware(UserRole.super_admin, UserRole.admin), UserController.getSingleUser)
+router.get('/get-me', AuthMiddleware(UserRole.super_admin, UserRole.admin, UserRole.user), UserController.getMe)
 
 
 export const UserRoutes = router;

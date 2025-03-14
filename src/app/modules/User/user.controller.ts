@@ -2,7 +2,7 @@ import catchAsync from "../../utils/catchAsync";
 import pickValidFields from "../../utils/pickValidFields";
 import sendResponse from "../../utils/sendResponse";
 import { UserValidFields } from "./user.constant";
-import { createUserService, getUsersService, } from "./user.service";
+import { createUserService, getMeService, getSingleUserService, getUsersService, } from "./user.service";
 
 
 const createUser = catchAsync(async (req, res) => {
@@ -30,11 +30,36 @@ const getUsers = catchAsync(async (req, res) => {
 
 
 
+const getSingleUser = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const result = await getSingleUserService(id);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "User is retrieved successfully",
+    data: result
+  });
+});
+
+
+
+const getMe = catchAsync(async (req, res) => {
+  const loginUserId = req.headers.id;
+  const result = await getMeService(loginUserId as string);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "My Information is retrieved successfully",
+    data: result
+  });
+});
 
 
 const UserController = {
     createUser,
-    getUsers
+    getUsers,
+    getSingleUser,
+    getMe
 }
 
 export default UserController;

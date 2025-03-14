@@ -112,5 +112,24 @@ const getUsersService = async (query: TUserQuery) => {
 }
 
 
+const getSingleUserService = async (userId: string) => {
+  const user = await UserModel.findById(userId).select('-role -status -address');
+  if(!user){
+    throw new AppError(404, "No User Found");
+  }
+  return user;
+}
 
-export { createUserService, getUsersService };
+
+
+const getMeService = async (userId: string) => {
+  const user = await UserModel.findById(userId);
+  if(!user){
+    throw new AppError(404, "No User Found");
+  }
+  return user;
+}
+
+
+
+export { createUserService, getUsersService, getSingleUserService, getMeService };

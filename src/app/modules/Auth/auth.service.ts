@@ -199,11 +199,51 @@ const changePasswordService = async (loginUserId: string, payload: IChangePass) 
 }
 
 
+const changeStatusService = async (id: string, payload: { status: string }) => {
+  const ObjectId = Types.ObjectId;
+
+  const user = await UserModel.findById(id);
+  if(!user){
+    throw new AppError(404, "User Not Found");
+  }
+
+  console.log(user);
+
+   const result = await UserModel.updateOne(
+    {_id: new ObjectId(id)},
+    payload
+   );
+
+   return result;
+}
+
+
+const deleteMyAccountService = async (loginUserId: string, password: string) => {
+  const ObjectId = Types.ObjectId;
+  const user = await UserModel.findById(loginUserId).select('+password');
+  if(!user){
+    throw new AppError(404, "User Not Found");
+  }
+
+   //check password
+   const isPasswordMatch = await checkPassword(password, user.password);
+   if (!isPasswordMatch) {
+       throw new AppError(400, 'Password is not correct');
+   }
+
+  // ---------------------------------------------------------Transaction rollback ------------------------------------//
+   //delete user
+  const result = await UserModel.deleteOne({ _id: new ObjectId(loginUserId) })
+  return result;
+}
+
 export {
     loginUserService,
     loginSuperAdminService,
     forgotPassSendOtpService,
     forgotPassVerifyOtpService,
     forgotPassCreateNewPassService,
-    changePasswordService
+    changePasswordService,
+    changeStatusService,
+    deleteMyAccountService
 }

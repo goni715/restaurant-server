@@ -1,7 +1,7 @@
 import config from "../../config";
 import catchAsync from "../../utils/catchAsync";
 import sendResponse from "../../utils/sendResponse";
-import { changePasswordService, forgotPassCreateNewPassService, forgotPassSendOtpService, forgotPassVerifyOtpService, loginSuperAdminService, loginUserService } from "./auth.service";
+import { changePasswordService, changeStatusService, deleteMyAccountService, forgotPassCreateNewPassService, forgotPassSendOtpService, forgotPassVerifyOtpService, loginSuperAdminService, loginUserService } from "./auth.service";
 
 
 
@@ -100,6 +100,32 @@ const changePassword = catchAsync(async (req, res) => {
 
 
 
+const changeStatus = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const result = await changeStatusService(id, req.body);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "User status is changed successfully",
+    data: result
+  })
+});
+
+
+
+const deleteMyAccount = catchAsync(async (req, res) => {
+  const loginUserId = req.headers.id;
+  const { password } = req.body
+  const result = await deleteMyAccountService(loginUserId as string, password);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "My account is deleted successfully",
+    data: result
+  })
+});
+
+
 
 
  const AuthController = {
@@ -108,7 +134,9 @@ const changePassword = catchAsync(async (req, res) => {
   forgotPassSendOtp,
   forgotPassVerifyOtp,
   forgotPassCreateNewPass,
-  changePassword
+  changePassword,
+  changeStatus,
+  deleteMyAccount
 }
 
 export default AuthController;

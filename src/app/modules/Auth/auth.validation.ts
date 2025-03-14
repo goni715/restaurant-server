@@ -81,3 +81,22 @@ export const changePasswordSchema = z.object({
     .min(6, "New Password minimum 6 characters long")
     .trim()
 });
+
+
+
+export const changeStatusValidationSchema = z.object({
+  status: z.enum(["blocked", "unblocked"], {
+    errorMap: () => ({ message: "{VALUE} is not supported" }),
+  })
+});
+
+
+
+export const deleteAccountValidationSchema = z.object({
+  password: z
+    .string({
+      required_error: "Password is required",
+    })
+    .min(6, "Password minimum 6 characters long")
+    .trim(),
+});

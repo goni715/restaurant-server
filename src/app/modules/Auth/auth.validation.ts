@@ -1,0 +1,83 @@
+import { z } from "zod";
+
+
+
+
+export const loginValidationSchema = z.object({
+  email: z.string({
+    required_error: "email is required"
+  }).email(),
+  password: z
+    .string({
+      required_error: "Password is required",
+    })
+    .min(6, "Password minimum 6 characters long")
+    .trim(),
+});
+
+
+export const forgotPassSendOtpSchema = z.object({
+  email: z
+    .string({
+      required_error: "Email is required",
+    })
+    .email()
+    .trim(),
+});
+
+
+export const forgotPassVerifyOtpSchema = z.object({
+  email: z
+    .string({
+      required_error: "Email is required",
+    })
+    .email()
+    .trim(),
+  otp: z
+    .string({
+      required_error: "Otp is required",
+    })
+    .min(4, "otp must be 4 characters long")
+    .max(4, "otp must be 4 characters long")
+    .trim(),
+});
+
+
+export const forgotPassCreateNewPassSchema = z.object({
+  email: z
+    .string({
+      required_error: "Email is required",
+    })
+    .email()
+    .trim(),
+  otp: z
+    .string({
+      required_error: "Otp is required",
+    })
+    .min(4, "otp must be 4 characters long")
+    .max(4, "otp must be 4 characters long")
+    .trim(),
+  password: z
+    .string({
+      required_error: "Password is required",
+    })
+    .min(6, "Password minimum 6 characters long")
+    .trim(),
+});
+
+
+
+export const changePasswordSchema = z.object({
+  currentPassword: z
+    .string({
+      required_error: "Current Password is required",
+    })
+    .min(6, "CurrePassword minimum 6 characters long")
+    .trim(),
+    newPassword: z
+    .string({
+      required_error: "New Password is required",
+    })
+    .min(6, "New Password minimum 6 characters long")
+    .trim()
+});

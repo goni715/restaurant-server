@@ -10,9 +10,7 @@ export const UserRole = {
 export const UserSearchFields = [
     "fullName",
     "email",
-    "country",
-    "university",
-    "profession"
+    "phone"
 ]
 
 
@@ -22,7 +20,6 @@ export const UserValidFields: string[] = [
   "limit",
   "sortBy",
   "sortOrder",
-  "country",
-  "university",
-  "profession",
+  "status",
+  "gender"
 ];

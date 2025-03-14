@@ -2,7 +2,7 @@ import catchAsync from "../../utils/catchAsync";
 import pickValidFields from "../../utils/pickValidFields";
 import sendResponse from "../../utils/sendResponse";
 import { UserValidFields } from "./user.constant";
-import { createUserService, getSuggestedUsersService } from "./user.service";
+import { createUserService, getUsersService, } from "./user.service";
 
 
 const createUser = catchAsync(async (req, res) => {
@@ -16,15 +16,15 @@ const createUser = catchAsync(async (req, res) => {
 })
 
 
-const getSuggestedUsers = catchAsync(async (req, res) => {
-  const loginUserId = req.headers.id;
+const getUsers = catchAsync(async (req, res) => {
   const validatedQuery = pickValidFields(req.query, UserValidFields);
-  const result = await getSuggestedUsersService(loginUserId as string, validatedQuery);
+  const result = await getUsersService(validatedQuery);
   sendResponse(res, {
     statusCode: 200,
     success: true,
-    message: "Suggested Users are retrieved successfully",
-    data: result
+    message: "Users are retrieved successfully",
+    meta: result.meta,
+    data: result.data
   });
 });
 
@@ -33,7 +33,8 @@ const getSuggestedUsers = catchAsync(async (req, res) => {
 
 
 const UserController = {
-    createUser
+    createUser,
+    getUsers
 }
 
 export default UserController;

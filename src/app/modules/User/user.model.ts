@@ -24,6 +24,11 @@ const userSchema = new Schema<IUser>({
         type: String,
         default: ''
     },
+    gender: {
+        type: String,
+        enum: ["male", "female"],
+        required: true
+    },
     password: {
         type: String,
         required: [true, 'password is required'],

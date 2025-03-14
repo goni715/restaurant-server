@@ -20,5 +20,8 @@ router.post(
 );
 
 
+router.get('/get-users', AuthMiddleware(UserRole.super_admin), UserController.getUsers)
+
+
 
 export const UserRoutes = router;

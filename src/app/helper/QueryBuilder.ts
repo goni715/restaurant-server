@@ -13,7 +13,7 @@ export const makeSearchQuery = (searchTerm: string, SearchFields: string[]) => {
 }
 
 
-export const makeFilterQuery = (filters: Record<string, string>) => {
+export const makeFilterQuery = (filters: Record<string, any>) => {
   let filterQuery: any = {};
 
   Object.keys(filters).forEach((key) => {

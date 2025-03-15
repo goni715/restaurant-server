@@ -1,12 +1,142 @@
-import { IRestaurantPayload } from "./restaurant.interface";
+import mongoose, { Types } from "mongoose";
+import AppError from "../../errors/AppError";
+import UserModel from "../User/user.model";
+import { IRestaurantPayload, TRestaurantQuery } from "./restaurant.interface";
+import RestaurantModel from "./restaurant.model";
+import { makeFilterQuery, makeSearchQuery } from "../../helper/QueryBuilder";
+import { RestaurantSearchFields } from "./restaurant.constant";
 
 
 
 const createRestaurantService = async (payload: IRestaurantPayload) => {
-    return payload;
+    const { ownerData, restaurantData } = payload;
+
+    
+  //check email already existed
+  const emailExists = await UserModel.findOne({ email: ownerData.email });
+  if (emailExists) {
+    throw new AppError(409, 'This email is already existed');
+  }
+
+  //check restaurant exist
+  const restaurant = await RestaurantModel.findOne({ name: restaurantData.name});
+  if (restaurant) {
+    throw new AppError(409, 'This restaurant name is already taken or existed');
+  }
+
+
+  const session = await mongoose.startSession();
+
+    try{
+        session.startTransaction();
+
+        //create the user
+        const user = await UserModel.create(
+            [{ ...ownerData, role: "admin" }],
+            { session }
+        );
+
+
+        //create the restaurant
+        const newRestaurant = await RestaurantModel.create(
+            [{ ...restaurantData,ownerId: user[0]._id }],
+            { session }
+        )
+        await session.commitTransaction();
+        await session.endSession();
+        return newRestaurant[0]
+    }catch(err:any){
+        await session.abortTransaction();
+        await session.endSession();
+        throw new Error(err)
+    }
+    
 }
 
 
+const getRestaurantsService = async (query: TRestaurantQuery) => {
+  const ObjectId = Types.ObjectId;
+  // 1. Extract query parameters
+  const {
+    searchTerm,
+    page = 1,
+    limit = 10,
+    sortOrder = "desc",
+    sortBy = "createdAt",
+    ...filters // Any additional filters
+  } = query;
+
+  // 2. Set up pagination
+  const skip = (Number(page) - 1) * Number(limit);
+
+  //3. setup sorting
+  const sortDirection = sortOrder === "asc" ? 1 : -1;
+
+  //4. setup searching
+  let searchQuery = {};
+
+  if (searchTerm) {
+    searchQuery = makeSearchQuery(searchTerm, RestaurantSearchFields);
+  }
+
+  //5 setup filters
+
+  let filterQuery = {};
+  if (filters) {
+    filterQuery = makeFilterQuery(filters);
+  }
+
+  const result = await RestaurantModel.aggregate([
+    {
+      $lookup: { from: 'users', localField: 'ownerId', foreignField: '_id', as: 'owner' }
+    },
+    {
+      $unwind: "$owner"
+    },
+    {
+      $match: {
+        ...searchQuery, // Apply search query
+        ...filterQuery, // Apply filters
+      },
+    },
+    // {
+    //   $project: {
+    //     _id: 1,
+    //     fullName: 1,
+    //     email: 1,
+    //     phone: 1,
+    //     gender: 1,
+    //     role: 1,
+    //     status: 1,
+    //     profileImg: 1,
+    //     createdAt: 1,
+    //     updatedAt: 1,
+    //   },
+    // },
+    { $sort: { [sortBy]: sortDirection } },
+    { $skip: skip },
+    { $limit: Number(limit) },
+  ]);
+
+  // total count of matching users
+  const totalCount = await RestaurantModel.countDocuments({
+    ...searchQuery,
+    ...filterQuery,
+  });
+
+  return {
+    meta: {
+      page: Number(page), //currentPage
+      limit: Number(limit),
+      totalPages: Math.ceil(totalCount / Number(limit)),
+      total: totalCount,
+    },
+    data: result,
+  };
+};
+  
+
 export {
-    createRestaurantService
+    createRestaurantService,
+    getRestaurantsService
 }

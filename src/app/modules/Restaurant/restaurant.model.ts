@@ -38,10 +38,28 @@ const restaurantSchema = new Schema<IRestaurant>({
         required: true,
         trim: true
     },
-    featured: {
+    features: {
+        type: [String],
+        default: []
+    },
+    cancellationCharge: {
+        type: Number,
+        required: true,
+        trim: true
+    },
+    discount: {
         type: String,
         trim: true
     },
+    availability: {
+        type: String,
+        enum: [ "Immediate seating", "Open reservations", "Waitlist"]
+    },
+    status: {
+        type: String,
+        enum: ["active", "deactive"],
+        default: 'active'
+    }
 },{
     timestamps: true,
     versionKey: false

@@ -1,6 +1,8 @@
 import catchAsync from "../../utils/catchAsync";
+import pickValidFields from "../../utils/pickValidFields";
 import sendResponse from "../../utils/sendResponse";
-import { createRestaurantService } from "./restaurant.service";
+import { RestaurantValidFields } from "./restaurant.interface";
+import { createRestaurantService, getRestaurantsService } from "./restaurant.service";
 
 
 
@@ -16,9 +18,22 @@ const createRestaurant = catchAsync(async (req, res) => {
   
 
 
+const getRestaurants = catchAsync(async (req, res) => {
+  const validatedQuery = pickValidFields(req.query, RestaurantValidFields);
+  const result = await getRestaurantsService(validatedQuery);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Restaurants are retrieved successfully",
+    meta: result.meta,
+    data: result.data
+  });
+});
+
 
 const RestaurantController = {
-    createRestaurant
+    createRestaurant,
+    getRestaurants
 }
 
 export default RestaurantController;

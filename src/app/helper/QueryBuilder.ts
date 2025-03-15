@@ -1,6 +1,4 @@
 
-
-
 export const makeSearchQuery = (searchTerm: string, SearchFields: string[]) => {
     const searchQuery = {
       $or: SearchFields.map((item) => ({

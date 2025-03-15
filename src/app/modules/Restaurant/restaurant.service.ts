@@ -73,11 +73,19 @@ const getRestaurantsService = async (query: TRestaurantQuery) => {
   const sortDirection = sortOrder === "asc" ? 1 : -1;
 
   //4. setup searching
-  let searchQuery = {};
+  let searchQuery: any = {};
 
   if (searchTerm) {
     searchQuery = makeSearchQuery(searchTerm, RestaurantSearchFields);
+    searchQuery = {
+      $or: [
+        ...searchQuery?.$or,
+        { keywords: { $in: [new RegExp(searchTerm, "i")] } }
+      ]
+    }
   }
+
+  console.dir(searchQuery, {depth:null})
 
   //5 setup filters
 

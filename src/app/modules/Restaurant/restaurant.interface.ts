@@ -38,6 +38,7 @@ export const RestaurantValidFields: string[] = [
   "availability",
   "dining",
   "ratings",
+  "status"
 ];
 
 

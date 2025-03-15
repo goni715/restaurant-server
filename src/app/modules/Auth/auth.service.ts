@@ -8,7 +8,8 @@ import config from "../../config";
 import OtpModel from "./otp.model";
 import sendEmailUtility from "../../utils/sendEmailUtility";
 import hashedPassword from "../../utils/hashedPassword";
-import { Types } from "mongoose";
+import mongoose, { Types } from "mongoose";
+import RestaurantModel from "../Restaurant/restaurant.model";
 
 
 
@@ -231,10 +232,25 @@ const deleteMyAccountService = async (loginUserId: string, password: string) => 
        throw new AppError(400, 'Password is not correct');
    }
 
-  // ---------------------------------------------------------Transaction rollback ------------------------------------//
-   //delete user
-  const result = await UserModel.deleteOne({ _id: new ObjectId(loginUserId) })
-  return result;
+ const session = await mongoose.startSession();
+
+  try{
+    session.startTransaction();
+
+    //delete restaurant
+    await RestaurantModel.deleteOne({ ownerId: new ObjectId(loginUserId) })
+
+     //delete user
+     const result = await UserModel.deleteOne({ _id: new ObjectId(loginUserId) })
+     await session.commitTransaction();
+     await session.endSession();
+     return result;
+  }
+  catch(err:any){
+    await session.abortTransaction();
+    await session.endSession();
+    throw new Error(err)
+  }
 }
 
 export {

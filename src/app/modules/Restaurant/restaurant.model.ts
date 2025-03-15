@@ -53,7 +53,8 @@ const restaurantSchema = new Schema<IRestaurant>({
     },
     availability: {
         type: String,
-        enum: [ "Immediate seating", "Open reservations", "Waitlist"]
+        enum: [ "Immediate seating", "Open reservations", "Waitlist"],
+        required: true
     },
     status: {
         type: String,

@@ -5,6 +5,7 @@ import { IRestaurantPayload, TRestaurantQuery } from "./restaurant.interface";
 import RestaurantModel from "./restaurant.model";
 import { makeFilterQuery, makeSearchQuery } from "../../helper/QueryBuilder";
 import { RestaurantSearchFields } from "./restaurant.constant";
+import { features } from "process";
 
 
 
@@ -85,7 +86,7 @@ const getRestaurantsService = async (query: TRestaurantQuery) => {
     }
   }
 
-  console.dir(searchQuery, {depth:null})
+  //console.dir(searchQuery, {depth:null})
 
   //5 setup filters
 
@@ -107,20 +108,30 @@ const getRestaurantsService = async (query: TRestaurantQuery) => {
         ...filterQuery, // Apply filters
       },
     },
-    // {
-    //   $project: {
-    //     _id: 1,
-    //     fullName: 1,
-    //     email: 1,
-    //     phone: 1,
-    //     gender: 1,
-    //     role: 1,
-    //     status: 1,
-    //     profileImg: 1,
-    //     createdAt: 1,
-    //     updatedAt: 1,
-    //   },
-    // },
+    {
+      $project: {
+        _id: 1,
+        ownerId: 1,
+        name: 1,
+        cuisine: 1,
+        website: 1,
+        location: 1,
+        keywords: 1,
+        price: 1,
+        features: 1,
+        cancellationCharge:1,
+        discount:1,
+        availability:1,
+        status:1,
+        createdAt: 1,
+        updatedAt: 1,
+        ownerName: "$owner.fullName",
+        ownerEmail: "$owner.email",
+        ownerPhone: "$owner.phone",
+        ownerImg: "$owner.profileImg",
+        ownerAddress: "$owner.address"
+      },
+    },
     { $sort: { [sortBy]: sortDirection } },
     { $skip: skip },
     { $limit: Number(limit) },

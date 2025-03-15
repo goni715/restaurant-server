@@ -45,7 +45,10 @@ export const restaurantValidationSchema = z.object({
     .optional(),
   price: z.number().min(0, "Price must be at least 0"),
   cancellationCharge: z.number().min(0, "Price must be at least 0"),
-  discount: z.string().optional()
+  discount: z.string().optional(),
+  availability: z.enum([ "Immediate seating", "Open reservations", "Waitlist"], {
+    errorMap: () => ({ message: "{VALUE} is not supported" }),
+  }),
 });
 
 

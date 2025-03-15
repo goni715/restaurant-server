@@ -31,7 +31,7 @@ const AuthMiddleware = (...roles: TUserRole[]) => {
           success: false,
           message: "You are not authorized",
           error: {
-            message: `Please, provide ${roles.join(" or ")} token`,
+            message: `Please, provide ${roles.map(role=>`'${role}'`).join(" or ")} token`,
           },
         });
       }

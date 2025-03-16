@@ -19,6 +19,11 @@ const restaurantSchema = new Schema<IRestaurant>({
         required:true,
         trim: true
     },
+    dining: {
+        type: String,
+        required:true,
+        trim: true
+    },
     website: {
         type: String,
         required:true,

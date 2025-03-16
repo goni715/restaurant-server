@@ -34,7 +34,9 @@ export const restaurantValidationSchema = z.object({
   name: z.string().min(1, "Name is required"),
   website: z.string().url("Invalid URL format"),
   cuisine: z.string().min(1, "Cuisine is required"),
-  diningStyle: z.string().min(1, "Dining style is required"),
+  dining: z.string({
+    required_error: "Dining Style is required"
+  }).min(1, "Dining style is required"),
   location: z.string().min(1, "Location is required"),
   keywords: z.array(z.string()).optional(),
   features: z.array(z.string()).optional(),

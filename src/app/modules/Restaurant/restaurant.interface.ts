@@ -7,7 +7,7 @@ export interface IRestaurant {
     name: string;
     website: string;
     cuisine: string;
-    diningStyle: string;
+    dining: string;
     location: string;
     keywords?: string[],
     features?: string[];
@@ -16,7 +16,6 @@ export interface IRestaurant {
     restaurantImg?: string;
     cancellationCharge: number;
     discount?: string;
-    availability: "Immediate seating" | "Open reservations" | "Waitlist";
     status: "active" | "deactive"
 }
 

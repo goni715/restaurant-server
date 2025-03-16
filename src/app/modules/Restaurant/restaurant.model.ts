@@ -26,7 +26,6 @@ const restaurantSchema = new Schema<IRestaurant>({
     },
     website: {
         type: String,
-        required:true,
         trim: true
     },
     location: {

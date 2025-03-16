@@ -3,7 +3,7 @@ import { z } from "zod";
 
 export const createRestaurantValidationSchema = z.object({
   name: z.string().min(1, "Name is required"),
-  website: z.string().url("Invalid URL format"),
+  website: z.string().url("Invalid URL format").optional(),
   cuisine: z.string().min(1, "Cuisine is required"),
   dining: z.string({
     required_error: "Dining Style is required"
@@ -17,7 +17,6 @@ export const createRestaurantValidationSchema = z.object({
     .max(5, "Ratings can't exceed 5")
     .optional(),
   price: z.number().min(0, "Price must be at least 0"),
-  cancellationCharge: z.number().min(0, "Price must be at least 0"),
   discount: z.string().optional()
 });
 
@@ -29,4 +28,9 @@ export const changeRestaurantStatusSchema = z.object({
   })
 });
 
+export const approveRestaurantSchema = z.object({
+  approved: z.enum(["pending", "accepted", "cancelled"], {
+    errorMap: () => ({ message: "{VALUE} is not supported" }),
+  })
+});
 

@@ -1,10 +1,12 @@
 import { Types } from "mongoose";
 
+export type TRestaurantStatus = "active" | "deactive";
+export type TApprovedStatus = "pending" | "accepted" | "cancelled";
 
 export interface IRestaurant {
     ownerId: Types.ObjectId;
     name: string;
-    website: string;
+    website?: string;
     cuisine: string;
     dining: string;
     location: string;
@@ -14,8 +16,8 @@ export interface IRestaurant {
     price: number;
     restaurantImg?: string;
     discount?: string;
-    status: "active" | "deactive";
-    approved: "pending" | "accepted" | "cancelled"
+    status: TRestaurantStatus;
+    approved: TApprovedStatus
 }
 
 
@@ -29,9 +31,22 @@ export const RestaurantValidFields: string[] = [
   "price",
   "dining",
   "ratings",
-  "status"
+  "status",
+  "approved"
 ];
 
+
+export const UserRestaurantValidFields: string[] = [
+  "searchTerm",
+  "page",
+  "limit",
+  "sortBy",
+  "sortOrder",
+  "cuisine",
+  "price",
+  "dining",
+  "ratings"
+];
 
 export type TRestaurantQuery = {
   searchTerm?: string;
@@ -43,5 +58,19 @@ export type TRestaurantQuery = {
   price?: number;
   dining?:string;
   ratings?:number;
-  status?: "active" | "deactive"
+  status?: TRestaurantStatus
+};
+
+
+export type TUserRestaurantQuery = {
+  searchTerm?: string;
+  page?: string;
+  limit?: string;
+  sortBy?: string;
+  sortOrder?: "asc" | "desc";
+  cuisine?: string;
+  price?: number;
+  dining?:string;
+  ratings?:number;
+  status?: TRestaurantStatus
 };

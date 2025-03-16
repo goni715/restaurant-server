@@ -47,24 +47,24 @@ const restaurantSchema = new Schema<IRestaurant>({
         type: [String],
         default: []
     },
-    cancellationCharge: {
-        type: Number,
-        required: true,
-        trim: true
-    },
     discount: {
         type: String,
         trim: true
     },
-    availability: {
-        type: String,
-        enum: [ "Immediate seating", "Open reservations", "Waitlist"],
-        required: true
+    ratings: {
+        type: Number,
+        trim: true,
+        default: 0,
     },
     status: {
         type: String,
         enum: ["active", "deactive"],
         default: 'active'
+    },
+    approved: {
+        type: String,
+        enum: ["pending", "accepted", "cancelled"],
+        default: 'pending'
     }
 },{
     timestamps: true,

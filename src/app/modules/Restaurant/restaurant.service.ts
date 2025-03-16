@@ -1,58 +1,28 @@
-import mongoose, { Types } from "mongoose";
+import { Types } from "mongoose";
 import AppError from "../../errors/AppError";
-import UserModel from "../User/user.model";
-import { IRestaurantPayload, TRestaurantQuery } from "./restaurant.interface";
+import { IRestaurant, TRestaurantQuery } from "./restaurant.interface";
 import RestaurantModel from "./restaurant.model";
 import { makeFilterQuery, makeSearchQuery } from "../../helper/QueryBuilder";
 import { RestaurantSearchFields } from "./restaurant.constant";
-import { features } from "process";
 
 
 
-const createRestaurantService = async (payload: IRestaurantPayload) => {
-    const { ownerData, restaurantData } = payload;
-
-    
-  //check email already existed
-  const emailExists = await UserModel.findOne({ email: ownerData.email });
-  if (emailExists) {
-    throw new AppError(409, 'This email is already existed');
-  }
+const createRestaurantService = async (
+  ownerId: string,
+  payload: IRestaurant
+) => {
+  const { name } = payload;
 
   //check restaurant exist
-  const restaurant = await RestaurantModel.findOne({ name: restaurantData.name});
+  const restaurant = await RestaurantModel.findOne({ name });
   if (restaurant) {
-    throw new AppError(409, 'This restaurant name is already taken or existed');
+    throw new AppError(409, "This restaurant name is already taken or existed");
   }
 
-
-  const session = await mongoose.startSession();
-
-    try{
-        session.startTransaction();
-
-        //create the user
-        const user = await UserModel.create(
-            [{ ...ownerData, role: "admin" }],
-            { session }
-        );
-
-
-        //create the restaurant
-        const newRestaurant = await RestaurantModel.create(
-            [{ ...restaurantData,ownerId: user[0]._id }],
-            { session }
-        )
-        await session.commitTransaction();
-        await session.endSession();
-        return newRestaurant[0]
-    }catch(err:any){
-        await session.abortTransaction();
-        await session.endSession();
-        throw new Error(err)
-    }
-    
-}
+  //create the restaurant
+  const result = await RestaurantModel.create({ ...payload, ownerId });
+  return result;
+};
 
 
 const getRestaurantsService = async (query: TRestaurantQuery) => {
@@ -114,6 +84,7 @@ const getRestaurantsService = async (query: TRestaurantQuery) => {
         ownerId: 1,
         name: 1,
         cuisine: 1,
+        dining: 1,
         website: 1,
         location: 1,
         keywords: 1,
@@ -121,7 +92,6 @@ const getRestaurantsService = async (query: TRestaurantQuery) => {
         features: 1,
         cancellationCharge:1,
         discount:1,
-        availability:1,
         status:1,
         createdAt: 1,
         updatedAt: 1,
@@ -153,9 +123,74 @@ const getRestaurantsService = async (query: TRestaurantQuery) => {
     data: result,
   };
 };
+
+
+const changeRestaurantStatusService = async (restaurantId: string, status: 'active' | 'deactive') => {
+  const ObjectId = Types.ObjectId;
+  const restaurant = await RestaurantModel.findById(restaurantId);
+  if(!restaurant){
+    throw new AppError(404, "Restaurant Not Found");
+  }
+
+  const result = await RestaurantModel.updateOne(
+    { _id: new ObjectId(restaurantId) },
+    { status }
+  )
+
+  return result;
+}
+
+
+const getSingleRestaurantService = async (restaurantId: string) => {
+  const ObjectId = Types.ObjectId;
+  const restaurant = await RestaurantModel.aggregate([
+    {
+      $match: {
+        _id: new ObjectId(restaurantId)
+      }
+    },
+    {
+      $lookup: { from: 'users', localField: 'ownerId', foreignField: '_id', as: 'owner' }
+    },
+    {
+      $unwind: "$owner"
+    },
+    {
+      $project: {
+        _id: 1,
+        ownerId: 1,
+        name: 1,
+        cuisine: 1,
+        dining: 1,
+        website: 1,
+        location: 1,
+        keywords: 1,
+        price: 1,
+        features: 1,
+        cancellationCharge:1,
+        discount:1,
+        status:1,
+        createdAt: 1,
+        updatedAt: 1,
+        ownerName: "$owner.fullName",
+        ownerEmail: "$owner.email",
+        ownerPhone: "$owner.phone",
+        ownerImg: "$owner.profileImg",
+        ownerAddress: "$owner.address"
+      },
+    },
+  ])
+  if(!restaurant){
+    throw new AppError(404, "Restaurant Not Found");
+  }
+
+  return restaurant;
+}
   
 
 export {
     createRestaurantService,
-    getRestaurantsService
+    getRestaurantsService,
+    changeRestaurantStatusService,
+    getSingleRestaurantService
 }

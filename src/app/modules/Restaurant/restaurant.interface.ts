@@ -1,5 +1,4 @@
 import { Types } from "mongoose";
-import { IUser } from "../User/user.interface";
 
 
 export interface IRestaurant {
@@ -14,15 +13,9 @@ export interface IRestaurant {
     ratings?: number;
     price: number;
     restaurantImg?: string;
-    cancellationCharge: number;
     discount?: string;
-    status: "active" | "deactive"
-}
-
-
-export interface IRestaurantPayload {
-    ownerData: IUser,
-    restaurantData: IRestaurant
+    status: "active" | "deactive";
+    approved: "pending" | "accepted" | "cancelled"
 }
 
 
@@ -34,7 +27,6 @@ export const RestaurantValidFields: string[] = [
   "sortOrder",
   "cuisine",
   "price",
-  "availability",
   "dining",
   "ratings",
   "status"
@@ -49,8 +41,7 @@ export type TRestaurantQuery = {
   sortOrder?: "asc" | "desc";
   cuisine?: string;
   price?: number;
-  availability?: "Immediate seating" | "Open reservations" | "Waitlist";
   dining?:string;
   ratings?:number;
-  status: "active" | "deactive"
+  status?: "active" | "deactive"
 };

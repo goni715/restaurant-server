@@ -1,36 +1,7 @@
-import { Types } from "mongoose";
 import { z } from "zod";
 
 
-export const createOwnerValidationSchema = z.object({
-  fullName: z.string({
-    required_error: "full Name is required",
-  }),
-  email: z
-    .string({
-      required_error: "email is required",
-    })
-    .email(),
-  phone: z.string({
-    required_error: "phone number is required",
-  }),
-  gender: z.enum(["male", "female"], {
-    errorMap: () => ({ message: "{VALUE} is not supported" }),
-  }),
-  address: z.string({
-    required_error: "address is required",
-  }),
-  password: z
-    .string({
-      required_error: "password is required",
-    })
-    .min(6, "Password minimum 6 characters long")
-    .trim(),
-});
-
-
-
-export const restaurantValidationSchema = z.object({
+export const createRestaurantValidationSchema = z.object({
   name: z.string().min(1, "Name is required"),
   website: z.string().url("Invalid URL format"),
   cuisine: z.string().min(1, "Cuisine is required"),
@@ -47,14 +18,15 @@ export const restaurantValidationSchema = z.object({
     .optional(),
   price: z.number().min(0, "Price must be at least 0"),
   cancellationCharge: z.number().min(0, "Price must be at least 0"),
-  discount: z.string().optional(),
-  availability: z.enum([ "Immediate seating", "Open reservations", "Waitlist"], {
-    errorMap: () => ({ message: "{VALUE} is not supported" }),
-  }),
+  discount: z.string().optional()
 });
 
 
-export const createRestaurantValidationSchema = z.object({
-    ownerData: createOwnerValidationSchema,
-    restaurantData: restaurantValidationSchema
-})
+
+export const changeRestaurantStatusSchema = z.object({
+  status: z.enum(["active", "deactive"], {
+    errorMap: () => ({ message: "{VALUE} is not supported" }),
+  })
+});
+
+

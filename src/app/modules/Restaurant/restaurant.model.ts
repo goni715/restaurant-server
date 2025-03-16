@@ -55,6 +55,10 @@ const restaurantSchema = new Schema<IRestaurant>({
         trim: true,
         default: 0,
     },
+    restaurantImg: { 
+        type: String,
+        default: ''
+    },
     status: {
         type: String,
         enum: ["active", "deactive"],

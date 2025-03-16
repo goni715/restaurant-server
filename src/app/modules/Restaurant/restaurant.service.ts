@@ -4,10 +4,12 @@ import { IRestaurant, TApprovedStatus, TRestaurantQuery, TRestaurantStatus, TUse
 import RestaurantModel from "./restaurant.model";
 import { makeFilterQuery, makeSearchQuery } from "../../helper/QueryBuilder";
 import { RestaurantSearchFields } from "./restaurant.constant";
+import { Request } from "express";
 
 
 
 const createRestaurantService = async (
+  req:Request,
   ownerId: string,
   payload: IRestaurant
 ) => {
@@ -18,6 +20,13 @@ const createRestaurantService = async (
   if (restaurant) {
     throw new AppError(409, "This restaurant name is already taken or existed");
   }
+
+  
+  if (req.file) {
+    //for local machine file path
+    payload.restaurantImg = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`; //for local machine
+ }
+
 
   //create the restaurant
   const result = await RestaurantModel.create({ ...payload, ownerId });

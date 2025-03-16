@@ -8,7 +8,7 @@ import { approveRestaurantService, changeRestaurantStatusService, createRestaura
 
 const createRestaurant = catchAsync(async (req, res) => {
   const loginUserId = req.headers.id;
-  const result = await createRestaurantService(loginUserId as string, req.body);
+  const result = await createRestaurantService(req, loginUserId as string, req.body);
   sendResponse(res, {
     statusCode: 200,
     success: true,

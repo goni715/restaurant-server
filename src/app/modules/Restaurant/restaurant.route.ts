@@ -1,15 +1,21 @@
-import express from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 import validationMiddleware from '../../middlewares/validationMiddleware';
 import RestaurantController from './restaurant.controller';
 import AuthMiddleware from '../../middlewares/AuthMiddleware';
 import { UserRole } from '../User/user.constant';
 import { approveRestaurantSchema, changeRestaurantStatusSchema, createRestaurantValidationSchema, } from './restaurant.validation';
+import upload from '../../helper/upload';
 
 const router = express.Router();
 
 router.post(
   "/create-restaurant",
   AuthMiddleware(UserRole.admin),
+  upload.single('file'),
+  (req: Request, res: Response, next: NextFunction) => {
+    req.body = JSON.parse(req.body.data);
+    next();
+  },
   validationMiddleware(createRestaurantValidationSchema),
   RestaurantController.createRestaurant
 );

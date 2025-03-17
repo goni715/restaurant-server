@@ -21,33 +21,6 @@ export interface IRestaurant {
 }
 
 
-export const RestaurantValidFields: string[] = [
-  "searchTerm",
-  "page",
-  "limit",
-  "sortBy",
-  "sortOrder",
-  "cuisine",
-  "price",
-  "dining",
-  "ratings",
-  "status",
-  "approved"
-];
-
-
-export const UserRestaurantValidFields: string[] = [
-  "searchTerm",
-  "page",
-  "limit",
-  "sortBy",
-  "sortOrder",
-  "cuisine",
-  "price",
-  "dining",
-  "ratings"
-];
-
 export type TRestaurantQuery = {
   searchTerm?: string;
   page?: string;
@@ -72,5 +45,4 @@ export type TUserRestaurantQuery = {
   price?: number;
   dining?:string;
   ratings?:number;
-  status?: TRestaurantStatus
 };

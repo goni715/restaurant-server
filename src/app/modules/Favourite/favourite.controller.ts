@@ -1,5 +1,7 @@
 import catchAsync from "../../utils/catchAsync";
+import pickValidFields from "../../utils/pickValidFields";
 import sendResponse from "../../utils/sendResponse";
+import { FavoriteValidFields } from "./favourite.constant";
 import { addOrRemoveFavouriteService, getFavouriteListService } from "./favourite.service";
 
 const addOrRemoveFavourite = catchAsync(async (req, res) => {
@@ -19,12 +21,14 @@ const addOrRemoveFavourite = catchAsync(async (req, res) => {
   
 const getFavouriteList = catchAsync(async (req, res) => {
   const loginUserId = req.headers.id;
-    const result = await getFavouriteListService(loginUserId as string);
+  const validatedQuery = pickValidFields(req.query, FavoriteValidFields);
+    const result = await getFavouriteListService(loginUserId as string, validatedQuery);
     sendResponse(res, {
       statusCode: 200,
       success: true,
-      message: "Favourite List retrieved successfully",
-      data: result,
+      message: "Favourite Restaurants are retrieved successfully",
+      meta: result.meta,
+      data: result.data
     });
 });
 

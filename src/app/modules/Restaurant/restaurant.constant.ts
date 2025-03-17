@@ -11,3 +11,31 @@ export const RestaurantSearchFields = [
     "owner.phone",
     "owner.address"
 ]
+
+
+export const RestaurantValidFields: string[] = [
+  "searchTerm",
+  "page",
+  "limit",
+  "sortBy",
+  "sortOrder",
+  "cuisine",
+  "price",
+  "dining",
+  "ratings",
+  "status",
+  "approved"
+];
+
+
+export const UserRestaurantValidFields: string[] = [
+  "searchTerm",
+  "page",
+  "limit",
+  "sortBy",
+  "sortOrder",
+  "cuisine",
+  "price",
+  "dining",
+  "ratings"
+];

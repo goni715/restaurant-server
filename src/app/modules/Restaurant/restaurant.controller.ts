@@ -1,7 +1,7 @@
 import catchAsync from "../../utils/catchAsync";
 import pickValidFields from "../../utils/pickValidFields";
 import sendResponse from "../../utils/sendResponse";
-import { RestaurantValidFields, UserRestaurantValidFields } from "./restaurant.interface";
+import { RestaurantValidFields, UserRestaurantValidFields } from "./restaurant.constant";
 import { approveRestaurantService, changeRestaurantStatusService, createRestaurantService, getOwnerRestaurantsService, getRestaurantsService, getSingleRestaurantService, getUserRestaurantsService, updateRestaurantService } from "./restaurant.service";
 
 

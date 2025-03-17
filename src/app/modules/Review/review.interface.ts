@@ -2,12 +2,15 @@ import { Types } from "mongoose";
 
 
 export interface IReview {
+  userId: Types.ObjectId;
+  restaurantId: Types.ObjectId;
   star: Number;
   comment: String;
-  userId: Types.ObjectId;
+  hidden: boolean,
 }
 
 export interface IReviewPayload {
+  restaurantId: Types.ObjectId;
   star: Number;
   comment: String;
 }

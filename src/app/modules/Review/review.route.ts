@@ -8,6 +8,8 @@ import { createReviewValidationSchema } from './review.validation';
 const router = express.Router();
 
 router.post('/create-review', AuthMiddleware(UserRole.user), validationMiddleware(createReviewValidationSchema), ReviewController.createReview);
+router.delete('/delete-review/:reviewId', AuthMiddleware(UserRole.super_admin), ReviewController.deleteReview)
+router.get('/get-restaurant-reviews/:restaurantId', AuthMiddleware(UserRole.super_admin, UserRole.admin, UserRole.user), ReviewController.getRestaurantReviews);
 
 
 export const ReviewRoutes = router;

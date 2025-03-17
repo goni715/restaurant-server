@@ -1,7 +1,6 @@
 import { model, Schema } from "mongoose";
 import { IReview } from "./review.interface";
 
-
 const reviewSchema = new Schema<IReview>(
   {
     userId: {
@@ -9,16 +8,33 @@ const reviewSchema = new Schema<IReview>(
       required: true,
       ref: "User",
     },
+    restaurantId: {
+      type: Schema.Types.ObjectId,
+      required: true,
+      ref: "Restaurant",
+    },
     star: {
       type: Number,
       required: true,
       trim: true,
+      min: [0.5, "Rating must be at least 0.5"],
+      max: [5, "Rating must not exceed 5"],
+      validate: {
+        validator: (value: number) => value % 0.5 === 0,
+        message: "Rating must be in increments of 0.5",
+      },
     },
     comment: {
       type: String,
       required: true,
       trim: true,
+      minlength: [5, "Comment must be at least 5 characters long"],
+      maxlength: [500, "Comment cannot exceed 500 characters"],
     },
+    hidden: {
+      type: Boolean,
+      default: false
+    }
   },
   {
     timestamps: true,
@@ -28,4 +44,3 @@ const reviewSchema = new Schema<IReview>(
 
 const ReviewModel = model<IReview>("Review", reviewSchema);
 export default ReviewModel;
-  

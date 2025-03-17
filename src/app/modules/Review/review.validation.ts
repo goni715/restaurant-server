@@ -1,7 +1,14 @@
+import { Types } from "mongoose";
 import { z } from "zod";
 
-
 export const createReviewValidationSchema = z.object({
+  restaurantId: z
+    .string({
+      required_error: "restaurantId is required!",
+    })
+    .refine((id) => Types.ObjectId.isValid(id), {
+      message: "restaurantId must be a valid ObjectId",
+    }),
   star: z
     .number()
     .min(0.5, { message: "Rating must be at least 0" }) // Minimum rating is 0
@@ -10,8 +17,6 @@ export const createReviewValidationSchema = z.object({
       message: "Rating must be in increments of 0.5",
     }),
   comment: z.string({
-    required_error: "Comment is required"
+    required_error: "Comment is required",
   }),
 });
-
-

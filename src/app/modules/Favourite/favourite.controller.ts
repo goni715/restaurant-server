@@ -6,11 +6,12 @@ const addOrRemoveFavourite = catchAsync(async (req, res) => {
   const loginUserId = req.headers.id;
   const { restaurantId } = req.body;
   const result = await addOrRemoveFavouriteService(loginUserId as string, restaurantId);
+
   sendResponse(res, {
     statusCode: 200,
     success: true,
-    message: "Restauant is made or removed successfully",
-    data: result,
+    message: result.message as string,
+    data: result.data,
   });
 });
   
@@ -22,7 +23,7 @@ const getFavouriteList = catchAsync(async (req, res) => {
     sendResponse(res, {
       statusCode: 200,
       success: true,
-      message: "User status is changed successfully",
+      message: "Favourite List retrieved successfully",
       data: result,
     });
 });

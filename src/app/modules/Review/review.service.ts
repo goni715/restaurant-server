@@ -1,6 +1,13 @@
-import { IReview } from "./review.interface";
+import { IReviewPayload } from "./review.interface";
 
 
-const createReviewService = async (payload: IReview) => {
+const createReviewService = async (loginUserId: string, payload: IReviewPayload) => {
+   return payload
+}
 
+
+
+
+export {
+    createReviewService
 }

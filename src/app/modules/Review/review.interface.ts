@@ -6,3 +6,8 @@ export interface IReview {
   comment: String;
   userId: Types.ObjectId;
 }
+
+export interface IReviewPayload {
+  star: Number;
+  comment: String;
+}

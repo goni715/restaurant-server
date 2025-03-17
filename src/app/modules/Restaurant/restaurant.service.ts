@@ -322,23 +322,6 @@ const getOwnerRestaurantsService = async (loginUserId:string, query: TRestaurant
 };
 
 
-
-const changeRestaurantStatusService = async (restaurantId: string, status: TRestaurantStatus) => {
-  const ObjectId = Types.ObjectId;
-  const restaurant = await RestaurantModel.findById(restaurantId);
-  if(!restaurant){
-    throw new AppError(404, "Restaurant Not Found");
-  }
-
-  const result = await RestaurantModel.updateOne(
-    { _id: new ObjectId(restaurantId) },
-    { status }
-  )
-
-  return result;
-}
-
-
 const getSingleRestaurantService = async (restaurantId: string) => {
   const ObjectId = Types.ObjectId;
   const restaurant = await RestaurantModel.aggregate([
@@ -386,6 +369,24 @@ const getSingleRestaurantService = async (restaurantId: string) => {
 }
   
 
+const changeRestaurantStatusService = async (restaurantId: string, status: TRestaurantStatus) => {
+  const ObjectId = Types.ObjectId;
+  const restaurant = await RestaurantModel.findById(restaurantId);
+  if(!restaurant){
+    throw new AppError(404, "Restaurant Not Found");
+  }
+
+  const result = await RestaurantModel.updateOne(
+    { _id: new ObjectId(restaurantId) },
+    { status }
+  )
+
+  return result;
+}
+
+
+
+
 const approveRestaurantService = async (restaurantId: string, approved: TApprovedStatus) => {
   const ObjectId = Types.ObjectId;
   const restaurant = await RestaurantModel.findById(restaurantId);
@@ -402,6 +403,28 @@ const approveRestaurantService = async (restaurantId: string, approved: TApprove
 }
 
 
+const updateRestaurantService = async (ownerId: string, restaurantId: string, payload: Partial<IRestaurant>) => {
+  const ObjectId = Types.ObjectId;
+  const restaurant = await RestaurantModel.findOne({
+    _id: restaurantId,
+    ownerId
+  });
+
+  if(!restaurant){
+    throw new AppError(404, "Restaurant Not Found");
+  }
+
+
+  const result = await RestaurantModel.updateOne(
+    { _id: new ObjectId(restaurantId), ownerId: new ObjectId(ownerId) },
+    payload
+  )
+  
+
+  return result;
+}
+
+
 export {
     createRestaurantService,
     getRestaurantsService,
@@ -409,5 +432,6 @@ export {
     getOwnerRestaurantsService,
     changeRestaurantStatusService,
     getSingleRestaurantService,
-    approveRestaurantService
+    approveRestaurantService,
+    updateRestaurantService
 }

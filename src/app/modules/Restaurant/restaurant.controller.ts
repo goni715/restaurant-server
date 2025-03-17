@@ -2,7 +2,7 @@ import catchAsync from "../../utils/catchAsync";
 import pickValidFields from "../../utils/pickValidFields";
 import sendResponse from "../../utils/sendResponse";
 import { RestaurantValidFields, UserRestaurantValidFields } from "./restaurant.interface";
-import { approveRestaurantService, changeRestaurantStatusService, createRestaurantService, getOwnerRestaurantsService, getRestaurantsService, getSingleRestaurantService, getUserRestaurantsService } from "./restaurant.service";
+import { approveRestaurantService, changeRestaurantStatusService, createRestaurantService, getOwnerRestaurantsService, getRestaurantsService, getSingleRestaurantService, getUserRestaurantsService, updateRestaurantService } from "./restaurant.service";
 
 
 
@@ -60,6 +60,19 @@ const getOwnerRestaurants = catchAsync(async (req, res) => {
 });
 
 
+const getSingleRestaurant = catchAsync(async (req, res) => {
+  const { restaurantId } = req.params;
+  const result = await getSingleRestaurantService(restaurantId);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Restaurant is retrieved successfully",
+    data: result
+  });
+});
+
+
+
 const changeRestaurantStatus = catchAsync(async (req, res) => {
   const { restaurantId } = req.params;
   const { status } = req.body; 
@@ -86,16 +99,18 @@ const approveRestaurant = catchAsync(async (req, res) => {
 });
 
 
-const getSingleRestaurant = catchAsync(async (req, res) => {
+const updateRestaurant = catchAsync(async (req, res) => {
+  const loginUserId = req.headers.id;
   const { restaurantId } = req.params;
-  const result = await getSingleRestaurantService(restaurantId);
+  const result = await updateRestaurantService(loginUserId as string, restaurantId, req.body);
   sendResponse(res, {
     statusCode: 200,
     success: true,
-    message: "Restaurant is retrieved successfully",
-    data: result
+    message: "Restaurant is updated successfully",
+    data: result,
   });
 });
+
 
 
 const RestaurantController = {
@@ -105,7 +120,8 @@ const RestaurantController = {
     getOwnerRestaurants,
     changeRestaurantStatus,
     getSingleRestaurant,
-    approveRestaurant
+    approveRestaurant,
+    updateRestaurant
 }
 
 export default RestaurantController;

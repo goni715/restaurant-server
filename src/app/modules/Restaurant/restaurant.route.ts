@@ -3,7 +3,7 @@ import validationMiddleware from '../../middlewares/validationMiddleware';
 import RestaurantController from './restaurant.controller';
 import AuthMiddleware from '../../middlewares/AuthMiddleware';
 import { UserRole } from '../User/user.constant';
-import { approveRestaurantSchema, changeRestaurantStatusSchema, createRestaurantValidationSchema, } from './restaurant.validation';
+import { approveRestaurantSchema, changeRestaurantStatusSchema, createRestaurantValidationSchema, updateRestaurantValidationSchema, } from './restaurant.validation';
 import upload from '../../helper/upload';
 
 const router = express.Router();
@@ -21,7 +21,8 @@ router.post(
 );
 
 
-router.get('/get-restaurants', AuthMiddleware('super_admin'), RestaurantController.getRestaurants)
+router.get('/get-restaurants', AuthMiddleware('super_admin'), RestaurantController.getRestaurants);
+router.get('/get-single-restaurant/:restaurantId', RestaurantController.getSingleRestaurant)
 router.get('/get-user-restaurants', RestaurantController.getUserRestaurants)
 router.get('/get-owner-restaurants', AuthMiddleware(UserRole.admin), RestaurantController.getOwnerRestaurants)
 
@@ -39,7 +40,13 @@ router.put(
   RestaurantController.approveRestaurant
 );
 
-router.get('/get-single-restaurant/:restaurantId', RestaurantController.getSingleRestaurant)
+router.put(
+  "/update-restaurant/:restaurantId",
+  AuthMiddleware(UserRole.admin),
+  validationMiddleware(updateRestaurantValidationSchema),
+  RestaurantController.updateRestaurant
+);
+
 
 
 export const RestaurantRoutes = router;

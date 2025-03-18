@@ -5,7 +5,7 @@ export interface IUser {
   email: string;
   phone: string;
   address?: string; //for admin
-  gender: 'male' | 'female',
+  gender: 'male' | 'female' | 'other',
   password: string;
   passwordChangedAt?: Date;
   role: "user" | "admin" | "super_admin";

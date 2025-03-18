@@ -131,5 +131,14 @@ const getMeService = async (userId: string) => {
 }
 
 
+const editMyProfileService = async (loginUserId: string, payload: Partial<IUser>) => {
+  const result = UserModel.updateOne(
+    { _id: loginUserId },
+    payload
+  )
 
-export { createUserService, getUsersService, getSingleUserService, getMeService };
+  return result;
+}
+
+
+export { createUserService, getUsersService, getSingleUserService, getMeService, editMyProfileService };

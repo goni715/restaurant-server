@@ -36,6 +36,7 @@ const loginUserService = async (payload: ILoginUser) => {
 
     return {
         accessToken,
+        role: user.role,
         refreshToken
     }
 }

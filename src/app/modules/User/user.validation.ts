@@ -12,7 +12,7 @@ export const createUserValidationSchema = z.object({
   phone: z.string({
     required_error: "phone number is required",
   }),
-  gender: z.enum(["male", "female"], {
+  gender: z.enum(["male", "female", "other"], {
     errorMap: () => ({ message: "{VALUE} is not supported" }),
   }),
   password: z
@@ -21,4 +21,20 @@ export const createUserValidationSchema = z.object({
     })
     .min(6, "Password minimum 6 characters long")
     .trim()
+});
+
+
+export const updateProfileValidationSchema = z.object({
+  fullName: z.string({
+    required_error: "full Name is required",
+  }).optional(),
+  phone: z.string({
+    required_error: "phone number is required",
+  }).optional(),
+  gender: z.enum(["male", "female", "other"], {
+    errorMap: () => ({ message: "{VALUE} is not supported" }),
+  }).optional(),
+  address: z.string({
+    required_error: "address is required",
+  }).optional()
 });

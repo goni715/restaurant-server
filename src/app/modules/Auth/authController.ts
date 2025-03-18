@@ -7,7 +7,7 @@ import { changePasswordService, changeStatusService, deleteMyAccountService, for
 
 const loginUser = catchAsync(async (req, res) => {
  const result = await loginUserService(req.body);
- const { accessToken, refreshToken} = result;
+ const { role, accessToken, refreshToken} = result;
  
  res.cookie("refreshToken", refreshToken, {
    httpOnly: true,  // Prevents client-side access to the cookie (more secure)
@@ -21,6 +21,7 @@ const loginUser = catchAsync(async (req, res) => {
    success: true,
    message: "User is logged in successfully",
    data: {
+     role,
      accessToken
    }
  })

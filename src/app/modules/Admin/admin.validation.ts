@@ -12,7 +12,7 @@ export const createAdminValidationSchema = z.object({
   phone: z.string({
     required_error: "phone number is required",
   }),
-  gender: z.enum(["male", "female"], {
+  gender: z.enum(["male", "female", "other"], {
     errorMap: () => ({ message: "{VALUE} is not supported" }),
   }),
   address: z.string({

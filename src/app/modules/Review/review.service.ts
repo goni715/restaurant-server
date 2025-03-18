@@ -93,6 +93,17 @@ const getRestaurantReviewsService = async (restaurantId: string) => {
     {
       $unwind: "$user"
     },
+    {
+      $project: {
+        _id: "$user._id",
+        fullName: "$user.fullName",
+        email: "$user.email",
+        phone: "$user.phone",
+        star: "$star",
+        comment: "$comment",
+        createdAt: "$createdAt"
+      }
+    }
   ])
 
   return result;

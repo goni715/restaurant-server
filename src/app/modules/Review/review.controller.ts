@@ -1,4 +1,5 @@
 import catchAsync from "../../utils/catchAsync";
+import pickValidFields from "../../utils/pickValidFields";
 import sendResponse from "../../utils/sendResponse";
 import { createReviewService, deleteReviewService, getRestaurantReviewsService } from "./review.service";
 
@@ -39,6 +40,7 @@ const deleteReview = catchAsync(async (req, res) => {
 
 const getRestaurantReviews = catchAsync(async (req, res) => {
   const { restaurantId } = req.params;
+  const validatedQuery = pickValidFields(req.query, FavoriteValidFields);
   const result = await getRestaurantReviewsService(
     restaurantId
   );

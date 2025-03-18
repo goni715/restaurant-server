@@ -8,13 +8,13 @@ export const FavouriteSearchFields = [
 
 
 export const FavoriteValidFields: string[] = [
-    "searchTerm",
-    "page",
-    "limit",
-    "sortBy",
-    "sortOrder",
-    "restaurant.cuisine",
-    "restaurant.price",
-    "restaurant.dining",
-    "restaurant.ratings"
-  ];
+  "searchTerm",
+  "page",
+  "limit",
+  "sortBy",
+  "sortOrder",
+  "restaurant.cuisine",
+  "restaurant.price",
+  "restaurant.dining",
+  "restaurant.ratings",
+];

@@ -21,4 +21,5 @@ export type TReviewQuery = {
   limit?: string;
   sortBy?: string;
   sortOrder?: "asc" | "desc";
+  star?:number
 };

@@ -7,3 +7,12 @@ export interface INotification {
   type: 'info' | 'warning' | 'success' | 'error';
   isRead?: boolean; 
 }
+
+
+export type TNotificationQuery = {
+  searchTerm?: string;
+  page?: string;
+  limit?: string;
+  sortBy?: string;
+  sortOrder?: "asc" | "desc";
+};

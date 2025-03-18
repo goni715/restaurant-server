@@ -162,25 +162,60 @@ const getRestaurantReviewsService = async (restaurantId: string, query: TReviewQ
         comment: "$comment",
         createdAt: "$createdAt"
       }
-    }
+    },
+    { $sort: { [sortBy]: sortDirection } },
+    { $skip: skip },
+    { $limit: Number(limit) },
   ])
 
-   // total count of matching users
-   const totalCount = await ReviewModel.countDocuments({
-    restaurantId: new ObjectId(restaurantId),
-    ...searchQuery, 
-    ...filterQuery, 
-  });
-
-  return {
-    meta: {
-      page: Number(page), //currentPage
-      limit: Number(limit),
-      totalPages: Math.ceil(totalCount / Number(limit)),
-      total: totalCount,
+   // total count of matching users 
+  const totalReviewResult = await ReviewModel.aggregate([
+    {
+      $match: { restaurantId: new ObjectId(restaurantId) }
     },
-    data: result,
-  };
+    {
+      $lookup: {
+        from: "users",
+        localField: "userId",
+        foreignField: "_id",
+        as: "user",
+      },
+    },
+    {
+      $unwind: "$user"
+    },
+    {
+      $match: {
+        ...searchQuery,
+        ...filterQuery
+      }
+    },
+    {
+      $project: {
+        _id: "$user._id",
+        fullName: "$user.fullName",
+        email: "$user.email",
+        phone: "$user.phone",
+        star: "$star",
+        comment: "$comment",
+        createdAt: "$createdAt"
+      }
+    },
+    { $count: "totalCount" }
+  ])
+
+  const totalCount = totalReviewResult[0]?.totalCount || 0;
+  const totalPages = Math.ceil(totalCount / Number(limit));
+
+return {
+  meta: {
+    page: Number(page), //currentPage
+    limit: Number(limit),
+    totalPages,
+    total: totalCount,
+  },
+  data: result,
+};
    
 }
 

@@ -99,8 +99,19 @@ const markAsReadService = async (loginUserId:string, notificationId: string) => 
 };
 
 
+const deleteNotificationService = async (notificationId: string) => {
+  const notification = await NotificationModel.findOne({_id: notificationId});
+  if (!notification) {
+    throw new AppError(404, "Notification Not Found");
+  }
+
+  const result = await NotificationModel.deleteOne({ _id: notificationId});
+  return result;
+}
+
 export {
     createNotificationService,
     getUserNotificationsService,
-    markAsReadService
+    markAsReadService,
+    deleteNotificationService
 }

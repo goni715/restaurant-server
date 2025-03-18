@@ -1,5 +1,5 @@
 import { Types } from "mongoose";
-import { ErrorMapCtx, z } from "zod";
+import { z } from "zod";
 
 export const createNotificationValidationSchema = z.object({
   userId: z

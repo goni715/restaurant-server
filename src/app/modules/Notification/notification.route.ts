@@ -26,4 +26,10 @@ router.get(
   NotificationController.getUserNotifications
 );
 
+router.delete(
+  "/delete-notification/:notificationId",
+  AuthMiddleware(UserRole.admin, UserRole.user, UserRole.super_admin),
+  NotificationController.deleteNotification
+);
+
 export const NotificationRoutes = router;

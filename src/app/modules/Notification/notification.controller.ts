@@ -1,6 +1,8 @@
 import catchAsync from "../../utils/catchAsync";
+import pickValidFields from "../../utils/pickValidFields";
 import sendResponse from "../../utils/sendResponse";
-import { createNotificationService, getUserNotificationsService, markAsReadService } from "./notification.service";
+import { NotificationValidFields } from "./notification.constant";
+import { createNotificationService, deleteNotificationService, getUserNotificationsService, markAsReadService } from "./notification.service";
 
 
 const createNotification = catchAsync(async (req, res) => {
@@ -31,7 +33,8 @@ const markAsRead = catchAsync(async (req, res) => {
 
 const getUserNotifications = catchAsync(async (req, res) => {
   const loginUserId = req.headers.id;
-  const result = await getUserNotificationsService(loginUserId as string, req.query);
+  const validatedQuery = pickValidFields(req.query, NotificationValidFields);
+  const result = await getUserNotificationsService(loginUserId as string, validatedQuery);
 
   sendResponse(res, {
     statusCode: 200,
@@ -43,10 +46,23 @@ const getUserNotifications = catchAsync(async (req, res) => {
 });
 
 
+const deleteNotification = catchAsync(async (req, res) => {
+  const { notificationId } = req.params;
+  const result = await deleteNotificationService(notificationId);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Notification is deleted successfully",
+    data: result,
+  });
+});
+
 const NotificationController = {
     createNotification,
     markAsRead,
-    getUserNotifications
+    getUserNotifications,
+    deleteNotification
  }
  
  export default NotificationController;

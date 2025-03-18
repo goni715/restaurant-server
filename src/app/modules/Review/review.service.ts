@@ -165,7 +165,22 @@ const getRestaurantReviewsService = async (restaurantId: string, query: TReviewQ
     }
   ])
 
-  return result;
+   // total count of matching users
+   const totalCount = await ReviewModel.countDocuments({
+    restaurantId: new ObjectId(restaurantId),
+    ...searchQuery, 
+    ...filterQuery, 
+  });
+
+  return {
+    meta: {
+      page: Number(page), //currentPage
+      limit: Number(limit),
+      totalPages: Math.ceil(totalCount / Number(limit)),
+      total: totalCount,
+    },
+    data: result,
+  };
    
 }
 

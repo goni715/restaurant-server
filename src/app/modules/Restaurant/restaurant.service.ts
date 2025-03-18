@@ -55,7 +55,6 @@ const getRestaurantsService = async (query: TRestaurantQuery) => {
 
   //4. setup searching
   let searchQuery: any = {};
-
   if (searchTerm) {
     searchQuery = makeSearchQuery(searchTerm, RestaurantSearchFields);
     searchQuery = {
@@ -69,7 +68,6 @@ const getRestaurantsService = async (query: TRestaurantQuery) => {
   //console.dir(searchQuery, {depth:null})
 
   //5 setup filters
-
   let filterQuery = {};
   if (filters) {
     filterQuery = makeFilterQuery(filters);
@@ -120,16 +118,31 @@ const getRestaurantsService = async (query: TRestaurantQuery) => {
   ]);
 
   // total count of matching users
-  const totalCount = await RestaurantModel.countDocuments({
-    ...searchQuery,
-    ...filterQuery,
-  });
+  const totalRestaurantResult = await RestaurantModel.aggregate([
+    {
+      $lookup: { from: 'users', localField: 'ownerId', foreignField: '_id', as: 'owner' }
+    },
+    {
+      $unwind: "$owner"
+    },
+    {
+      $match: {
+        ...searchQuery, // Apply search query
+        ...filterQuery, // Apply filters
+      },
+    },
+    { $count: "totalCount" },
+  ]);
+
+
+  const totalCount = totalRestaurantResult[0]?.totalCount || 0;
+  const totalPages = Math.ceil(totalCount / Number(limit));
 
   return {
     meta: {
       page: Number(page), //currentPage
       limit: Number(limit),
-      totalPages: Math.ceil(totalCount / Number(limit)),
+      totalPages,
       total: totalCount,
     },
     data: result,
@@ -230,18 +243,41 @@ const getUserRestaurantsService = async (query: TUserRestaurantQuery) => {
   ]);
 
   // total count of matching users
-  const totalCount = await RestaurantModel.countDocuments({
-    ...searchQuery,
-    ...filterQuery,
-    status: "active",
-    approved: "accepted"
-  });
+  const totalRestaurantResult = await RestaurantModel.aggregate([
+    {
+      $match: {
+        status: "active",
+        approved: "accepted",
+      }
+    },
+    {
+      $lookup: {
+        from: "users",
+        localField: "ownerId",
+        foreignField: "_id",
+        as: "owner",
+      },
+    },
+    {
+      $unwind: "$owner",
+    },
+    {
+      $match: {
+        ...searchQuery, // Apply search query
+        ...filterQuery, // Apply filters
+      },
+    },
+    { $count: "totalCount" },
+  ]);
+
+    const totalCount = totalRestaurantResult[0]?.totalCount || 0;
+    const totalPages = Math.ceil(totalCount / Number(limit));
 
   return {
     meta: {
       page: Number(page), //currentPage
       limit: Number(limit),
-      totalPages: Math.ceil(totalCount / Number(limit)),
+      totalPages,
       total: totalCount,
     },
     data: result,
@@ -269,7 +305,6 @@ const getOwnerRestaurantsService = async (loginUserId:string, query: TRestaurant
 
   //4. setup searching
   let searchQuery: any = {};
-
   if (searchTerm) {
     searchQuery = makeSearchQuery(searchTerm, RestaurantSearchFields);
     searchQuery = {
@@ -283,7 +318,6 @@ const getOwnerRestaurantsService = async (loginUserId:string, query: TRestaurant
   //console.dir(searchQuery, {depth:null})
 
   //5 setup filters
-
   let filterQuery = {};
   if (filters) {
     filterQuery = makeFilterQuery(filters);
@@ -307,20 +341,33 @@ const getOwnerRestaurantsService = async (loginUserId:string, query: TRestaurant
   ]);
 
   // total count of matching users
-  const totalCount = await RestaurantModel.countDocuments({
-    ...searchQuery,
-    ...filterQuery,
-  });
-
-  return {
-    meta: {
-      page: Number(page), //currentPage
-      limit: Number(limit),
-      totalPages: Math.ceil(totalCount / Number(limit)),
-      total: totalCount,
+  const totalRestaurantResult = await RestaurantModel.aggregate([
+    {
+      $match: {
+         ownerId: new ObjectId(loginUserId) ,
+      }
     },
-    data: result,
-  };
+    {
+      $match: {
+        ...searchQuery, // Apply search query
+        ...filterQuery, // Apply filters
+      },
+    },
+    { $count: "totalCount" },
+  ]);
+
+  const totalCount = totalRestaurantResult[0]?.totalCount || 0;
+  const totalPages = Math.ceil(totalCount / Number(limit));
+
+return {
+  meta: {
+    page: Number(page), //currentPage
+    limit: Number(limit),
+    totalPages,
+    total: totalCount,
+  },
+  data: result,
+};
 };
 
 

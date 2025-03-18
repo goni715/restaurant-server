@@ -14,3 +14,11 @@ export interface IReviewPayload {
   star: Number;
   comment: String;
 }
+
+export type TReviewQuery = {
+  searchTerm?: string;
+  page?: string;
+  limit?: string;
+  sortBy?: string;
+  sortOrder?: "asc" | "desc";
+};

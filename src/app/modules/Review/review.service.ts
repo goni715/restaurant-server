@@ -1,15 +1,17 @@
-import { Types } from "mongoose";
+import mongoose, { Types } from "mongoose";
 import AppError from "../../errors/AppError";
 import RestaurantModel from "../Restaurant/restaurant.model";
-import { IReviewPayload } from "./review.interface";
+import { IReviewPayload, TReviewQuery } from "./review.interface";
 import ReviewModel from "./review.model";
+import { makeFilterQuery, makeSearchQuery } from "../../helper/QueryBuilder";
+import { ReviewSearchFields } from "./review.constant";
 
 
 const createReviewService = async (
   loginUserId: string,
   payload: IReviewPayload
 ) => {
-  const ObjectId = Types.ObjectId;  
+  const ObjectId = Types.ObjectId;
   const { restaurantId, star, comment } = payload;
   //check restaurant not exist
   const restaurant = await RestaurantModel.findById(restaurantId);
@@ -17,37 +19,59 @@ const createReviewService = async (
     throw new AppError(404, "Restaurant Not Found");
   }
 
-  // Create a new review
-  await ReviewModel.create({
-    userId: loginUserId,
-    restaurantId,
-    star,
-    comment,
-  });
+  //transaction & rollback
+  const session = await mongoose.startSession();
 
+  try {
+    session.startTransaction();
 
-//find the average ratings value
-const averageRatingsResult = await ReviewModel.aggregate([
-    {
-      $match: { restaurantId: new ObjectId(restaurantId) }, 
-    },
-    {
-        $group: {
-          _id: "$restaurantId",
-          averageRating: { $avg: "$star" },
+    // Create a new review
+    await ReviewModel.create(
+      {
+        userId: loginUserId,
+        restaurantId,
+        star,
+        comment,
+      },
+      { session }
+    );
+
+    //find the average ratings value
+    const averageRatingsResult = await ReviewModel.aggregate(
+      [
+        {
+          $match: { restaurantId: new ObjectId(restaurantId) },
         },
-    }
-  ]);
+        {
+          $group: {
+            _id: "$restaurantId",
+            averageRating: { $avg: "$star" },
+          },
+        },
+      ],
+      { session }
+    );
 
-  const averageRatings = averageRatingsResult.length > 0 ? Number((averageRatingsResult[0]?.averageRating).toFixed(1)) : restaurant.ratings;
+    const averageRatings =
+      averageRatingsResult.length > 0
+        ? Number((averageRatingsResult[0]?.averageRating).toFixed(1))
+        : restaurant.ratings;
 
-  //update the ratings
-  const result = await RestaurantModel.updateOne(
-    { _id: new ObjectId(restaurantId) },
-    { ratings: averageRatings }
-  )
+    //update the ratings
+    const result = await RestaurantModel.updateOne(
+      { _id: new ObjectId(restaurantId) },
+      { ratings: averageRatings },
+      { session }
+    );
 
-  return result;
+    await session.commitTransaction();
+    await session.endSession();
+    return result;
+  } catch (err: any) {
+    await session.abortTransaction();
+    await session.endSession();
+    throw new Error(err);
+  }
 };
 
 
@@ -69,8 +93,37 @@ const deleteReviewService = async (reviewId: string) => {
 }
 
 
-const getRestaurantReviewsService = async (restaurantId: string) => {
+const getRestaurantReviewsService = async (restaurantId: string, query: TReviewQuery) => {
   const ObjectId = Types.ObjectId;
+    
+  // 1. Extract query parameters
+  const {
+    searchTerm, 
+    page = 1, 
+    limit = 10, 
+    sortOrder = "desc",
+    sortBy = "createdAt", 
+    ...filters // Any additional filters
+  } = query;
+
+
+  // 2. Set up pagination
+  const skip = (Number(page) - 1) * Number(limit);
+
+  //3. setup sorting
+  const sortDirection = sortOrder === "asc" ? 1 : -1;
+
+  //4. setup searching
+    let searchQuery = {};
+    if (searchTerm) {
+      searchQuery = makeSearchQuery(searchTerm, ReviewSearchFields);
+    }
+  
+    //5 setup filters
+    let filterQuery = {};
+    if (filters) {
+      filterQuery = makeFilterQuery(filters);
+    }
   
    //check restaurant not exist
    const restaurant = await RestaurantModel.findById(restaurantId);
@@ -92,6 +145,12 @@ const getRestaurantReviewsService = async (restaurantId: string) => {
     },
     {
       $unwind: "$user"
+    },
+    {
+      $match: {
+        ...searchQuery,
+        ...filterQuery
+      }
     },
     {
       $project: {

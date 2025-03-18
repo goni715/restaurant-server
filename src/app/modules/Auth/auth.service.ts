@@ -232,6 +232,7 @@ const deleteMyAccountService = async (loginUserId: string, password: string) => 
        throw new AppError(400, 'Password is not correct');
    }
 
+  //transaction & rollback
  const session = await mongoose.startSession();
 
   try{

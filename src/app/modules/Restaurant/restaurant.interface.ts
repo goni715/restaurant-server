@@ -6,13 +6,11 @@ export type TApprovedStatus = "pending" | "accepted" | "cancelled";
 export interface IRestaurant {
     ownerId: Types.ObjectId;
     name: string;
-    cuisine: Types.ObjectId[];
     dining: Types.ObjectId[];
     location: string;
     keywords?: string[],
     features?: string[];
     ratings?: number;
-    price: number;
     restaurantImg?: string;
     discount?: string;
     status: TRestaurantStatus;
@@ -27,7 +25,6 @@ export type TRestaurantQuery = {
   sortBy?: string;
   sortOrder?: "asc" | "desc";
   cuisine?: string;
-  price?: number;
   dining?:string;
   ratings?:number;
   status?: TRestaurantStatus

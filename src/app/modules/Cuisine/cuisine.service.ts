@@ -9,7 +9,7 @@ const createCuisineService = async (name: string) => {
     //check cuisine is already existed
     const cuisine = await CuisineModel.findOne({ slug });
     if(cuisine){
-        throw new AppError(409, 'This quisine is already existed');
+        throw new AppError(409, 'This cuisine is already existed');
     }
 
     const result = await CuisineModel.create({

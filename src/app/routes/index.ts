@@ -9,6 +9,7 @@ import { NotificationRoutes } from '../modules/Notification/notification.route';
 import { CuisineRoutes } from '../modules/Cuisine/cuisine.route';
 import { DiningRoutes } from '../modules/Dining/dining.route';
 import { SocialMediaRoutes } from '../modules/SocialMedia/socialMedia.route';
+import { MenuRoutes } from '../modules/Menu/menu.route';
 
 const router = express.Router();
 
@@ -41,6 +42,10 @@ const moduleRoutes = [
     {
         path: '/restaurant',
         route: RestaurantRoutes
+    },
+    {
+        path: '/menu',
+        route: MenuRoutes
     },
     {
         path: '/favourite',

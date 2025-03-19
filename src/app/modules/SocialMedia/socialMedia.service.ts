@@ -1,29 +1,25 @@
 import slugify from "slugify";
 import AppError from "../../errors/AppError";
-import DiningModel from "./dining.model";
+import DiningModel from "./socialMedia.model";
+import { ISocialMedia } from "./socialMedia.interface";
+import RestaurantModel from "../Restaurant/restaurant.model";
 
 
-const createDiningService = async (name: string) => {
-    const slug = slugify(name).toLowerCase();
-    
-    //check Dining is already existed
-    const dining = await DiningModel.findOne({ slug });
-    if(dining){
-        throw new AppError(409, 'This dining is already existed');
-    }
-
-    const result = await DiningModel.create({ name, slug })
-
-    return result;
+const createSocialMediaService = async (payload: ISocialMedia) => {
+     //check restaurant exist
+  const restaurant = await RestaurantModel.findById(payload.restaurantId);
+  if (!restaurant) {
+    throw new AppError(409, "Restaurant not found");
+  }
 }
 
 
-const getDiningListService = async () => {
+const getSocialMediaListService = async () => {
     const result = await DiningModel.find().select('-createdAt -updatedAt').sort('-createdAt')
     return result;
 }
 
-const updateDiningService = async (DiningId: string, name: string) => {
+const updateSocialMediaService = async (DiningId: string, name: string) => {
     const Dining = await DiningModel.findById(DiningId)
     if(!Dining){
         throw new AppError(404, 'This quisine not found');
@@ -46,7 +42,7 @@ const updateDiningService = async (DiningId: string, name: string) => {
     return result;
 }
 
-const deleteDiningService = async (DiningId: string) => {
+const deleteSocialMediaService = async (DiningId: string) => {
     const Dining = await DiningModel.findById(DiningId)
     if(!Dining){
         throw new AppError(404, 'This quisine not found');
@@ -57,8 +53,8 @@ const deleteDiningService = async (DiningId: string) => {
 }
 
 export {
-    createDiningService,
-    getDiningListService,
-    updateDiningService,
-    deleteDiningService
+    createSocialMediaService,
+    getSocialMediaListService,
+    updateSocialMediaService,
+    deleteSocialMediaService
 }

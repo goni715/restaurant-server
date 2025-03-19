@@ -1,11 +1,10 @@
 import slugify from "slugify";
-import { ICuisine } from "./cuisine.interface";
 import CuisineModel from "./cuisine.model";
 import AppError from "../../errors/AppError";
 
 
-const createCuisineService = async (payload: ICuisine) => {
-    const slug = slugify(payload.name).toLowerCase();
+const createCuisineService = async (name: string) => {
+    const slug = slugify(name).toLowerCase();
     
     //check cuisine is already existed
     const cuisine = await CuisineModel.findOne({ slug });
@@ -14,7 +13,7 @@ const createCuisineService = async (payload: ICuisine) => {
     }
 
     const result = await CuisineModel.create({
-        name: payload.name,
+        name,
         slug
     })
 
@@ -23,17 +22,17 @@ const createCuisineService = async (payload: ICuisine) => {
 
 
 const getCuisinesService = async () => {
-    const result = await CuisineModel.find().select('-createdAt -updatedAt')
+    const result = await CuisineModel.find().select('-createdAt -updatedAt').sort('-createdAt')
     return result;
 }
 
-const updateCuisineService = async (cuisineId: string, payload: ICuisine) => {
+const updateCuisineService = async (cuisineId: string, name: string) => {
     const cuisine = await CuisineModel.findById(cuisineId)
     if(!cuisine){
         throw new AppError(404, 'This quisine not found');
     }
 
-    const slug = slugify(payload.name).toLowerCase();
+    const slug = slugify(name).toLowerCase();
     const cuisineExist = await CuisineModel.findOne({ _id: { $ne: cuisineId }, slug })
     if(cuisineExist){
         throw new AppError(409, 'Sorry! This quisine name is already taken');
@@ -42,7 +41,7 @@ const updateCuisineService = async (cuisineId: string, payload: ICuisine) => {
     const result = await CuisineModel.updateOne(
         { _id: cuisineId},
         {
-            name: payload.name,
+            name,
             slug
         }
     )
@@ -57,7 +56,6 @@ const deleteCuisineService = async (cuisineId: string) => {
     }
 
     const result = await CuisineModel.deleteOne({ _id: cuisineId})
-
     return result;
 }
 

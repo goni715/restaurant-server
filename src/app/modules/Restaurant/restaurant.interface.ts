@@ -6,9 +6,8 @@ export type TApprovedStatus = "pending" | "accepted" | "cancelled";
 export interface IRestaurant {
     ownerId: Types.ObjectId;
     name: string;
-    website?: string;
-    cuisine: string;
-    dining: string;
+    cuisine: Types.ObjectId[];
+    dining: Types.ObjectId[];
     location: string;
     keywords?: string[],
     features?: string[];

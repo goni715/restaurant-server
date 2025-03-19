@@ -6,12 +6,14 @@ const cuisineSchema = new Schema<ICuisine>({
     name: {
         type: String,
         required: true,
-        unique: true
+        unique: true,
+        trim: true
     },
     slug: {
         type: String,
         required: true,
-        unique: true
+        unique: true,
+        trim: true
     }
 },{
     timestamps: true,
@@ -20,5 +22,5 @@ const cuisineSchema = new Schema<ICuisine>({
 
 
 
-const CuisineModel = model("Cuisine", cuisineSchema);
+const CuisineModel = model<ICuisine>("Cuisine", cuisineSchema);
 export default CuisineModel

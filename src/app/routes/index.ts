@@ -7,6 +7,8 @@ import { FavouriteRoutes } from '../modules/Favourite/favourite.route';
 import { ReviewRoutes } from '../modules/Review/review.route';
 import { NotificationRoutes } from '../modules/Notification/notification.route';
 import { CuisineRoutes } from '../modules/Cuisine/cuisine.route';
+import { DiningRoutes } from '../modules/Dining/dining.route';
+import { SocialMediaRoutes } from '../modules/SocialMedia/socialMedia.route';
 
 const router = express.Router();
 
@@ -27,6 +29,14 @@ const moduleRoutes = [
     {
         path: '/cuisine',
         route: CuisineRoutes
+    },
+    {
+        path: '/dining',
+        route: DiningRoutes
+    },
+    {
+        path: '/social-media',
+        route: SocialMediaRoutes
     },
     {
         path: '/restaurant',

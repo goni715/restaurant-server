@@ -13,6 +13,9 @@ const cuisineSchema = new Schema<ICuisine>({
         required: true,
         unique: true
     }
+},{
+    timestamps: true,
+    versionKey: false
 })
 
 

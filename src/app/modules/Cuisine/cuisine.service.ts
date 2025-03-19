@@ -27,7 +27,43 @@ const getCuisinesService = async () => {
     return result;
 }
 
+const updateCuisineService = async (cuisineId: string, payload: ICuisine) => {
+    const cuisine = await CuisineModel.findById(cuisineId)
+    if(!cuisine){
+        throw new AppError(404, 'This quisine not found');
+    }
+
+    const slug = slugify(payload.name).toLowerCase();
+    const cuisineExist = await CuisineModel.findOne({ _id: { $ne: cuisineId }, slug })
+    if(cuisineExist){
+        throw new AppError(409, 'Sorry! This quisine name is already taken');
+    }
+
+    const result = await CuisineModel.updateOne(
+        { _id: cuisineId},
+        {
+            name: payload.name,
+            slug
+        }
+    )
+
+    return result;
+}
+
+const deleteCuisineService = async (cuisineId: string) => {
+    const cuisine = await CuisineModel.findById(cuisineId)
+    if(!cuisine){
+        throw new AppError(404, 'This quisine not found');
+    }
+
+    const result = await CuisineModel.deleteOne({ _id: cuisineId})
+
+    return result;
+}
+
 export {
     createCuisineService,
-    getCuisinesService
+    getCuisinesService,
+    updateCuisineService,
+    deleteCuisineService
 }

@@ -4,7 +4,8 @@ import { createSocialMediaService, deleteSocialMediaService, getSocialMediaListS
 
 
 const createSocialMedia = catchAsync(async (req, res) => {
-  const result = await createSocialMediaService(req.body);
+  const loginUserId = req.headers.id;
+  const result = await createSocialMediaService(loginUserId as string, req.body);
 
   sendResponse(res, {
     statusCode: 200,
@@ -22,16 +23,15 @@ const getSocialMediaList = catchAsync(async (req, res) => {
   sendResponse(res, {
     statusCode: 200,
     success: true,
-    message: "Social Medias are retrived successfully",
+    message: "Social Media are retrived successfully",
     data: result
   });
 });
 
 
 const updateSocialMedia = catchAsync(async (req, res) => {
-  const { diningId } = req.params;
-  const { name } = req.body;
-  const result = await updateSocialMediaService(diningId, name);
+  const loginUserId = req.headers.id;
+  const result = await updateSocialMediaService(loginUserId as string, req.body);
 
   sendResponse(res, {
     statusCode: 200,
@@ -43,8 +43,9 @@ const updateSocialMedia = catchAsync(async (req, res) => {
 
 
 const deleteSocialMedia = catchAsync(async (req, res) => {
-  const { diningId } = req.params;
-  const result = await deleteSocialMediaService(diningId);
+  const loginUserId = req.headers.id;
+  const { restaurantId } = req.params;
+  const result = await deleteSocialMediaService(loginUserId as string, restaurantId);
 
   sendResponse(res, {
     statusCode: 200,

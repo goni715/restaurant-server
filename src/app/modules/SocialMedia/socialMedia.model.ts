@@ -3,6 +3,18 @@ import { ISocialMedia } from "./socialMedia.interface";
 
 
 const socialMediaSchema = new Schema<ISocialMedia>({
+    ownerId: {
+        type: Schema.Types.ObjectId,
+        required: true,
+        unique: true,
+        ref: "User",
+    },
+    restaurantId: {
+        type: Schema.Types.ObjectId,
+        required: true,
+        unique: true,
+        ref: "Restaurant",
+    },
     website: {
         type: String,
         trim: true

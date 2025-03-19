@@ -9,7 +9,7 @@ export const socialMediaSchema = z.object({
     })
     .refine((id) => Types.ObjectId.isValid(id), {
       message: "restaurantId must be a valid ObjectId",
-    }),
+  }),
   website: z.string().url().optional(),
   facebook: z.string().url().optional(),
   youtube: z.string().url().optional(),

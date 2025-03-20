@@ -34,7 +34,6 @@ const createRestaurantService = async (
 };
 
 
-
 const getRestaurantsService = async (query: TRestaurantQuery) => {
   const ObjectId = Types.ObjectId;
   // 1. Extract query parameters

@@ -6,6 +6,7 @@ export interface IMenu {
     restaurantId: Types.ObjectId,
     cuisineId: Types.ObjectId;
     name: string;
+    slug: string;
     price: number;
     ratings?: number;
     ingredient: string;

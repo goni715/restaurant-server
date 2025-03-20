@@ -1,22 +1,14 @@
+import { Types } from "mongoose";
 import { z } from "zod";
 
+export const objectIdSchema = z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid ObjectId");
 
 export const createRestaurantValidationSchema = z.object({
   name: z.string().min(1, "Name is required"),
-  website: z.string().url("Invalid URL format").optional(),
-  cuisine: z.string().min(1, "Cuisine is required"),
-  dining: z.string({
-    required_error: "Dining Style is required"
-  }).min(1, "Dining style is required"),
+  dining: z.array(objectIdSchema).min(1, "There must be at least two options"),
   location: z.string().min(1, "Location is required"),
   keywords: z.array(z.string()).optional(),
   features: z.array(z.string()).optional(),
-  ratings: z
-    .number()
-    .min(0, "Ratings must be at least 0")
-    .max(5, "Ratings can't exceed 5")
-    .optional(),
-  price: z.number().min(0, "Price must be at least 0"),
   discount: z.string().optional()
 });
 

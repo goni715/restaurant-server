@@ -20,6 +20,13 @@ router.post(
   validationMiddleware(loginValidationSchema),
   AuthController.loginUser
 );
+
+router.post(
+  "/login-admin",
+  validationMiddleware(loginValidationSchema),
+  AuthController.loginAdmin
+);
+
 router.post(
   "/login-super-admin",
   validationMiddleware(loginValidationSchema),

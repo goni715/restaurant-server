@@ -1,6 +1,6 @@
 import catchAsync from "../../utils/catchAsync";
 import sendResponse from "../../utils/sendResponse";
-import { createMenuService } from "./menu.service";
+import { createMenuService, getMenusService } from "./menu.service";
 
 
 const createMenu = catchAsync(async (req, res) => {
@@ -15,8 +15,24 @@ const createMenu = catchAsync(async (req, res) => {
   });
 });
 
+
+
+const getMenus = catchAsync(async (req, res) => {
+  const loginUserId = req.headers.id;
+  const { restaurantId } = req.params;
+  const result = await getMenusService(loginUserId as string, restaurantId);
+
+  sendResponse(res, {
+    statusCode: 201,
+    success: true,
+    message: "Menus are retrieved successfully",
+    data: result,
+  });
+});
+
 const MenuController = {
-  createMenu
+  createMenu,
+  getMenus
 };
 
 export default MenuController;

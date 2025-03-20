@@ -6,6 +6,7 @@ const restaurantSchema = new Schema<IRestaurant>({
     ownerId: {
         type: Schema.Types.ObjectId,
         required: true,
+        unique: true,
         ref: 'User'
     },
     name: {
@@ -14,20 +15,11 @@ const restaurantSchema = new Schema<IRestaurant>({
         unique: true,
         trim: true
     },
-    cuisine: {
-        type: String,
-        required:true,
-        trim: true
-    },
-    dining: {
-        type: String,
-        required:true,
-        trim: true
-    },
-    website: {
-        type: String,
-        trim: true
-    },
+    dining: [{
+        type: Schema.Types.ObjectId,
+        ref: "Dining",
+        required: true,
+    }],
     location: {
         type: String,
         required:true,
@@ -36,11 +28,6 @@ const restaurantSchema = new Schema<IRestaurant>({
     keywords: {
         type: [String],
         default: []
-    },
-    price: {
-        type: Number,
-        required: true,
-        trim: true
     },
     features: {
         type: [String],

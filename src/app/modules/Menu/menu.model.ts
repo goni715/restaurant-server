@@ -23,6 +23,11 @@ const menuSchema = new Schema<IMenu>(
       required: true,
       trim: true
     },
+    slug: {
+      type: String,
+      required: true,
+      trim: true
+    },
     price: {
       type: Number,
       required: true,

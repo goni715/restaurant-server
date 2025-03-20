@@ -6,60 +6,81 @@ import RestaurantModel from "../Restaurant/restaurant.model";
 
 const createSocialMediaService = async (loginUserId:string, payload: ISocialMedia) => {
   //check restaurant exist
-  const restaurant = await RestaurantModel.findOne({ _id:payload.restaurantId, ownerId: loginUserId })
+  const restaurant = await RestaurantModel.findOne({ ownerId: loginUserId })
   if (!restaurant) {
     throw new AppError(404, "Restaurant not found");
   }
 
-
   //check already social-media exist
-  const socialMedia = await SocialMediaModel.findOne({ ownerId:loginUserId, restaurantId: payload.restaurantId });
+  const socialMedia = await SocialMediaModel.findOne({ ownerId:loginUserId, restaurantId: restaurant._id });
   if (socialMedia) {
     throw new AppError(409, "Social Media is already exist");
   }
 
   const result = await SocialMediaModel.create({
     ...payload,
-    ownerId: loginUserId
+    ownerId: loginUserId,
+    restaurantId: restaurant._id
   })
 
   return result;
 }
 
-const getSocialMediaListService = async () => {
-    const result = await SocialMediaModel.find();
-    return result;
+
+
+const getSocialMediaService = async (loginUserId: string) => {
+  //check social-media not found
+  const socialMedia = await SocialMediaModel.findOne({
+    ownerId: loginUserId
+  });
+  if (!socialMedia) {
+    throw new AppError(404, "Social Media not found");
+  }
+
+  return socialMedia
 }
+
+
+
 
 const updateSocialMediaService = async (loginUserId: string, payload: ISocialMedia) => {
    //check restaurant exist
-  const restaurant = await RestaurantModel.findOne({ _id:payload.restaurantId, ownerId: loginUserId })
+  const restaurant = await RestaurantModel.findOne({ ownerId: loginUserId })
   if (!restaurant) {
     throw new AppError(404, "Restaurant not found");
   }
 
+  //check social-media not found
+  const socialMedia = await SocialMediaModel.findOne({ ownerId:loginUserId, restaurantId: restaurant._id });
+  if (!socialMedia) {
+    throw new AppError(404, "Social Media not found");
+  }
+
   const result = await SocialMediaModel.updateOne(
-    { ownerId: loginUserId, restaurantId: payload.restaurantId},
+    { ownerId: loginUserId, restaurantId: restaurant._id},
     payload
   )
 
   return result;
 }
 
-const deleteSocialMediaService = async (loginUserId: string, restaurantId: string) => {
-    //check restaurant exist
-  const restaurant = await RestaurantModel.findOne({ _id:restaurantId, ownerId: loginUserId })
-  if (!restaurant) {
-    throw new AppError(404, "Restaurant not found");
-  }
 
-  const result = await SocialMediaModel.deleteOne({ restaurantId, ownerId: loginUserId })
+
+const deleteSocialMediaService = async (loginUserId: string) => {
+  //check social-media not found
+  const socialMedia = await SocialMediaModel.findOne({
+    ownerId: loginUserId
+  });
+  if (!socialMedia) {
+    throw new AppError(404, "Social Media not found");
+  }
+  const result = await SocialMediaModel.deleteOne({ ownerId: loginUserId });
   return result;
 }
 
 export {
     createSocialMediaService,
-    getSocialMediaListService,
+    getSocialMediaService,
     updateSocialMediaService,
     deleteSocialMediaService
 }

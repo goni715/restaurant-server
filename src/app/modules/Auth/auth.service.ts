@@ -10,6 +10,7 @@ import sendEmailUtility from "../../utils/sendEmailUtility";
 import hashedPassword from "../../utils/hashedPassword";
 import mongoose, { Types } from "mongoose";
 import RestaurantModel from "../Restaurant/restaurant.model";
+import SocialMediaModel from "../SocialMedia/socialMedia.model";
 
 
 
@@ -282,6 +283,9 @@ const deleteMyAccountService = async (loginUserId: string, password: string) => 
 
     //delete restaurant
     await RestaurantModel.deleteOne({ ownerId: new ObjectId(loginUserId) })
+
+    //delete social media
+    await SocialMediaModel.deleteOne({ ownerId: loginUserId });
 
      //delete user
      const result = await UserModel.deleteOne({ _id: new ObjectId(loginUserId) })

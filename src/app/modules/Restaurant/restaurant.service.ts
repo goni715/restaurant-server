@@ -15,7 +15,13 @@ const createRestaurantService = async (
 ) => {
   const { name } = payload;
 
-  //check restaurant exist
+  //check restaurant owner is already exist
+  const owner = await RestaurantModel.findOne({ ownerId });
+  if (owner) {
+    throw new AppError(409, "Sorry! You have already a restaurant");
+  }
+
+  //check restaurant
   const restaurant = await RestaurantModel.findOne({ name });
   if (restaurant) {
     throw new AppError(409, "This restaurant name is already taken or existed");

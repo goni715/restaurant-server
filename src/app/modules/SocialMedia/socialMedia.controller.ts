@@ -1,6 +1,6 @@
 import catchAsync from "../../utils/catchAsync";
 import sendResponse from "../../utils/sendResponse";
-import { createSocialMediaService, deleteSocialMediaService, getSocialMediaListService, updateSocialMediaService } from "./socialMedia.service";
+import { createSocialMediaService, deleteSocialMediaService, getSocialMediaService, updateSocialMediaService } from "./socialMedia.service";
 
 
 const createSocialMedia = catchAsync(async (req, res) => {
@@ -17,13 +17,14 @@ const createSocialMedia = catchAsync(async (req, res) => {
 
 
 
-const getSocialMediaList = catchAsync(async (req, res) => {
-  const result = await getSocialMediaListService();
+const getSocialMedia = catchAsync(async (req, res) => {
+  const loginUserId = req.headers.id;
+  const result = await getSocialMediaService(loginUserId as string);
 
   sendResponse(res, {
     statusCode: 200,
     success: true,
-    message: "Social Media are retrived successfully",
+    message: "Social Media is retrived successfully",
     data: result
   });
 });
@@ -44,8 +45,7 @@ const updateSocialMedia = catchAsync(async (req, res) => {
 
 const deleteSocialMedia = catchAsync(async (req, res) => {
   const loginUserId = req.headers.id;
-  const { restaurantId } = req.params;
-  const result = await deleteSocialMediaService(loginUserId as string, restaurantId);
+  const result = await deleteSocialMediaService(loginUserId as string);
 
   sendResponse(res, {
     statusCode: 200,
@@ -58,7 +58,7 @@ const deleteSocialMedia = catchAsync(async (req, res) => {
 
 const SocialMediaController = {
   createSocialMedia,
-  getSocialMediaList,
+  getSocialMedia,
   updateSocialMedia,
   deleteSocialMedia
 }

@@ -19,3 +19,21 @@ export const createMenuValidationSchema = z.object({
     required_error: "ingredient is required",
   }),
 });
+
+
+export const updateMenuValidationSchema = z.object({
+  cuisineId: z
+    .string({
+      required_error: "cuisineId is required!",
+    })
+    .refine((id) => Types.ObjectId.isValid(id), {
+      message: "cuisineId must be a valid ObjectId",
+  }).optional(),
+  name: z.string({
+    required_error: "name is required",
+  }).optional(),
+  price: z.number().positive("Price must be a positive number").min(0, "Price must be at least 0").optional(),
+  ingredient: z.string({
+    required_error: "ingredient is required",
+  }).optional(),
+});

@@ -190,17 +190,6 @@ const getRestaurantReviewsService = async (restaurantId: string, query: TReviewQ
         ...filterQuery
       }
     },
-    {
-      $project: {
-        _id: "$user._id",
-        fullName: "$user.fullName",
-        email: "$user.email",
-        phone: "$user.phone",
-        star: "$star",
-        comment: "$comment",
-        createdAt: "$createdAt"
-      }
-    },
     { $count: "totalCount" }
   ])
 

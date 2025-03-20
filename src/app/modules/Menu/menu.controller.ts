@@ -1,5 +1,7 @@
 import catchAsync from "../../utils/catchAsync";
+import pickValidFields from "../../utils/pickValidFields";
 import sendResponse from "../../utils/sendResponse";
+import { MenuValidFields } from "./menu.constant";
 import { createMenuService, getMenusService } from "./menu.service";
 
 
@@ -19,13 +21,15 @@ const createMenu = catchAsync(async (req, res) => {
 
 const getMenus = catchAsync(async (req, res) => {
   const { restaurantId } = req.params;
-  const result = await getMenusService(restaurantId);
+  const validatedQuery = pickValidFields(req.query, MenuValidFields);
+  const result = await getMenusService(restaurantId, validatedQuery);
 
   sendResponse(res, {
     statusCode: 201,
     success: true,
     message: "Menus are retrieved successfully",
-    data: result,
+    meta: result.meta,
+    data: result.data,
   });
 });
 

@@ -12,3 +12,13 @@ export interface IMenu {
     ratings?: number;
     ingredient: string;
 }
+
+
+export type TMenuQuery = {
+    searchTerm?: string;
+    page?: string;
+    limit?: string;
+    sortBy?: string;
+    sortOrder?: "asc" | "desc";
+    cuisineId?:string
+  };

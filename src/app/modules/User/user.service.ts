@@ -53,13 +53,11 @@ const getUsersService = async (query: TUserQuery) => {
 
   //4. setup searching
   let searchQuery = {};
-
   if (searchTerm) {
     searchQuery = makeSearchQuery(searchTerm, UserSearchFields);
   }
 
   //5 setup filters
-
   let filterQuery = {};
   if (filters) {
     filterQuery = makeFilterQuery(filters);

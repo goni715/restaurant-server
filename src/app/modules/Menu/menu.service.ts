@@ -2,10 +2,12 @@ import slugify from "slugify";
 import AppError from "../../errors/AppError";
 import CuisineModel from "../Cuisine/cuisine.model";
 import RestaurantModel from "../Restaurant/restaurant.model";
-import { IMenu } from "./menu.interface"
+import { IMenu, TMenuQuery } from "./menu.interface"
 import MenuModel from "./menu.model";
 import { Request } from "express";
 import { Types } from "mongoose";
+import { makeFilterQuery, makeSearchQuery } from "../../helper/QueryBuilder";
+import { MenuSearchFields } from "./menu.constant";
 
 
 
@@ -64,15 +66,105 @@ const createMenuService = async (req:Request, loginUserId: string, payload: IMen
 }
 
 
-const getMenusService = async (restaurantId:string) => {
+const getMenusService = async (restaurantId:string, query: TMenuQuery) => {
   const ObjectId = Types.ObjectId;
-  const menus = await MenuModel.aggregate([
+    // 1. Extract query parameters
+    const {
+      searchTerm, 
+      page = 1, 
+      limit = 10, 
+      sortOrder = "desc",
+      sortBy = "createdAt", 
+      ...filters  // Any additional filters
+    } = query;
+  
+    // 2. Set up pagination
+    const skip = (Number(page) - 1) * Number(limit);
+  
+    //3. setup sorting
+    const sortDirection = sortOrder === "asc" ? 1 : -1;
+  
+    //4. setup searching
+    let searchQuery = {};
+    if (searchTerm) {
+      searchQuery = makeSearchQuery(searchTerm, MenuSearchFields);
+    }
+  
+    //5 setup filters
+    let filterQuery = {};
+    if (filters) {
+      filterQuery = makeFilterQuery(filters);
+    }
+
+  const result = await MenuModel.aggregate([
     {
       $match: { restaurantId: new ObjectId(restaurantId)}
-    }
+    },
+    {
+      $lookup: {
+        from: "cuisines", localField: "cuisineId", foreignField: "_id", as: "cuisine"
+      }
+    },
+    {
+      $unwind: "$cuisine"
+    },
+    {
+      $match: {
+        ...searchQuery,
+        ...filterQuery
+      }
+    },
+    {
+      $project: {
+        _id: 1,
+        name: 1,
+        image:1,
+        price:1,
+        ingredient:1,
+        ratings:1,
+        cuisineName: "$cuisine.name",
+        createdAt: "$createdAt"
+      }
+    },
+    { $sort: { [sortBy]: sortDirection } },
+    { $skip: skip },
+    { $limit: Number(limit) },
   ])
 
-  return menus;
+
+  const totalMenuResult = await MenuModel.aggregate([
+    {
+      $match: { restaurantId: new ObjectId(restaurantId)}
+    },
+    {
+      $lookup: {
+        from: "cuisines", localField: "cuisineId", foreignField: "_id", as: "cuisine"
+      }
+    },
+    {
+      $unwind: "$cuisine"
+    },
+    {
+      $match: {
+        ...searchQuery,
+        ...filterQuery
+      }
+    },
+    { $count: "totalCount" }
+  ])
+
+  const totalCount = totalMenuResult[0]?.totalCount || 0;
+  const totalPages = Math.ceil(totalCount / Number(limit));
+
+return {
+  meta: {
+    page: Number(page), //currentPage
+    limit: Number(limit),
+    totalPages,
+    total: totalCount,
+  },
+  data: result,
+};
 }
 
 

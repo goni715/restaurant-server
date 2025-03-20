@@ -28,6 +28,11 @@ const menuSchema = new Schema<IMenu>(
       required: true,
       trim: true
     },
+    image: {
+      type: String,
+      required: true,
+      trim: true
+    },
     price: {
       type: Number,
       required: true,

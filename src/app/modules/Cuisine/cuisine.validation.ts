@@ -7,3 +7,4 @@ export const cuisineValidationSchema = z.object({
         required_error: "name is required"
     }).trim()
 })
+

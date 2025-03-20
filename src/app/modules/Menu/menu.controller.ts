@@ -5,7 +5,7 @@ import { createMenuService, getMenusService } from "./menu.service";
 
 const createMenu = catchAsync(async (req, res) => {
   const loginUserId = req.headers.id;
-  const result = await createMenuService(loginUserId as string, req.body);
+  const result = await createMenuService(req, loginUserId as string, req.body);
 
   sendResponse(res, {
     statusCode: 201,
@@ -18,9 +18,8 @@ const createMenu = catchAsync(async (req, res) => {
 
 
 const getMenus = catchAsync(async (req, res) => {
-  const loginUserId = req.headers.id;
   const { restaurantId } = req.params;
-  const result = await getMenusService(loginUserId as string, restaurantId);
+  const result = await getMenusService(restaurantId);
 
   sendResponse(res, {
     statusCode: 201,

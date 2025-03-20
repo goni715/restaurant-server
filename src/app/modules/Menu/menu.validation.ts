@@ -4,13 +4,6 @@ import { z } from "zod";
 
 
 export const createMenuValidationSchema = z.object({
-  restaurantId: z
-    .string({
-      required_error: "restaurantId is required!",
-    })
-    .refine((id) => Types.ObjectId.isValid(id), {
-      message: "restaurantId must be a valid ObjectId",
-  }),
   cuisineId: z
     .string({
       required_error: "cuisineId is required!",

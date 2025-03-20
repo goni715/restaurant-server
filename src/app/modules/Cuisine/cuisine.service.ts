@@ -1,9 +1,10 @@
 import slugify from "slugify";
 import CuisineModel from "./cuisine.model";
 import AppError from "../../errors/AppError";
+import { Request } from "express";
 
 
-const createCuisineService = async (name: string) => {
+const createCuisineService = async (req:Request, name: string) => {
     const slug = slugify(name).toLowerCase();
     
     //check cuisine is already existed
@@ -12,8 +13,18 @@ const createCuisineService = async (name: string) => {
         throw new AppError(409, 'This cuisine is already existed');
     }
 
+    if(!req.file){
+        throw new AppError(400, "image is required");
+    }
+    let image="";
+    if(req.file) {
+        //for local machine file path
+        image = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`; //for local machine
+    }
+
     const result = await CuisineModel.create({
         name,
+        image,
         slug
     })
 
@@ -22,11 +33,11 @@ const createCuisineService = async (name: string) => {
 
 
 const getCuisinesService = async () => {
-    const result = await CuisineModel.find().select('-createdAt -updatedAt').sort('-createdAt')
+    const result = await CuisineModel.find().select('-slug -createdAt -updatedAt').sort('-createdAt')
     return result;
 }
 
-const updateCuisineService = async (cuisineId: string, name: string) => {
+const updateCuisineService = async (req:Request, cuisineId: string, name: string) => {
     const cuisine = await CuisineModel.findById(cuisineId)
     if(!cuisine){
         throw new AppError(404, 'This quisine not found');
@@ -38,10 +49,17 @@ const updateCuisineService = async (cuisineId: string, name: string) => {
         throw new AppError(409, 'Sorry! This quisine name is already taken');
     }
 
+    let image=cuisine.image;
+    if(req.file) {
+        //for local machine file path
+        image = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`; //for local machine
+    }
+
     const result = await CuisineModel.updateOne(
         { _id: cuisineId},
         {
             name,
+            image,
             slug
         }
     )

@@ -9,6 +9,10 @@ const cuisineSchema = new Schema<ICuisine>({
         unique: true,
         trim: true
     },
+    image: {
+        type: String,
+        trim: true
+    },
     slug: {
         type: String,
         required: true,

@@ -7,6 +7,7 @@ export interface IMenu {
     cuisineId: Types.ObjectId;
     name: string;
     slug: string;
+    image: string;
     price: number;
     ratings?: number;
     ingredient: string;

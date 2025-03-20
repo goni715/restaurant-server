@@ -5,7 +5,7 @@ import { createCuisineService, deleteCuisineService, getCuisinesService, updateC
 
 const createCuisine = catchAsync(async (req, res) => {
   const { name } = req.body;
-  const result = await createCuisineService(name);
+  const result = await createCuisineService(req, name);
 
   sendResponse(res, {
     statusCode: 200,
@@ -32,7 +32,7 @@ const getCuisines = catchAsync(async (req, res) => {
 const updateCuisine = catchAsync(async (req, res) => {
   const { cuisineId } = req.params;
   const { name } = req.body;
-  const result = await updateCuisineService(cuisineId, name);
+  const result = await updateCuisineService(req, cuisineId, name);
 
   sendResponse(res, {
     statusCode: 200,

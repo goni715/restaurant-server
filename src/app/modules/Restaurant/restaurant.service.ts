@@ -31,7 +31,7 @@ const createRestaurantService = async (
   if (req.file) {
     //for local machine file path
     payload.restaurantImg = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`; //for local machine
- }
+  }
 
 
   //create the restaurant

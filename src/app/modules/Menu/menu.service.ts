@@ -102,6 +102,19 @@ const getMenusService = async (restaurantId:string, query: TMenuQuery) => {
     },
     {
       $lookup: {
+        from: "menureviews",
+        localField: "_id",
+        foreignField: "menuId",
+        as: "reviews"
+      }
+    },
+    {
+      $addFields: {
+        totalReviewers: { $size: "$reviews" },
+      }
+    },
+    {
+      $lookup: {
         from: "cuisines", localField: "cuisineId", foreignField: "_id", as: "cuisine"
       }
     },
@@ -122,6 +135,7 @@ const getMenusService = async (restaurantId:string, query: TMenuQuery) => {
         price:1,
         ingredient:1,
         ratings:1,
+        totalReviewers:1,
         cuisineId:1,
         cuisineName: "$cuisine.name",
         createdAt: "$createdAt"

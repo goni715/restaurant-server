@@ -86,37 +86,51 @@ const getRestaurantsService = async (query: TRestaurantQuery) => {
       $unwind: "$owner"
     },
     {
+      $lookup: {
+        from: "reviews",
+        localField: "_id",
+        foreignField: "restaurantId",
+        as: "reviews"
+      }
+    },
+    {
+      $addFields: {
+        totalReviewers: { $size: "$reviews" },
+      }
+    },
+    {
       $match: {
         ...searchQuery, // Apply search query
         ...filterQuery, // Apply filters
       },
     },
-    {
-      $project: {
-        _id: 1,
-        ownerId: 1,
-        name: 1,
-        cuisine: 1,
-        dining: 1,
-        website: 1,
-        location: 1,
-        keywords: 1,
-        price: 1,
-        features: 1,
-        cancellationCharge:1,
-        discount:1,
-        ratings: 1,
-        status:1,
-        approved:1,
-        createdAt: 1,
-        updatedAt: 1,
-        ownerName: "$owner.fullName",
-        ownerEmail: "$owner.email",
-        ownerPhone: "$owner.phone",
-        ownerImg: "$owner.profileImg",
-        ownerAddress: "$owner.address"
-      },
-    },
+    // {
+    //   $project: {
+    //     _id: 1,
+    //     ownerId: 1,
+    //     name: 1,
+    //     cuisine: 1,
+    //     dining: 1,
+    //     website: 1,
+    //     location: 1,
+    //     keywords: 1,
+    //     price: 1,
+    //     features: 1,
+    //     cancellationCharge:1,
+    //     discount:1,
+    //     ratings: 1,
+    //     totalReviewers:1,
+    //     status:1,
+    //     approved:1,
+    //     createdAt: 1,
+    //     updatedAt: 1,
+    //     ownerName: "$owner.fullName",
+    //     ownerEmail: "$owner.email",
+    //     ownerPhone: "$owner.phone",
+    //     ownerImg: "$owner.profileImg",
+    //     ownerAddress: "$owner.address"
+    //   },
+    // },
     { $sort: { [sortBy]: sortDirection } },
     { $skip: skip },
     { $limit: Number(limit) },

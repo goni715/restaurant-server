@@ -2,7 +2,7 @@ import catchAsync from "../../utils/catchAsync";
 import pickValidFields from "../../utils/pickValidFields";
 import sendResponse from "../../utils/sendResponse";
 import { RestaurantValidFields, UserRestaurantValidFields } from "./restaurant.constant";
-import { approveRestaurantService, changeRestaurantStatusService, createRestaurantService, getOwnerRestaurantsService, getRestaurantsService, getSingleRestaurantService, getUserRestaurantsService, updateRestaurantService } from "./restaurant.service";
+import { approveRestaurantService, changeRestaurantStatusService, createRestaurantService, getOwnerRestaurantService, getRestaurantsService, getSingleRestaurantService, getUserRestaurantsService, updateRestaurantImageService, updateRestaurantService } from "./restaurant.service";
 
 
 
@@ -46,16 +46,14 @@ const getUserRestaurants = catchAsync(async (req, res) => {
 });
 
 
-const getOwnerRestaurants = catchAsync(async (req, res) => {
+const getOwnerRestaurant = catchAsync(async (req, res) => {
   const loginUserId = req.headers.id;
-  const validatedQuery = pickValidFields(req.query, RestaurantValidFields);
-  const result = await getOwnerRestaurantsService(loginUserId as string, validatedQuery);
+  const result = await getOwnerRestaurantService(loginUserId as string);
   sendResponse(res, {
     statusCode: 200,
     success: true,
-    message: "Restaurants are retrieved successfully",
-    meta: result.meta,
-    data: result.data
+    message: "Restaurant is retrieved successfully",
+    data: result
   });
 });
 
@@ -113,15 +111,29 @@ const updateRestaurant = catchAsync(async (req, res) => {
 
 
 
+const updateRestaurantImage = catchAsync(async (req, res) => {
+  const loginUserId = req.headers.id;
+  const result = await updateRestaurantImageService(req, loginUserId as string);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Restaurant's image is updated successfully",
+    data: result,
+  });
+});
+
+
+
 const RestaurantController = {
     createRestaurant,
     getRestaurants,
     getUserRestaurants,
-    getOwnerRestaurants,
+    getOwnerRestaurant,
     changeRestaurantStatus,
     getSingleRestaurant,
     approveRestaurant,
-    updateRestaurant
+    updateRestaurant,
+    updateRestaurantImage
 }
 
 export default RestaurantController;

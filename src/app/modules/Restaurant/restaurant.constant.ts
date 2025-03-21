@@ -2,16 +2,21 @@
 
 export const RestaurantSearchFields = [
     "name",
-    "cuisine",
+    "cuisine.name",
     "location",
-    "dining",
     //"keywords", //this is array fields
     "owner.fullName",
     "owner.email",
-    "owner.phone",
-    "owner.address"
+    "owner.phone"
 ]
 
+
+export const UserRestaurantSearchFields = [
+  "name",
+  "cuisine.name",
+  "location",
+  //"keywords", //this is array fields
+]
 
 export const RestaurantValidFields: string[] = [
   "searchTerm",
@@ -19,9 +24,7 @@ export const RestaurantValidFields: string[] = [
   "limit",
   "sortBy",
   "sortOrder",
-  "cuisine",
-  "price",
-  "dining",
+  "cuisine.name",
   "ratings",
   "status",
   "approved"
@@ -34,8 +37,6 @@ export const UserRestaurantValidFields: string[] = [
   "limit",
   "sortBy",
   "sortOrder",
-  "cuisine",
-  "price",
-  "dining",
+  "cuisine.name",
   "ratings"
 ];

@@ -23,8 +23,8 @@ router.post(
 
 router.get('/get-restaurants', AuthMiddleware('super_admin'), RestaurantController.getRestaurants);
 router.get('/get-single-restaurant/:restaurantId', RestaurantController.getSingleRestaurant)
-router.get('/get-user-restaurants', RestaurantController.getUserRestaurants)
-router.get('/get-owner-restaurants', AuthMiddleware(UserRole.admin), RestaurantController.getOwnerRestaurants)
+router.get('/get-user-restaurants', AuthMiddleware(UserRole.user), RestaurantController.getUserRestaurants)
+router.get('/get-owner-restaurants', AuthMiddleware(UserRole.admin), RestaurantController.getOwnerRestaurant)
 
 router.put(
   "/change-restaurant-status/:restaurantId",
@@ -47,6 +47,13 @@ router.put(
   RestaurantController.updateRestaurant
 );
 
+
+router.put(
+  "/update-restaurant-image",
+  AuthMiddleware(UserRole.admin),
+  upload.single('file'),
+  RestaurantController.updateRestaurantImage
+);
 
 
 export const RestaurantRoutes = router;

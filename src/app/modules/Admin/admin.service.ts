@@ -5,7 +5,9 @@ import UserModel from "../User/user.model";
 
 
 const createAdminService = async (req:Request, payload: IUser) => {
+  console.log(payload);
   const user = await UserModel.findOne({ email: payload.email });
+  console.log(user);
   if (user) {
     throw new AppError(409, "Email is already existed");
   }

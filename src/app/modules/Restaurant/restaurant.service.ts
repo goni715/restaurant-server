@@ -476,10 +476,9 @@ const approveRestaurantService = async (restaurantId: string, approved: TApprove
 }
 
 
-const updateRestaurantService = async (ownerId: string, restaurantId: string, payload: Partial<IRestaurant>) => {
+const updateRestaurantService = async (ownerId: string, payload: Partial<IRestaurant>) => {
   const ObjectId = Types.ObjectId;
   const restaurant = await RestaurantModel.findOne({
-    _id: restaurantId,
     ownerId
   });
 
@@ -489,7 +488,7 @@ const updateRestaurantService = async (ownerId: string, restaurantId: string, pa
 
 
   const result = await RestaurantModel.updateOne(
-    { _id: new ObjectId(restaurantId), ownerId: new ObjectId(ownerId) },
+    { ownerId: new ObjectId(ownerId) },
     payload
   )
   
@@ -498,7 +497,7 @@ const updateRestaurantService = async (ownerId: string, restaurantId: string, pa
 }
 
 
-const updateRestaurantImageService = async (req:Request, loginUserId: string) => {
+const updateRestaurantImgService = async (req:Request, loginUserId: string) => {
   const restaurant = await RestaurantModel.findOne({
     ownerId: loginUserId,
   });
@@ -519,6 +518,8 @@ const updateRestaurantImageService = async (req:Request, loginUserId: string) =>
     { restaurantImg: image }
   )
 
+  return result;
+
 };
 
 
@@ -531,5 +532,5 @@ export {
     getSingleRestaurantService,
     approveRestaurantService,
     updateRestaurantService,
-    updateRestaurantImageService
+    updateRestaurantImgService
 }

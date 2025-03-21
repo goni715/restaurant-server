@@ -2,7 +2,7 @@ import catchAsync from "../../utils/catchAsync";
 import pickValidFields from "../../utils/pickValidFields";
 import sendResponse from "../../utils/sendResponse";
 import { RestaurantValidFields, UserRestaurantValidFields } from "./restaurant.constant";
-import { approveRestaurantService, changeRestaurantStatusService, createRestaurantService, getOwnerRestaurantService, getRestaurantsService, getSingleRestaurantService, getUserRestaurantsService, updateRestaurantImageService, updateRestaurantService } from "./restaurant.service";
+import { approveRestaurantService, changeRestaurantStatusService, createRestaurantService, getOwnerRestaurantService, getRestaurantsService, getSingleRestaurantService, getUserRestaurantsService, updateRestaurantImgService, updateRestaurantService } from "./restaurant.service";
 
 
 
@@ -99,8 +99,7 @@ const approveRestaurant = catchAsync(async (req, res) => {
 
 const updateRestaurant = catchAsync(async (req, res) => {
   const loginUserId = req.headers.id;
-  const { restaurantId } = req.params;
-  const result = await updateRestaurantService(loginUserId as string, restaurantId, req.body);
+  const result = await updateRestaurantService(loginUserId as string, req.body);
   sendResponse(res, {
     statusCode: 200,
     success: true,
@@ -111,9 +110,9 @@ const updateRestaurant = catchAsync(async (req, res) => {
 
 
 
-const updateRestaurantImage = catchAsync(async (req, res) => {
+const updateRestaurantImg = catchAsync(async (req, res) => {
   const loginUserId = req.headers.id;
-  const result = await updateRestaurantImageService(req, loginUserId as string);
+  const result = await updateRestaurantImgService(req, loginUserId as string);
   sendResponse(res, {
     statusCode: 200,
     success: true,
@@ -133,7 +132,7 @@ const RestaurantController = {
     getSingleRestaurant,
     approveRestaurant,
     updateRestaurant,
-    updateRestaurantImage
+    updateRestaurantImg
 }
 
 export default RestaurantController;

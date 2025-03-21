@@ -2,7 +2,7 @@ import catchAsync from "../../utils/catchAsync";
 import pickValidFields from "../../utils/pickValidFields";
 import sendResponse from "../../utils/sendResponse";
 import { UserValidFields } from "./user.constant";
-import { createUserService, editMyProfileService, getMeService, getSingleUserService, getUsersService, } from "./user.service";
+import { createUserService, editMyProfileService, getMeService, getSingleUserService, getUsersService, updateProfileImgService, } from "./user.service";
 
 
 const createUser = catchAsync(async (req, res) => {
@@ -68,12 +68,26 @@ const editMyProfile = catchAsync(async (req, res) => {
 });
 
 
+
+const updateProfileImg = catchAsync(async (req, res) => {
+  const loginUserId = req.headers.id;
+  const result = await updateProfileImgService(req, loginUserId as string);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Image is updated successfully",
+    data: result,
+  });
+});
+
+
 const UserController = {
     createUser,
     getUsers,
     getSingleUser,
     getMe,
-    editMyProfile
+    editMyProfile,
+    updateProfileImg
 }
 
 export default UserController;

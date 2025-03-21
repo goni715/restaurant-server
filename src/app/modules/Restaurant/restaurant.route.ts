@@ -41,7 +41,7 @@ router.put(
 );
 
 router.put(
-  "/update-restaurant/:restaurantId",
+  "/update-restaurant",
   AuthMiddleware(UserRole.admin),
   validationMiddleware(updateRestaurantValidationSchema),
   RestaurantController.updateRestaurant
@@ -49,10 +49,10 @@ router.put(
 
 
 router.put(
-  "/update-restaurant-image",
+  "/update-restaurant-img",
   AuthMiddleware(UserRole.admin),
   upload.single('file'),
-  RestaurantController.updateRestaurantImage
+  RestaurantController.updateRestaurantImg
 );
 
 

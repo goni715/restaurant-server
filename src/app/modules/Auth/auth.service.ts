@@ -5,12 +5,12 @@ import UserModel from "../User/user.model";
 import { IChangePass, ILoginUser, INewPassword, IVerifyOTp } from "./auth.interface";
 import createToken, { TExpiresIn } from "../../utils/createToken";
 import config from "../../config";
-import OtpModel from "./otp.model";
 import sendEmailUtility from "../../utils/sendEmailUtility";
 import hashedPassword from "../../utils/hashedPassword";
 import mongoose, { Types } from "mongoose";
 import RestaurantModel from "../Restaurant/restaurant.model";
 import SocialMediaModel from "../SocialMedia/socialMedia.model";
+import OtpModel from "../Otp/otp.model";
 
 
 
@@ -299,6 +299,64 @@ const deleteMyAccountService = async (loginUserId: string, password: string) => 
     throw new Error(err)
   }
 }
+
+
+const refreshTokenService = async(token: string) => {
+  if (!token) {
+    throw new AppError(401, `You are not unauthorized !`);
+  }
+
+  //verify-token
+   const decoded = await verifyToken(
+      token,
+      config.jwt_refresh_secret as string
+    )
+
+    const { role, userId, iat } = decoded; //decoded-data
+
+    //check if the user is exist
+    const user = await UserModel.findOne({ id: userId });
+    if (!user) {
+      throw new AppError(httpStatus.NOT_FOUND, `This user is not found`);
+    }
+
+    //check if the user is already deleted
+    const isDeleted = user?.isDeleted;
+    if (isDeleted) {
+      throw new AppError(
+        httpStatus.FORBIDDEN,
+        `This user is already deleted`,
+      );
+    }
+
+    //check if the user is already blocked
+    const blockStatus = user?.status;
+    if (blockStatus === 'blocked') {
+      throw new AppError(httpStatus.FORBIDDEN, `This user is blocked`);
+    }
+
+    //check if passwordChangedAt is greater than token iat
+    if (
+      user?.passwordChangedAt &&
+      isJWTIssuedBeforePasswordChanged(user?.passwordChangedAt, iat as number)
+    ) {
+      throw new AppError(httpStatus.UNAUTHORIZED, 'You are not authorized !');
+    }
+
+  //create new access token
+  const jwtPayload = {
+    userId: user.id,
+    role: user.role,
+  };
+
+  const accessToken = createToken(jwtPayload, config.jwt_access_secret as string, config.jwt_access_expires_in as string);
+
+  return {
+    accessToken
+  }
+  
+}
+
 
 export {
     loginUserService,

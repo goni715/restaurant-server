@@ -5,6 +5,7 @@ import { Request } from "express";
 import { Types } from "mongoose";
 import { makeFilterQuery, makeSearchQuery } from "../../helper/QueryBuilder";
 import { UserSearchFields } from "./user.constant";
+import RestaurantModel from "../Restaurant/restaurant.model";
 
 
 
@@ -29,8 +30,6 @@ const createUserService = async (req:Request, payload: IUser) => {
   result.password=""
   return result;
 }
-
-
 
 
 const getUsersService = async (query: TUserQuery) => {
@@ -139,4 +138,23 @@ const editMyProfileService = async (loginUserId: string, payload: Partial<IUser>
 }
 
 
-export { createUserService, getUsersService, getSingleUserService, getMeService, editMyProfileService };
+const updateProfileImgService = async (req:Request, loginUserId: string) => {
+
+  if(!req.file){
+    throw new AppError(400, "image is required");
+  }
+
+  //uploaded-image
+  const image = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`; //for local machine
+  
+  const result = await UserModel.updateOne(
+    { _id: loginUserId },
+    { profileImg : image }
+  )
+
+  return result;
+
+};
+
+
+export { createUserService, getUsersService, getSingleUserService, getMeService, editMyProfileService, updateProfileImgService };

@@ -2,6 +2,7 @@ import slugify from "slugify";
 import CuisineModel from "./cuisine.model";
 import AppError from "../../errors/AppError";
 import { Request } from "express";
+import MenuModel from "../Menu/menu.model";
 
 
 const createCuisineService = async (req:Request, name: string) => {
@@ -71,6 +72,12 @@ const deleteCuisineService = async (cuisineId: string) => {
     const cuisine = await CuisineModel.findById(cuisineId)
     if(!cuisine){
         throw new AppError(404, 'This quisine not found');
+    }
+
+    //check if cuisineId is associated with menu
+    const associateWithMenu = await MenuModel.findOne({ cuisineId });
+    if(associateWithMenu){
+        throw new AppError(400, 'Failled to delete, This cusine is associated with menu');
     }
 
     const result = await CuisineModel.deleteOne({ _id: cuisineId})

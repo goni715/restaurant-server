@@ -5,12 +5,14 @@ import morgan from "morgan";
 import notFound from "./app/middlewares/notFound";
 import globalErrorHandler from "./app/middlewares/globalErrorHandler";
 import bodyParser from "body-parser";
+import cookieParser from 'cookie-parser';
 import path from "path";
 
 
 const app: Application = express();
 
 app.use(cors())
+app.use(cookieParser())
 app.use(morgan('dev'))
 
 app.get('/', (req:Request, res:Response) => {

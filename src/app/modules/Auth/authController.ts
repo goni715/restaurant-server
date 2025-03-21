@@ -1,7 +1,7 @@
 import config from "../../config";
 import catchAsync from "../../utils/catchAsync";
 import sendResponse from "../../utils/sendResponse";
-import { changePasswordService, changeStatusService, deleteMyAccountService, forgotPassCreateNewPassService, forgotPassSendOtpService, forgotPassVerifyOtpService, loginAdminService, loginSuperAdminService, loginUserService } from "./auth.service";
+import { changePasswordService, changeStatusService, deleteMyAccountService, forgotPassCreateNewPassService, forgotPassSendOtpService, forgotPassVerifyOtpService, loginAdminService, loginSuperAdminService, loginUserService, refreshTokenService } from "./auth.service";
 
 
 
@@ -151,6 +151,19 @@ const deleteMyAccount = catchAsync(async (req, res) => {
 
 
 
+const refreshToken = catchAsync(async (req, res) => {
+  const { refreshToken } = req.cookies;
+  
+  const result = await refreshTokenService(refreshToken);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Access token is retrieved successfully !',
+    data: result
+  });
+});
+
+
 
  const AuthController = {
   loginUser,
@@ -161,7 +174,8 @@ const deleteMyAccount = catchAsync(async (req, res) => {
   forgotPassCreateNewPass,
   changePassword,
   changeStatus,
-  deleteMyAccount
+  deleteMyAccount,
+  refreshToken
 }
 
 export default AuthController;

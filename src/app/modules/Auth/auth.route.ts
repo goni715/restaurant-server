@@ -8,6 +8,7 @@ import {
   forgotPassSendOtpSchema,
   forgotPassVerifyOtpSchema,
   loginValidationSchema,
+  refreshTokenValidationSchema,
 } from "./auth.validation";
 import AuthMiddleware from "../../middlewares/AuthMiddleware";
 import { UserRole } from "../User/user.constant";
@@ -65,9 +66,11 @@ router.put(
 
 router.delete(
   "/delete-my-account",
-  AuthMiddleware(UserRole.super_admin, UserRole.admin, UserRole.user),
+  AuthMiddleware(UserRole.admin, UserRole.user),
   validationMiddleware(deleteAccountValidationSchema),
   AuthController.deleteMyAccount
 );
+
+router.post('/refresh-token', validationMiddleware(refreshTokenValidationSchema), AuthController.refreshToken);
 
 export const AuthRoutes = router;

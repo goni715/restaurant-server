@@ -100,3 +100,11 @@ export const deleteAccountValidationSchema = z.object({
     .min(6, "Password minimum 6 characters long")
     .trim(),
 });
+
+
+
+export const refreshTokenValidationSchema = z.object({
+  refreshToken: z.string({
+      required_error: 'Refresh token is required !'
+  })
+})

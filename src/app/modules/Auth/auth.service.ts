@@ -11,6 +11,12 @@ import mongoose, { Types } from "mongoose";
 import RestaurantModel from "../Restaurant/restaurant.model";
 import SocialMediaModel from "../SocialMedia/socialMedia.model";
 import OtpModel from "../Otp/otp.model";
+import verifyToken from "../../utils/verifyToken";
+import { isJWTIssuedBeforePassChanged } from "../../utils/isJWTIssuedBeforePassChanged";
+import MenuModel from "../Menu/menu.model";
+import FavouriteModel from "../Favourite/favourite.model";
+import ReviewModel from "../Review/review.model";
+import MenuReviewModel from "../MenuReview/menuReview.model";
 
 
 
@@ -269,6 +275,8 @@ const deleteMyAccountService = async (loginUserId: string, password: string) => 
     throw new AppError(404, "User Not Found");
   }
 
+ 
+
    //check password
    const isPasswordMatch = await checkPassword(password, user.password);
    if (!isPasswordMatch) {
@@ -282,13 +290,25 @@ const deleteMyAccountService = async (loginUserId: string, password: string) => 
     session.startTransaction();
 
     //delete restaurant
-    await RestaurantModel.deleteOne({ ownerId: new ObjectId(loginUserId) })
+    await RestaurantModel.deleteOne({ ownerId: new ObjectId(loginUserId) }, { session })
 
     //delete social media
-    await SocialMediaModel.deleteOne({ ownerId: loginUserId });
+    await SocialMediaModel.deleteOne({ ownerId: loginUserId }, { session });
 
+    //delete menus
+    await MenuModel.deleteMany({ ownerId: loginUserId }, { session })
+
+    //delete favourite list
+    await FavouriteModel.deleteMany({ userId: loginUserId }, { session } )
+
+    //delete the reviews
+    await ReviewModel.deleteMany({ userId: loginUserId }, { session })
+    
+    //delete the menu reviews
+    await MenuReviewModel.deleteMany({ userId: loginUserId }, { session })
+    
      //delete user
-     const result = await UserModel.deleteOne({ _id: new ObjectId(loginUserId) })
+     const result = await UserModel.deleteOne({ _id: new ObjectId(loginUserId) }, { session })
      await session.commitTransaction();
      await session.endSession();
      return result;
@@ -301,61 +321,52 @@ const deleteMyAccountService = async (loginUserId: string, password: string) => 
 }
 
 
-const refreshTokenService = async(token: string) => {
+const refreshTokenService = async (token: string) => {
   if (!token) {
     throw new AppError(401, `You are not unauthorized !`);
   }
 
-  //verify-token
-   const decoded = await verifyToken(
-      token,
-      config.jwt_refresh_secret as string
-    )
-
-    const { role, userId, iat } = decoded; //decoded-data
+  try {
+    //token-verify
+    const decoded = verifyToken(token, config.jwt_refresh_secret as Secret);
 
     //check if the user is exist
-    const user = await UserModel.findOne({ id: userId });
+    const user = await UserModel.findById(decoded.id);
     if (!user) {
-      throw new AppError(httpStatus.NOT_FOUND, `This user is not found`);
-    }
-
-    //check if the user is already deleted
-    const isDeleted = user?.isDeleted;
-    if (isDeleted) {
-      throw new AppError(
-        httpStatus.FORBIDDEN,
-        `This user is already deleted`,
-      );
+      throw new AppError(401, `You are unauthorized, user not found`);
     }
 
     //check if the user is already blocked
-    const blockStatus = user?.status;
-    if (blockStatus === 'blocked') {
-      throw new AppError(httpStatus.FORBIDDEN, `This user is blocked`);
+    const blockStatus = user.status;
+    if (blockStatus === "blocked") {
+      throw new AppError(401, `You are unauthorized, This user is blocked`);
     }
 
     //check if passwordChangedAt is greater than token iat
     if (
       user?.passwordChangedAt &&
-      isJWTIssuedBeforePasswordChanged(user?.passwordChangedAt, iat as number)
+      isJWTIssuedBeforePassChanged(
+        user?.passwordChangedAt,
+        decoded.iat as number
+      )
     ) {
-      throw new AppError(httpStatus.UNAUTHORIZED, 'You are not authorized !');
+      throw new AppError(401, "You are not authorized !");
     }
 
-  //create new access token
-  const jwtPayload = {
-    userId: user.id,
-    role: user.role,
-  };
+    //create accessToken
+    const accessToken = createToken(
+      { email: user.email, id: String(user._id), role: user.role },
+      config.jwt_access_secret as Secret,
+      config.jwt_access_expires_in as TExpiresIn
+    );
 
-  const accessToken = createToken(jwtPayload, config.jwt_access_secret as string, config.jwt_access_expires_in as string);
-
-  return {
-    accessToken
+    return {
+      accessToken,
+    };
+  } catch (err: any) {
+    throw new AppError(401, "You are unauthorized");
   }
-  
-}
+};
 
 
 export {
@@ -367,5 +378,6 @@ export {
     forgotPassCreateNewPassService,
     changePasswordService,
     changeStatusService,
-    deleteMyAccountService
+    deleteMyAccountService,
+    refreshTokenService
 }

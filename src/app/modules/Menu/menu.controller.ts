@@ -2,7 +2,7 @@ import catchAsync from "../../utils/catchAsync";
 import pickValidFields from "../../utils/pickValidFields";
 import sendResponse from "../../utils/sendResponse";
 import { MenuValidFields } from "./menu.constant";
-import { createMenuService, getMenusService } from "./menu.service";
+import { createMenuService, deleteMenuService, getMenusService, updateMenuService } from "./menu.service";
 
 
 const createMenu = catchAsync(async (req, res) => {
@@ -25,7 +25,7 @@ const getMenus = catchAsync(async (req, res) => {
   const result = await getMenusService(restaurantId, validatedQuery);
 
   sendResponse(res, {
-    statusCode: 201,
+    statusCode: 200,
     success: true,
     message: "Menus are retrieved successfully",
     meta: result.meta,
@@ -33,9 +33,40 @@ const getMenus = catchAsync(async (req, res) => {
   });
 });
 
+
+
+const updateMenu = catchAsync(async (req, res) => {
+  const loginUserId = req.headers.id;
+  const { menuId } = req.params;
+  const result = await updateMenuService(req, loginUserId as string, menuId, req.body);
+
+  sendResponse(res, {
+    statusCode: 201,
+    success: true,
+    message: "Menu is updated successfully",
+    data: result,
+  });
+});
+
+
+const deleteMenu = catchAsync(async (req, res) => {
+  const loginUserId = req.headers.id;
+  const { menuId } = req.params;
+  const result = await deleteMenuService(loginUserId as string, menuId);
+
+  sendResponse(res, {
+    statusCode: 201,
+    success: true,
+    message: "Menu is deleted successfully",
+    data: result,
+  });
+});
+
 const MenuController = {
   createMenu,
-  getMenus
+  getMenus,
+  updateMenu,
+  deleteMenu
 };
 
 export default MenuController;

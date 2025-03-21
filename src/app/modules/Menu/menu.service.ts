@@ -122,6 +122,7 @@ const getMenusService = async (restaurantId:string, query: TMenuQuery) => {
         price:1,
         ingredient:1,
         ratings:1,
+        cuisineId:1,
         cuisineName: "$cuisine.name",
         createdAt: "$createdAt"
       }
@@ -168,9 +169,9 @@ return {
 }
 
 
-const updateMenuService = async (req:Request, loginUserId: string, payload: IMenu) => {
+const updateMenuService = async (req:Request, loginUserId: string, menuId:string, payload: IMenu) => {
   const { cuisineId, name } = payload;
-  const slug = slugify(name).toLowerCase();
+ 
 
   //check cuisine not found
   const cuisine = await CuisineModel.findById(cuisineId);
@@ -178,45 +179,38 @@ const updateMenuService = async (req:Request, loginUserId: string, payload: IMen
     throw new AppError(404, "This cuisine not found");
   }
 
-  //check restaurant not found
-  const restaurant = await RestaurantModel.findOne({
-    ownerId: loginUserId
-  });
-  if (!restaurant) {
-    throw new AppError(404, "Restaurant not found");
-  }
+ 
 
-
-  //check menu already existed
+  //check menu not found
   const menu = await MenuModel.findOne({
+    _id: menuId,
     ownerId: loginUserId,
-    restaurantId: restaurant._id,
-    cuisineId,
-    slug
   });
 
-  const cuisineExist = await CuisineModel.findOne({ _id: { $ne: cuisineId }, slug })
-
-  if(menu) {
-    throw new AppError(409, "Menu is already existed");
+  if (!menu) {
+    throw new AppError(404, "Menu not found");
   }
 
+  let slug = menu.slug;
+  if(name){
+    slug = slugify(name).toLowerCase();
+  }
   
-  
-  if (!req.file) {
-    throw new AppError(400, "image is required");
-  }
-  let image="";
-  if (req.file) {
-    //for local machine file path
-    image = `${req.protocol}://${req.get("host")}/uploads/${ req.file.filename}`; //for local machine
+  let image=cuisine.image;
+  if(req.file) {
+      //for local machine file path
+      image = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`; //for local machine
   }
 
-  //create the menu
-  const result = await MenuModel.create({
+
+  //update the menu
+  const result = await MenuModel.updateOne(
+    {
+      _id: menuId,
+      ownerId: loginUserId
+    },
+    {
       ...payload,
-      ownerId: loginUserId,
-      restaurantId: restaurant._id,
       image,
       slug
   })
@@ -225,8 +219,28 @@ const updateMenuService = async (req:Request, loginUserId: string, payload: IMen
 }
 
 
+const deleteMenuService = async (loginUserId: string, menuId: string) => {
+   //check menu not found
+   const menu = await MenuModel.findOne({
+    _id: menuId,
+    ownerId: loginUserId,
+  });
+
+  if (!menu) {
+    throw new AppError(404, "Menu not found");
+  }
+
+  const result = await MenuModel.deleteOne({
+    _id: menuId,
+    ownerId: loginUserId
+  },)
+  return result;
+}
+
+
 export {
     createMenuService,
     getMenusService,
-    updateMenuService
+    updateMenuService,
+    deleteMenuService
 }

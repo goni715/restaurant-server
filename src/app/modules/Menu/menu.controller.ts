@@ -41,7 +41,7 @@ const updateMenu = catchAsync(async (req, res) => {
   const result = await updateMenuService(req, loginUserId as string, menuId, req.body);
 
   sendResponse(res, {
-    statusCode: 201,
+    statusCode: 200,
     success: true,
     message: "Menu is updated successfully",
     data: result,
@@ -55,7 +55,7 @@ const deleteMenu = catchAsync(async (req, res) => {
   const result = await deleteMenuService(loginUserId as string, menuId);
 
   sendResponse(res, {
-    statusCode: 201,
+    statusCode: 200,
     success: true,
     message: "Menu is deleted successfully",
     data: result,

@@ -27,12 +27,12 @@ const createReviewService = async (
 
     // Create a new review
     await ReviewModel.create(
-      {
+      [{
         userId: loginUserId,
         restaurantId,
         star,
         comment,
-      },
+      }],
       { session }
     );
 
@@ -154,6 +154,7 @@ const getRestaurantReviewsService = async (restaurantId: string, query: TReviewQ
     },
     {
       $project: {
+        reviewId: "$_id",
         _id: "$user._id",
         fullName: "$user.fullName",
         email: "$user.email",

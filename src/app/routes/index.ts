@@ -10,6 +10,7 @@ import { CuisineRoutes } from '../modules/Cuisine/cuisine.route';
 import { DiningRoutes } from '../modules/Dining/dining.route';
 import { SocialMediaRoutes } from '../modules/SocialMedia/socialMedia.route';
 import { MenuRoutes } from '../modules/Menu/menu.route';
+import { MenuReviewRoutes } from '../modules/MenuReview/menuReview.route';
 
 const router = express.Router();
 
@@ -55,6 +56,10 @@ const moduleRoutes = [
         path: '/review',
         route: ReviewRoutes
     },  
+    {
+        path: '/menu-review',
+        route: MenuReviewRoutes
+    }, 
     {
         path: '/notification',
         route: NotificationRoutes

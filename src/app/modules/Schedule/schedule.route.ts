@@ -14,6 +14,22 @@ router.post(
   ScheduleController.createSchedule
 );
 
+router.get(
+  "/get-schedules",
+  AuthMiddleware(UserRole.admin),
+  ScheduleController.getSchedules
+);
 
+router.get(
+  "/get-single-schedule/:scheduleId",
+  AuthMiddleware(UserRole.admin),
+  ScheduleController.getSingleSchedule
+);
+
+router.delete(
+  "/delete-schedule/:scheduleId",
+  AuthMiddleware(UserRole.admin),
+  ScheduleController.deleteSchedule
+);
 
 export const ScheduleRoutes = router;

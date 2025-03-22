@@ -3,6 +3,7 @@ import { Types } from "mongoose";
 
 export interface ISchedule extends Document {
     restaurantId: Types.ObjectId;
+    ownerId: Types.ObjectId;
     startDateTime: Date;
     endDateTime: Date;
     isBooked: boolean;

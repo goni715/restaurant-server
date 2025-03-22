@@ -17,6 +17,7 @@ import MenuModel from "../Menu/menu.model";
 import FavouriteModel from "../Favourite/favourite.model";
 import ReviewModel from "../Review/review.model";
 import MenuReviewModel from "../MenuReview/menuReview.model";
+import ScheduleModel from "../Schedule/schedule.model";
 
 
 
@@ -306,7 +307,10 @@ const deleteMyAccountService = async (loginUserId: string, password: string) => 
     
     //delete the menu reviews
     await MenuReviewModel.deleteMany({ userId: loginUserId }, { session })
-    
+
+    //delete the menu reviews
+    await ScheduleModel.deleteMany({ ownerId: loginUserId }, { session })
+
      //delete user
      const result = await UserModel.deleteOne({ _id: new ObjectId(loginUserId) }, { session })
      await session.commitTransaction();

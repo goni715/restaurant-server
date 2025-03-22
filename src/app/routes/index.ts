@@ -12,6 +12,7 @@ import { SocialMediaRoutes } from '../modules/SocialMedia/socialMedia.route';
 import { MenuRoutes } from '../modules/Menu/menu.route';
 import { MenuReviewRoutes } from '../modules/MenuReview/menuReview.route';
 import { ScheduleRoutes } from '../modules/Schedule/schedule.route';
+import { BookingRoutes } from '../modules/Booking/booking.route';
 
 const router = express.Router();
 
@@ -68,7 +69,11 @@ const moduleRoutes = [
     {
         path: '/schedule',
         route: ScheduleRoutes
-    }   
+    },
+    {
+        path: '/booking',
+        route: BookingRoutes
+    }  
 ]
 
 moduleRoutes.forEach((item, i)=> router.use(item.path, item.route));

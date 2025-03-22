@@ -39,10 +39,11 @@ const createScheduleService = async (loginUserId: string, payload: TSchedulePayl
             let endDateTime = new Date(startDateTime.getTime() + timeSlotMinutes * 60 * 1000); // Add 30 
             
             const scheduleData = {
-                restaurantId: restaurant._id,
-                startDateTime: startDateTime,
-                endDateTime: endDateTime
-            }
+              ownerId: loginUserId,
+              restaurantId: restaurant._id,
+              startDateTime: startDateTime,
+              endDateTime: endDateTime,
+            };
 
             //check if schedule exist
             const existingSchedule = await ScheduleModel.findOne(scheduleData);

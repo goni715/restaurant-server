@@ -10,6 +10,11 @@ const scehduleSchema = new Schema<ISchedule>(
       required: true,
       ref: "Restaurant",
     },
+    ownerId: {
+      type: Schema.Types.ObjectId,
+      required: true,
+      ref: "User",
+    },
     startDateTime: {
       type: Date,
       required: true,

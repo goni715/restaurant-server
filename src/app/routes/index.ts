@@ -11,6 +11,7 @@ import { DiningRoutes } from '../modules/Dining/dining.route';
 import { SocialMediaRoutes } from '../modules/SocialMedia/socialMedia.route';
 import { MenuRoutes } from '../modules/Menu/menu.route';
 import { MenuReviewRoutes } from '../modules/MenuReview/menuReview.route';
+import { ScheduleRoutes } from '../modules/Schedule/schedule.route';
 
 const router = express.Router();
 
@@ -63,7 +64,11 @@ const moduleRoutes = [
     {
         path: '/notification',
         route: NotificationRoutes
-    }  
+    },
+    {
+        path: '/schedule',
+        route: ScheduleRoutes
+    }   
 ]
 
 moduleRoutes.forEach((item, i)=> router.use(item.path, item.route));

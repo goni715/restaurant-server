@@ -10,8 +10,18 @@ const scehduleSchema = new Schema<ISchedule>(
       required: true,
       ref: "Restaurant",
     },
-    startDateTime: { type: Date, required: true },
-    endDateTime: { type: Date, required: true },
+    startDateTime: {
+      type: Date,
+      required: true,
+    },
+    endDateTime: {
+      type: Date,
+      required: true,
+    },
+    isBooked: {
+      type: Boolean,
+      default: false
+    }
   },
   {
     timestamps: true,

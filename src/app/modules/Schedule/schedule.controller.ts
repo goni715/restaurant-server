@@ -4,12 +4,13 @@ import { createScheduleService } from "./schedule.service";
 
 
 const createSchedule = catchAsync(async (req, res) => {
-    const result = await createScheduleService();
+  const loginUserId = req.headers.id;
+    const result = await createScheduleService(loginUserId as string, req.body);
   
     sendResponse(res, {
       statusCode: 200,
       success: true,
-      message: "Schedule is created successfully",
+      message: "Schedule created successfully",
       data: result
     });
 });

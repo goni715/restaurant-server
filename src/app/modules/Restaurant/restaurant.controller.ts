@@ -2,7 +2,7 @@ import catchAsync from "../../utils/catchAsync";
 import pickValidFields from "../../utils/pickValidFields";
 import sendResponse from "../../utils/sendResponse";
 import { RestaurantValidFields, UserRestaurantValidFields } from "./restaurant.constant";
-import { approveRestaurantService, changeRestaurantStatusService, createRestaurantService, getOwnerRestaurantService, getRestaurantsService, getSingleRestaurantService, getUserRestaurantsService, updateRestaurantImgService, updateRestaurantService } from "./restaurant.service";
+import { approveRestaurantService, changeRestaurantStatusService, createRestaurantService, deleteRestaurantService, getOwnerRestaurantService, getRestaurantsService, getSingleRestaurantService, getUserRestaurantsService, updateRestaurantImgService, updateRestaurantService } from "./restaurant.service";
 
 
 
@@ -13,7 +13,7 @@ const createRestaurant = catchAsync(async (req, res) => {
     statusCode: 200,
     success: true,
     message: "Restaurant is created successfully",
-    data: result,
+    data: result
   });
 });
   
@@ -122,6 +122,18 @@ const updateRestaurantImg = catchAsync(async (req, res) => {
 });
 
 
+const deleteRestaurant = catchAsync(async (req, res) => {
+  const loginUserId = req.headers.id;
+  const result = await deleteRestaurantService(loginUserId as string);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Restaurant is deleted successfully",
+    data: result,
+  });
+});
+
+
 
 const RestaurantController = {
     createRestaurant,
@@ -132,7 +144,8 @@ const RestaurantController = {
     getSingleRestaurant,
     approveRestaurant,
     updateRestaurant,
-    updateRestaurantImg
+    updateRestaurantImg,
+    deleteRestaurant
 }
 
 export default RestaurantController;

@@ -26,9 +26,10 @@ const createMenuReviewService = async (
     session.startTransaction();
 
     // Create a new review
-    await MenuReviewModel.create(
+   const result = await MenuReviewModel.create(
       [{
         userId: loginUserId,
+        restaurantId: menu.restaurantId,
         menuId,
         star
       }],
@@ -57,7 +58,7 @@ const createMenuReviewService = async (
         : menu.ratings;
 
     // //update the ratings
-    const result = await MenuModel.updateOne(
+    await MenuModel.updateOne(
       { _id: new ObjectId(menuId) },
       { ratings: averageRatings },
       { session }

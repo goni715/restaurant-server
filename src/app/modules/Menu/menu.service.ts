@@ -137,6 +137,7 @@ const getMenusService = async (restaurantId:string, query: TMenuQuery) => {
         ratings:1,
         totalReviewers:1,
         cuisineId:1,
+        restaurantId: 1,
         cuisineName: "$cuisine.name",
         createdAt: "$createdAt"
       }

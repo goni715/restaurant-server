@@ -46,6 +46,18 @@ const restaurantSchema = new Schema<IRestaurant>({
         type: String,
         default: ''
     },
+    payment: {
+        type: Boolean,
+        default: false
+    },
+    bookingFee: { //per guest
+        type: Number,
+        default: 0
+    },
+    cancellationCharge: {
+        type: Number,
+        default: 0
+    },
     status: {
         type: String,
         enum: ["active", "deactive"],

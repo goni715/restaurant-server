@@ -8,6 +8,11 @@ const menuReviewSchema = new Schema<IMenuReview>(
       required: true,
       ref: "User",
     },
+    restaurantId: {
+      type: Schema.Types.ObjectId,
+      required: true,
+      ref: "Restaurant",
+    },
     menuId: {
       type: Schema.Types.ObjectId,
       required: true,

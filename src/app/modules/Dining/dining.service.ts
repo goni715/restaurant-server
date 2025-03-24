@@ -56,7 +56,7 @@ const deleteDiningService = async (diningId: string) => {
     //check if diningId is associated with restaurant
     const associateWithRestaurant = await RestaurantModel.findOne({ dining: { $in: [diningId] } });
     if(associateWithRestaurant){
-        throw new AppError(400, 'Failled to delete, This dining is associated with restaurant');
+        throw new AppError(409, 'Failled to delete, This dining is associated with restaurant');
     }
 
     const result = await DiningModel.deleteOne({ _id: dining})

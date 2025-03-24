@@ -276,8 +276,6 @@ const deleteMyAccountService = async (loginUserId: string, password: string) => 
     throw new AppError(404, "User Not Found");
   }
 
- 
-
    //check password
    const isPasswordMatch = await checkPassword(password, user.password);
    if (!isPasswordMatch) {

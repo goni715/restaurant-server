@@ -8,9 +8,11 @@ export const createRestaurantValidationSchema = z.object({
   location: z.string().min(1, "Location is required"),
   keywords: z.array(z.string()).optional(),
   features: z.array(z.string()).optional(),
-  discount: z.string().optional()
-});
-
+  discount: z.string().optional(),
+  payment: z.boolean().default(false),
+  bookingFee: z.number().positive("bookingFee must be a positive number").optional(),
+  cancellationCharge: z.number().positive("bookingFee must be a positive number").optional()
+})
 
 export const updateRestaurantValidationSchema = z.object({
   name: z.string().min(1, "Name is required").optional(),
@@ -23,7 +25,7 @@ export const updateRestaurantValidationSchema = z.object({
   keywords: z.array(z.string()).optional().optional(),
   features: z.array(z.string()).optional(),
   price: z.number().min(0, "Price must be at least 0").optional(),
-  discount: z.string().optional()
+  discount: z.string().optional(),
 });
 
 

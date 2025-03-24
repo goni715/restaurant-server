@@ -1,10 +1,17 @@
-import { Types } from "mongoose";
+import mongoose, { Types } from "mongoose";
 import AppError from "../../errors/AppError";
 import { IRestaurant, TApprovedStatus, TRestaurantQuery, TRestaurantStatus, TUserRestaurantQuery } from "./restaurant.interface";
 import RestaurantModel from "./restaurant.model";
 import { makeFilterQuery, makeSearchQuery } from "../../helper/QueryBuilder";
 import { RestaurantSearchFields, UserRestaurantSearchFields } from "./restaurant.constant";
 import { Request } from "express";
+import SocialMediaModel from "../SocialMedia/socialMedia.model";
+import MenuModel from "../Menu/menu.model";
+import FavouriteModel from "../Favourite/favourite.model";
+import ReviewModel from "../Review/review.model";
+import MenuReviewModel from "../MenuReview/menuReview.model";
+import ScheduleModel from "../Schedule/schedule.model";
+import BookingModel from "../Booking/booking.model";
 
 
 
@@ -523,6 +530,61 @@ const updateRestaurantImgService = async (req:Request, loginUserId: string) => {
 };
 
 
+const deleteRestaurantService = async (loginUserId: string) => {
+  const ObjectId = Types.ObjectId;
+  const restaurant = await RestaurantModel.findOne({
+    ownerId:loginUserId
+  });
+
+  if(!restaurant){
+    throw new AppError(404, "Restaurant Not Found");
+  }
+
+  //check if restaurantId is associated with booking
+  const associateWithBooking = await BookingModel.findOne({ restaurantId: restaurant._id });
+  if(associateWithBooking){
+      throw new AppError(409, 'Failled to delete, This restaurant is associated with booking');
+  }
+
+  //transaction & rollback
+ const session = await mongoose.startSession();
+
+  try{
+    session.startTransaction();
+
+    //delete social media
+    await SocialMediaModel.deleteOne({ ownerId: new ObjectId(loginUserId) }, { session });
+
+    //delete menus
+    await MenuModel.deleteMany({ ownerId: new ObjectId(loginUserId) }, { session })
+
+    //delete favourite list
+    await FavouriteModel.deleteMany({ restaurantId: new ObjectId(restaurant._id) }, { session } )
+
+    //delete the reviews
+    await ReviewModel.deleteMany({ restaurantId: new ObjectId(restaurant._id) }, { session })
+    
+    //delete the menu reviews
+    await MenuReviewModel.deleteMany({ restaurantId: new ObjectId(restaurant._id) }, { session })
+
+    //delete the schedule
+    await ScheduleModel.deleteMany({ restaurantId: new ObjectId(restaurant._id) }, { session })
+
+    //delete restaurant
+    const result = await RestaurantModel.deleteOne({ ownerId: new ObjectId(loginUserId) }, { session });
+
+    //transaction success
+    await session.commitTransaction();
+    await session.endSession();
+    return result;
+  }
+  catch(err:any){
+    await session.abortTransaction();
+    await session.endSession();
+    throw new Error(err)
+  }
+}
+
 export {
     createRestaurantService,
     getRestaurantsService,
@@ -532,5 +594,6 @@ export {
     getSingleRestaurantService,
     approveRestaurantService,
     updateRestaurantService,
-    updateRestaurantImgService
+    updateRestaurantImgService,
+    deleteRestaurantService
 }

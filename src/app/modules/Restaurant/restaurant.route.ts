@@ -48,12 +48,13 @@ router.put(
 );
 
 
-router.put(
-  "/update-restaurant-img",
+router.delete(
+  "/delete-restaurant",
   AuthMiddleware(UserRole.admin),
-  upload.single('file'),
-  RestaurantController.updateRestaurantImg
+  RestaurantController.deleteRestaurant
 );
+
+
 
 
 export const RestaurantRoutes = router;

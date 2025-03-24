@@ -3,6 +3,7 @@ import { Types } from "mongoose";
 
 export interface IMenuReview {
   userId: Types.ObjectId;
+  restaurantId: Types.ObjectId;
   menuId: Types.ObjectId;
   star: Number;
 }

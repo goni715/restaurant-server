@@ -24,6 +24,16 @@ export type TScheduleQuery = {
     limit?: string;
     sortBy?: string;
     sortOrder?: 'asc' | 'desc';
+    date?: string;
     startDate?: string;
     endDate?: string;
+};
+
+
+export type TUserScheduleQuery = {
+    page?: string;
+    limit?: string;
+    sortBy?: string;
+    sortOrder?: 'asc' | 'desc';
+    date?: string;
 };

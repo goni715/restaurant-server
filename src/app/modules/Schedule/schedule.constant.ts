@@ -8,3 +8,12 @@ export const ScheduleValidFields: string[] = [
     "startDate",
     "endDate"
 ];
+
+
+export const UserScheduleValidFields: string[] = [
+    "page",
+    "limit",
+    "sortBy",
+    "sortOrder",
+    "date",
+];

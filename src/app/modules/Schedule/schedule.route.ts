@@ -21,6 +21,12 @@ router.get(
 );
 
 router.get(
+  "/get-user-schedules/:restaurantId",
+  AuthMiddleware(UserRole.user),
+  ScheduleController.getUserSchedules
+);
+
+router.get(
   "/get-single-schedule/:scheduleId",
   AuthMiddleware(UserRole.admin),
   ScheduleController.getSingleSchedule

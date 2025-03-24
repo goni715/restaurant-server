@@ -1,7 +1,7 @@
 import { Types } from "mongoose";
 import AppError from "../../errors/AppError";
 import RestaurantModel from "../Restaurant/restaurant.model";
-import { TSchedulePayload, TScheduleQuery } from "./schedule.interface"
+import { TSchedulePayload, TScheduleQuery, TUserScheduleQuery } from "./schedule.interface"
 import ScheduleModel from "./schedule.model";
 
 
@@ -149,6 +149,88 @@ return {
 };
 }
 
+
+
+const getUserSchedulesService =  async (restaurantId: string, query:TUserScheduleQuery) => {
+  const ObjectId = Types.ObjectId;
+   // 1. Extract query parameters
+    const {
+      page = 1, 
+      limit = 10, 
+      sortOrder = "asc",
+      sortBy = "startDateTime", 
+      date
+      //...filters // Any additional filters
+    } = query;
+  
+  
+    // 2. Set up pagination
+    const skip = (Number(page) - 1) * Number(limit);
+  
+    //3. setup sorting
+    const sortDirection = sortOrder === "asc" ? 1 : -1;
+ 
+    
+      //4 setup filters
+      let filterQuery = {};
+      //check if only filter by date
+      if (date) {
+        const start = `${date}T00:00:00.000+00:00`;
+          const end = `${date}T23:59:59.999+00:00`;
+         filterQuery = {
+           startDateTime: { $gte: new Date(start), $lte: new Date(end) }
+         };
+      }
+
+
+  //check restaurant not found
+  const restaurant = await RestaurantModel.findOne({
+    _id: restaurantId,
+  });
+  if (!restaurant) {
+    throw new AppError(404, "Restaurant not found");
+  }
+
+
+  const result = await ScheduleModel.aggregate([
+      {
+          $match: {
+              restaurantId: new ObjectId(restaurant._id),
+              ...filterQuery
+          }
+      },
+      { $sort: { [sortBy]: sortDirection } },
+      { $skip: skip },
+      { $limit: Number(limit) }
+  ])
+
+   // total count of matching users 
+const totalReviewResult = await ScheduleModel.aggregate([
+  {
+    $match: {
+       restaurantId: new ObjectId(restaurant._id),
+       ...filterQuery
+    }
+  },
+  { $count: "totalCount" }
+])
+
+const totalCount = totalReviewResult[0]?.totalCount || 0;
+const totalPages = Math.ceil(totalCount / Number(limit));
+
+return {
+meta: {
+  page: Number(page), //currentPage
+  limit: Number(limit),
+  totalPages,
+  total: totalCount,
+},
+data: result,
+};
+}
+
+
+
 const getSingleScheduleService = async (scheduleId: string) => {
   const schedule = await ScheduleModel.findById(scheduleId);
   if (!schedule) {
@@ -188,6 +270,7 @@ const deleteScheduleService = async (loginUserId: string, scheduleId: string) =>
 export {
     createScheduleService,
     getSchedulesService,
+    getUserSchedulesService,
     getSingleScheduleService,
     deleteScheduleService
 }

@@ -4,6 +4,7 @@ export const ScheduleValidFields: string[] = [
     "limit",
     "sortBy",
     "sortOrder",
+    "date",
     "startDate",
     "endDate"
 ];

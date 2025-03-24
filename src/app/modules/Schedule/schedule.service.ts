@@ -68,6 +68,7 @@ const getSchedulesService =  async (loginUserId: string, query:TScheduleQuery) =
         limit = 10, 
         sortOrder = "asc",
         sortBy = "startDateTime", 
+        date,
         startDate,
         endDate
         //...filters // Any additional filters
@@ -83,13 +84,23 @@ const getSchedulesService =  async (loginUserId: string, query:TScheduleQuery) =
       
         //4 setup filters
         let filterQuery = {};
+        //check if only filter by date
+        if (date && !startDate && !endDate) {
+          const start = `${date}T00:00:00.000+00:00`;
+            const end = `${date}T23:59:59.999+00:00`;
+           filterQuery = {
+             startDateTime: { $gte: new Date(start), $lte: new Date(end) }
+           };
+        }
+
+        //check if startDate & endDate exist
         if (startDate && endDate) {
             const start = `${startDate}T00:00:00.000+00:00`;
             const end = `${endDate}T23:59:59.999+00:00`;
            filterQuery = {
-            startDateTime: { $gte: new Date(start) },
-            endDateTime: { $lte: new Date(end) }
-           }
+             startDateTime: { $gte: new Date(start) },
+             endDateTime: { $lte: new Date(end) },
+           };
         }
 
     //check restaurant not found

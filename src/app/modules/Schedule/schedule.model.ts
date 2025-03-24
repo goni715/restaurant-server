@@ -23,9 +23,15 @@ const scehduleSchema = new Schema<ISchedule>(
       type: Date,
       required: true,
     },
-    isBooked: {
-      type: Boolean,
-      default: false
+    availableSeats: {
+      type: Number,
+      required: true,
+      validate: {
+        validator: function (value) {
+          return value > 0; // Ensures the number is positive
+        },
+        message: "available seats must be a positive number"
+      },
     }
   },
   {

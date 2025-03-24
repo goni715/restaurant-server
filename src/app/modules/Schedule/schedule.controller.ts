@@ -7,7 +7,7 @@ import { createScheduleService, deleteScheduleService, getSchedulesService, getS
 
 const createSchedule = catchAsync(async (req, res) => {
   const loginUserId = req.headers.id;
-    const result = await createScheduleService(loginUserId as string, req.body);
+  const result = await createScheduleService(loginUserId as string, req.body);
   
     sendResponse(res, {
       statusCode: 200,

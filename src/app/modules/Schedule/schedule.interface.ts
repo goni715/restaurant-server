@@ -6,7 +6,7 @@ export interface ISchedule extends Document {
     ownerId: Types.ObjectId;
     startDateTime: Date;
     endDateTime: Date;
-    isBooked: boolean;
+    availableSeats: number;
 }
 
 
@@ -14,7 +14,8 @@ export type TSchedulePayload = {
     startDate: string;
     endDate: string
     startTime: string
-    endTime: string 
+    endTime: string;
+    availableSeats: number;
 }
 
 

@@ -96,6 +96,7 @@ export const createScheduleSchema = z
     endDate: endDateSchema,
     startTime: startTimeSchema,
     endTime: endTimeSchema,
+    availableSeats: z.number().positive("available seats must be a positive number").optional(),
   })
   .superRefine((values, ctx) => {
     const { startDate, endDate, startTime, endTime } = values;

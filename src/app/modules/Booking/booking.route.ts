@@ -3,13 +3,22 @@ import AuthMiddleware from '../../middlewares/AuthMiddleware';
 import { UserRole } from '../User/user.constant';
 import validationMiddleware from '../../middlewares/validationMiddleware';
 import BookingController from './booking.controller';
+import { createBookingSchema } from './booking.validation';
 
 const router = express.Router();
 
 router.post(
-  "/create-booking",
+  "/create-booking-without-payment",
   AuthMiddleware(UserRole.user),
-  BookingController.createBooking
+  validationMiddleware(createBookingSchema),
+  BookingController.createBookingWithoutPayment
+);
+
+router.post(
+  "/create-booking-with-payment",
+  AuthMiddleware(UserRole.user),
+  validationMiddleware(createBookingSchema),
+  BookingController.createBookingWithPayment
 );
 
 

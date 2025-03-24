@@ -3,10 +3,11 @@ import AppError from "../../errors/AppError";
 import RestaurantModel from "../Restaurant/restaurant.model";
 import { TSchedulePayload, TScheduleQuery, TUserScheduleQuery } from "./schedule.interface"
 import ScheduleModel from "./schedule.model";
+import BookingModel from "../Booking/booking.model";
 
 
 const createScheduleService = async (loginUserId: string, payload: TSchedulePayload) => {
-    const { startDate, endDate, startTime, endTime } = payload;
+    const { startDate, endDate, startTime, endTime, availableSeats } = payload;
     //check restaurant not found
     const restaurant = await RestaurantModel.findOne({
         ownerId: loginUserId
@@ -49,7 +50,10 @@ const createScheduleService = async (loginUserId: string, payload: TSchedulePayl
             const existingSchedule = await ScheduleModel.findOne(scheduleData);
 
             if(!existingSchedule){
-                schedules.push(scheduleData)
+                schedules.push({
+                  ...scheduleData,
+                  availableSeats
+                })
             }
 
             startDateTime = endDateTime; // Move to the next slot
@@ -230,7 +234,6 @@ data: result,
 }
 
 
-
 const getSingleScheduleService = async (scheduleId: string) => {
   const schedule = await ScheduleModel.findById(scheduleId);
   if (!schedule) {
@@ -241,28 +244,22 @@ const getSingleScheduleService = async (scheduleId: string) => {
 
 
 const deleteScheduleService = async (loginUserId: string, scheduleId: string) => {
-  //check restaurant not found
-  const restaurant = await RestaurantModel.findOne({
-    ownerId: loginUserId,
-  });
-  if (!restaurant) {
-    throw new AppError(404, "Restaurant not found");
-  }
-
+ 
   //check schedule not found
-  const schedule = await ScheduleModel.findOne({ _id: scheduleId, restaurantId: restaurant._id });
+  const schedule = await ScheduleModel.findOne({ _id: scheduleId, ownerId: loginUserId });
   if (!schedule) {
     throw new AppError(404, "Schedule not found");
   }
 
- 
-  if(schedule.isBooked===true){
-    throw new AppError(403, 'Failled to delete, This schedule is already booked')
+ //check if scheduleId is associated with booking
+  const associateWithBooking = await BookingModel.findOne({ scheduleId });
+  if(associateWithBooking){
+      throw new AppError(409, 'Failled to delete, This Schedule is associated with booking');
   }
 
  const result = await ScheduleModel.deleteOne({
    _id: scheduleId,
-   restaurantId: restaurant._id,
+   ownerId: loginUserId
  });
  return result;
 }

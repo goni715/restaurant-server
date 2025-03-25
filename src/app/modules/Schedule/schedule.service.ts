@@ -212,7 +212,7 @@ const getUserSchedulesService =  async (restaurantId: string, query:TUserSchedul
               ...filterQuery
           }
       },
-      { $sort: { [sortBy]: sortDirection } },
+      { $sort: { [sortBy]: sortDirection, endDateTime:1 } },
       { $skip: skip },
       { $limit: Number(limit) }
   ])

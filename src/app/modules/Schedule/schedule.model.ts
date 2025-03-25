@@ -30,9 +30,14 @@ const scehduleSchema = new Schema<ISchedule>(
         validator: function (value) {
           return value > 0; // Ensures the number is positive
         },
-        message: "available seats must be a positive number"
+        message: "available seats must be a positive number",
       },
-    }
+    },
+    availability: {
+      type: String,
+      required: true,
+      enum: ["Immediate seating", "Open Reservations", "Waitlist"],
+    },
   },
   {
     timestamps: true,

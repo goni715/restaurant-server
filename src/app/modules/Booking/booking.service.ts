@@ -1,15 +1,16 @@
-import mongoose from "mongoose";
+import mongoose, { Types } from "mongoose";
 import AppError from "../../errors/AppError";
 import ScheduleModel from "../Schedule/schedule.model";
 import { IBookingPayload } from "./booking.interface"
 import BookingModel from "./booking.model";
+import PaymentModel from "../Payment/payment.model";
 
 
 const createBookingWithoutPaymentService = async (
   loginUserId: string,
   payload: IBookingPayload
 ) => {
-  const { scheduleId, price, guest } = payload;
+  const { scheduleId, guest } = payload;
   //check schedule not found
   const schedule = await ScheduleModel.findById(scheduleId);
   if (!schedule) {
@@ -32,7 +33,6 @@ const createBookingWithoutPaymentService = async (
         userId: loginUserId,
         scheduleId,
         restaurantId: schedule.restaurantId,
-        price,
         guest,
     }], { session });
 
@@ -48,7 +48,7 @@ const createBookingWithoutPaymentService = async (
     
     await session.commitTransaction();
     await session.endSession();
-    return newBooking;
+    return newBooking[0];
   }catch(err:any){
     await session.abortTransaction();
     await session.endSession();
@@ -62,8 +62,8 @@ const createBookingWithPaymentService = async (
   loginUserId: string,
   payload: IBookingPayload
 ) => {
-  return "Without Payment"
-  const { scheduleId, price, guest } = payload;
+  const { scheduleId, amount, guest } = payload;
+   const ObjectId = Types.ObjectId;
   //check schedule not found
   const schedule = await ScheduleModel.findById(scheduleId);
   if (!schedule) {
@@ -86,7 +86,7 @@ const createBookingWithPaymentService = async (
         userId: loginUserId,
         scheduleId,
         restaurantId: schedule.restaurantId,
-        price,
+        amount,
         guest,
     }], { session });
 
@@ -102,16 +102,26 @@ const createBookingWithPaymentService = async (
     
     //database-process-03
     //create the payment
+    const transactionId = new ObjectId().toString();
+    await PaymentModel.create({
+        bookingId: newBooking[0]?._id,
+        amount,
+        transactionId
+    })
 
 
     await session.commitTransaction();
     await session.endSession();
-    return newBooking;
+    return newBooking[0];
   }catch(err:any){
     await session.abortTransaction();
     await session.endSession();
     throw new Error(err)
   }
 };
+
+const getBookingsService = async () => {
+
+}
 
 export { createBookingWithoutPaymentService, createBookingWithPaymentService };

@@ -10,6 +10,16 @@ const paymentSchema = new Schema<IPayment>(
       required: true,
       ref: "Booking",
     },
+    transactionId: {
+      type: String,
+      unique: true,
+      required: true,
+    },
+    amount: {
+      type: Number,
+      required: true,
+      trim:true
+    },
     status: {
         type: String,
         enum: ["paid", "unpaid"],

@@ -1,5 +1,7 @@
 import { Types } from "mongoose";
 
+export type IAvailability = "Immediate seating" | "Open Reservations" | "Waitlist";
+
 
 export interface ISchedule extends Document {
     restaurantId: Types.ObjectId;
@@ -7,6 +9,7 @@ export interface ISchedule extends Document {
     startDateTime: Date;
     endDateTime: Date;
     availableSeats: number;
+    availability: IAvailability
 }
 
 

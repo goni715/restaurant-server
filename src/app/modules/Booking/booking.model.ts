@@ -20,9 +20,9 @@ const bookingSchema = new Schema<IBooking>(
       required: true,
       ref: "Restaurant",
     },
-    price: {
+    amount: {
         type: Number,
-        required: true,
+        default: 0,
         trim: true
     },
     guest: {
@@ -39,11 +39,6 @@ const bookingSchema = new Schema<IBooking>(
         type: String,
         enum: ["paid", "unpaid"],
         default: "unpaid"
-    },
-    availability: {
-        type: String,
-        enum: ["Immediate seating", "Waitlist"],
-        default: "Immediate seating"
     }
   },
   {

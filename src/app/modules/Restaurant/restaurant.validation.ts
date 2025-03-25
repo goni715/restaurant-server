@@ -11,7 +11,7 @@ export const createRestaurantValidationSchema = z.object({
   discount: z.string().optional(),
   payment: z.boolean().default(false),
   bookingFee: z.number().positive("bookingFee must be a positive number").optional(),
-  cancellationCharge: z.number().positive("bookingFee must be a positive number").optional()
+  cancellationPercentage: z.number().nonnegative().default(0)
 })
 
 export const updateRestaurantValidationSchema = z.object({

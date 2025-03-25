@@ -4,10 +4,11 @@ import RestaurantModel from "../Restaurant/restaurant.model";
 import { TSchedulePayload, TScheduleQuery, TUserScheduleQuery } from "./schedule.interface"
 import ScheduleModel from "./schedule.model";
 import BookingModel from "../Booking/booking.model";
+import isDifferenceDuration from "../../utils/isDifferenceDuration";
 
 
 const createScheduleService = async (loginUserId: string, payload: TSchedulePayload) => {
-    const { startDate, endDate, startTime, endTime, availableSeats } = payload;
+    const {duration, startDate, endDate, startTime, endTime, availableSeats, bookingFee, availability, paymentRequired } = payload;
     //check restaurant not found
     const restaurant = await RestaurantModel.findOne({
         ownerId: loginUserId
@@ -20,7 +21,7 @@ const createScheduleService = async (loginUserId: string, payload: TSchedulePayl
     // schedule creation part
 
     const schedules = [];
-    const timeSlotMinutes = 30; // Schedule interval
+    //duration = const timeSlotMinutes = 30; // Schedule interval = unit = minutes
 
     // Convert start and end date to UTC
     const startDateObj = new Date(`${startDate}T00:00:00.000Z`);
@@ -36,8 +37,12 @@ const createScheduleService = async (loginUserId: string, payload: TSchedulePayl
         const [endHour, endMinute] = endTime.split(":").map(Number);
         let endDateTimeLimit = new Date(Date.UTC(currentDay.getUTCFullYear(), currentDay.getUTCMonth(), currentDay.getUTCDate(), endHour, endMinute, 0));
 
-        while (startDateTime < endDateTimeLimit) {
-            let endDateTime = new Date(startDateTime.getTime() + timeSlotMinutes * 60 * 1000); // Add 30 
+       // console.log(isDifferenceDuration(startDateTime, endDateTimeLimit, duration)); true or false
+       //check if startDateTime is less than endDateTimeLimit
+       //check if difference between startDateTime & endDateTimeLimit = duration time
+       //or check if difference between startDateTime & endDateTimeLimit is greater than duration time
+        while (startDateTime < endDateTimeLimit && isDifferenceDuration(startDateTime, endDateTimeLimit, duration)) {
+            let endDateTime = new Date(startDateTime.getTime() + duration * 60 * 1000); // Add duration minutes
             
             const scheduleData = {
               ownerId: loginUserId,
@@ -52,7 +57,10 @@ const createScheduleService = async (loginUserId: string, payload: TSchedulePayl
             if(!existingSchedule){
                 schedules.push({
                   ...scheduleData,
-                  availableSeats
+                  availableSeats,
+                  bookingFee,
+                  availability,
+                  paymentRequired
                 })
             }
 
@@ -90,10 +98,11 @@ const getSchedulesService =  async (loginUserId: string, query:TScheduleQuery) =
         let filterQuery = {};
         //check if only filter by date
         if (date && !startDate && !endDate) {
+          console.log("Yes");
           const start = `${date}T00:00:00.000+00:00`;
             const end = `${date}T23:59:59.999+00:00`;
            filterQuery = {
-             startDateTime: { $gte: new Date(start), $lte: new Date(end) }
+             startDateTime: { $gte: new Date(start), $lte: new Date(end) },
            };
         }
 
@@ -123,7 +132,7 @@ const getSchedulesService =  async (loginUserId: string, query:TScheduleQuery) =
                 ...filterQuery
             }
         },
-        { $sort: { [sortBy]: sortDirection } },
+        { $sort: { [sortBy]: sortDirection, endDateTime:1 } },
         { $skip: skip },
         { $limit: Number(limit) }
     ])

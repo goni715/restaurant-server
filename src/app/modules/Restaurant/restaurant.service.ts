@@ -34,7 +34,9 @@ const createRestaurantService = async (
     throw new AppError(409, "This restaurant name is already taken or existed");
   }
 
-  
+  if(!req.file){
+    throw new AppError(400, "image is required");
+  }
   if (req.file) {
     //for local machine file path
     payload.restaurantImg = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`; //for local machine

@@ -1,52 +1,35 @@
 import { z, ZodTypeAny } from 'zod';
 
-const startTimeSchema = z.string({
-    required_error: "Please select Start Time"
-})
-.min(1, { message: "Please select Start Time"})
-.refine(
-  (value) => {
-    const regex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/; // 00-09 10-19 20-23
-    return regex.test(value); //return true or false
-  },
-  {
-    message: 'Invalid time format , expected "HH:MM" in 24 hours format',
-  },
-).refine(
-    (value) => {
-        const arr = ['00', '30'] //required-minutes
-        const minutes = value.split(':')[1]
-        return arr.includes(minutes); //return true or false
-      },
-      {
-        message: `Minutes should be '00' or '30' `,
-      },
-  );
-
-
-const endTimeSchema = z.string({
-    required_error: "Please select End Time"
-})
-.min(1, { message: "Please select End Time"})
-.refine(
+const startTimeSchema = z
+  .string({
+    required_error: "Please select Start Time",
+  })
+  .min(1, { message: "Please select Start Time" })
+  .refine(
     (value) => {
       const regex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/; // 00-09 10-19 20-23
       return regex.test(value); //return true or false
     },
     {
       message: 'Invalid time format , expected "HH:MM" in 24 hours format',
+    }
+  );
+
+
+const endTimeSchema = z
+  .string({
+    required_error: "Please select End Time",
+  })
+  .min(1, { message: "Please select End Time" })
+  .refine(
+    (value) => {
+      const regex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/; // 00-09 10-19 20-23
+      return regex.test(value); //return true or false
     },
-  )
-.refine(
-  (value) => {
-    const arr = ['00', '30'] //required-minutes
-    const minutes = value.split(':')[1]
-    return arr.includes(minutes); //return true or false
-  },
-  {
-    message: `Minutes should be '00' or '30' `,
-  },
-);
+    {
+      message: 'Invalid time format , expected "HH:MM" in 24 hours format',
+    }
+  );
 
 
 
@@ -96,7 +79,15 @@ export const createScheduleSchema = z
     endDate: endDateSchema,
     startTime: startTimeSchema,
     endTime: endTimeSchema,
+    duration: z.number().positive("Duration must be a positive number").min(0, "Duration must be at least 0"),
     availableSeats: z.number().positive("available seats must be a positive number").optional(),
+    availability: z.enum(["Immediate Seating", "Open Reservations", "Waitlist"], {
+      errorMap: () => ({ message: "{VALUE} is not supported" }),
+    }),
+    bookingFee: z.number().nonnegative().default(0),
+    paymentRequired: z.enum(["Yes", "No"], {
+      errorMap: () => ({ message: "{VALUE} is not supported" }),
+    }),
   })
   .superRefine((values, ctx) => {
     const { startDate, endDate, startTime, endTime } = values;

@@ -13,9 +13,7 @@ export interface IRestaurant {
     ratings?: number;
     restaurantImg?: string;
     discount?: string;
-    payment: boolean;
-    bookingFee: number; //per guest
-    cancellationCharge?: number;
+    cancellationPercentage?: number;
     status: TRestaurantStatus;
     approved: TApprovedStatus
 }

@@ -13,6 +13,7 @@ export interface IBooking {
     guest: number;
     paymentStatus: TPaymentStatus;
     status: TBookingStatus;
+    cancellationCharge: number;
 }
 
 

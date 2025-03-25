@@ -36,7 +36,16 @@ const scehduleSchema = new Schema<ISchedule>(
     availability: {
       type: String,
       required: true,
-      enum: ["Immediate seating", "Open Reservations", "Waitlist"],
+      enum: ["Immediate Seating", "Open Reservations", "Waitlist"],
+    },
+    bookingFee: { //per guest
+      type: Number,
+      default: 0
+    },
+    paymentRequired: {
+      type: String,
+      required: true,
+      enum: ["Yes", "No"],
     },
   },
   {

@@ -163,7 +163,6 @@ return {
 }
 
 
-
 const getUserSchedulesService =  async (restaurantId: string, query:TUserScheduleQuery) => {
   const ObjectId = Types.ObjectId;
    // 1. Extract query parameters

@@ -20,6 +20,11 @@ const bookingSchema = new Schema<IBooking>(
       required: true,
       ref: "Restaurant",
     },
+    diningId: {
+      type: Schema.Types.ObjectId,
+      required: true,
+      ref: "Dining",
+    },
     amount: {
         type: Number,
         default: 0,

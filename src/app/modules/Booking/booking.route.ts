@@ -21,6 +21,10 @@ router.post(
   BookingController.createBookingWithPayment
 );
 
-
+router.get(
+  "/get-bookings",
+  AuthMiddleware(UserRole.admin),
+  BookingController.getBookings
+);
 
 export const BookingRoutes = router;

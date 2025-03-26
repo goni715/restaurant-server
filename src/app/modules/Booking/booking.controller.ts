@@ -1,6 +1,6 @@
 import catchAsync from "../../utils/catchAsync";
 import sendResponse from "../../utils/sendResponse";
-import { createBookingWithoutPaymentService, createBookingWithPaymentService } from "./booking.service";
+import { createBookingWithoutPaymentService, createBookingWithPaymentService, getBookingsService } from "./booking.service";
 
 const createBookingWithoutPayment = catchAsync(async (req, res) => {
   const loginUserId = req.headers.id;
@@ -27,9 +27,22 @@ const createBookingWithPayment = catchAsync(async (req, res) => {
   });
 });
 
+const getBookings = catchAsync(async (req, res) => {
+  const loginUserId = req.headers.id;
+  const result = await getBookingsService(loginUserId as string);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Bookings are retrieved successfully",
+    data: result,
+  });
+});
+
 const BookingController = {
   createBookingWithoutPayment,
-  createBookingWithPayment
+  createBookingWithPayment,
+  getBookings
 };
 
 export default BookingController;

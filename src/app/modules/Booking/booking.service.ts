@@ -4,13 +4,20 @@ import ScheduleModel from "../Schedule/schedule.model";
 import { IBookingPayload } from "./booking.interface"
 import BookingModel from "./booking.model";
 import PaymentModel from "../Payment/payment.model";
+import DiningModel from "../Dining/dining.model";
+import RestaurantModel from "../Restaurant/restaurant.model";
 
 
 const createBookingWithoutPaymentService = async (
   loginUserId: string,
   payload: IBookingPayload
 ) => {
-  const { scheduleId, guest } = payload;
+  const { scheduleId, diningId, guest } = payload;
+  
+  const dining = await DiningModel.findById(diningId);
+  if(!dining){
+      throw new AppError(404, 'This dining not found');
+  }
   //check schedule not found
   const schedule = await ScheduleModel.findById(scheduleId);
   if (!schedule) {
@@ -33,6 +40,7 @@ const createBookingWithoutPaymentService = async (
         userId: loginUserId,
         scheduleId,
         restaurantId: schedule.restaurantId,
+        diningId,
         guest,
     }], { session });
 
@@ -62,8 +70,14 @@ const createBookingWithPaymentService = async (
   loginUserId: string,
   payload: IBookingPayload
 ) => {
-  const { scheduleId, amount, guest } = payload;
+  const { scheduleId, diningId, amount, guest } = payload;
    const ObjectId = Types.ObjectId;
+
+   const dining = await DiningModel.findById(diningId);
+   if(!dining){
+       throw new AppError(404, 'This dining not found');
+   }
+   
   //check schedule not found
   const schedule = await ScheduleModel.findById(scheduleId);
   if (!schedule) {
@@ -86,6 +100,7 @@ const createBookingWithPaymentService = async (
         userId: loginUserId,
         scheduleId,
         restaurantId: schedule.restaurantId,
+        diningId,
         amount,
         guest,
     }], { session });
@@ -120,8 +135,14 @@ const createBookingWithPaymentService = async (
   }
 };
 
-const getBookingsService = async () => {
+const getBookingsService = async (loginUserId: string) => {
+  //check restaurant exist
+  const restaurant = await RestaurantModel.findOne({ ownerId: loginUserId });
+  if (!restaurant) {
+    throw new AppError(404, "Restaurant not found");
+  }
 
+  return "Get Booking Service";
 }
 
-export { createBookingWithoutPaymentService, createBookingWithPaymentService };
+export { createBookingWithoutPaymentService, createBookingWithPaymentService, getBookingsService };

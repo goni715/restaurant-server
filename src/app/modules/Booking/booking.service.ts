@@ -136,13 +136,20 @@ const createBookingWithPaymentService = async (
 };
 
 const getBookingsService = async (loginUserId: string) => {
+  const ObjectId = Types.ObjectId;
   //check restaurant exist
   const restaurant = await RestaurantModel.findOne({ ownerId: loginUserId });
   if (!restaurant) {
     throw new AppError(404, "Restaurant not found");
   }
 
-  return "Get Booking Service";
+  const result = BookingModel.aggregate([
+    {
+      $match: { restaurantId: new ObjectId(restaurant._id)}
+    }
+  ])
+
+  return result;
 }
 
 export { createBookingWithoutPaymentService, createBookingWithPaymentService, getBookingsService };

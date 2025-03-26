@@ -93,6 +93,123 @@ const deleteReviewService = async (reviewId: string) => {
 }
 
 
+const getMyRestaurantReviewsService = async (loginUserId: string, query: TReviewQuery) => {
+  const ObjectId = Types.ObjectId;
+    
+  // 1. Extract query parameters
+  const {
+    searchTerm, 
+    page = 1, 
+    limit = 10, 
+    sortOrder = "desc",
+    sortBy = "createdAt", 
+    ...filters // Any additional filters
+  } = query;
+
+
+  // 2. Set up pagination
+  const skip = (Number(page) - 1) * Number(limit);
+
+  //3. setup sorting
+  const sortDirection = sortOrder === "asc" ? 1 : -1;
+
+  //4. setup searching
+    let searchQuery = {};
+    if (searchTerm) {
+      searchQuery = makeSearchQuery(searchTerm, ReviewSearchFields);
+    }
+  
+    //5 setup filters
+    let filterQuery = {};
+    if (filters) {
+      filterQuery = makeFilterQuery(filters);
+    }
+  
+   //check restaurant not exist
+   const restaurant = await RestaurantModel.findOne({ownerId: loginUserId});
+   if (!restaurant) {
+     throw new AppError(404, "Restaurant Not Found");
+   }
+
+  const result = await ReviewModel.aggregate([
+    {
+      $match: { restaurantId: new ObjectId(restaurant._id) }
+    },
+    {
+      $lookup: {
+        from: "users",
+        localField: "userId",
+        foreignField: "_id",
+        as: "user",
+      },
+    },
+    {
+      $unwind: "$user"
+    },
+    {
+      $match: {
+        ...searchQuery,
+        ...filterQuery
+      }
+    },
+    {
+      $project: {
+        reviewId: "$_id",
+        userId: "$user._id",
+        fullName: "$user.fullName",
+        email: "$user.email",
+        phone: "$user.phone",
+        star: "$star",
+        comment: "$comment",
+        createdAt: "$createdAt",
+        _id:0
+      }
+    },
+    { $sort: { [sortBy]: sortDirection } },
+    { $skip: skip },
+    { $limit: Number(limit) },
+  ])
+
+   // total count of matching users 
+  const totalReviewResult = await ReviewModel.aggregate([
+    {
+      $match: { restaurantId: new ObjectId(restaurant._id) }
+    },
+    {
+      $lookup: {
+        from: "users",
+        localField: "userId",
+        foreignField: "_id",
+        as: "user",
+      },
+    },
+    {
+      $unwind: "$user"
+    },
+    {
+      $match: {
+        ...searchQuery,
+        ...filterQuery
+      }
+    },
+    { $count: "totalCount" }
+  ])
+
+  const totalCount = totalReviewResult[0]?.totalCount || 0;
+  const totalPages = Math.ceil(totalCount / Number(limit));
+
+return {
+  meta: {
+    page: Number(page), //currentPage
+    limit: Number(limit),
+    totalPages,
+    total: totalCount,
+  },
+  data: result,
+};
+   
+}
+
 const getRestaurantReviewsService = async (restaurantId: string, query: TReviewQuery) => {
   const ObjectId = Types.ObjectId;
     
@@ -155,13 +272,14 @@ const getRestaurantReviewsService = async (restaurantId: string, query: TReviewQ
     {
       $project: {
         reviewId: "$_id",
-        _id: "$user._id",
+        userId: "$user._id",
         fullName: "$user.fullName",
         email: "$user.email",
         phone: "$user.phone",
         star: "$star",
         comment: "$comment",
-        createdAt: "$createdAt"
+        createdAt: "$createdAt",
+        _id:0
       }
     },
     { $sort: { [sortBy]: sortDirection } },
@@ -212,5 +330,6 @@ return {
 export {
     createReviewService,
     deleteReviewService,
-    getRestaurantReviewsService
+    getRestaurantReviewsService,
+    getMyRestaurantReviewsService
 }

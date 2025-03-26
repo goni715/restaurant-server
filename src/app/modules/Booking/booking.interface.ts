@@ -2,7 +2,7 @@ import { Types } from "mongoose";
 
 
 export type TPaymentStatus = "paid" | "unpaid";
-export type TBookingStatus = "pending" | "confirmed" | "cancelled";
+export type TBookingStatus = "pending" | "completed" | "cancelled";
 
 export interface IBooking {
     scheduleId: Types.ObjectId;
@@ -23,3 +23,15 @@ export interface IBookingPayload {
     amount: number;
     guest: number;
 }
+
+
+export type TBookingQuery = {
+    searchTerm?:string,
+    page?: string;
+    limit?: string;
+    sortBy?: string;
+    sortOrder?: 'asc' | 'desc';
+    date?: string;
+    paymentStatus?: TPaymentStatus;
+    status?: TBookingStatus;
+};

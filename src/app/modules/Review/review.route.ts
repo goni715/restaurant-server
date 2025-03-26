@@ -9,6 +9,7 @@ const router = express.Router();
 
 router.post('/create-review', AuthMiddleware(UserRole.user), validationMiddleware(createReviewValidationSchema), ReviewController.createReview);
 router.delete('/delete-review/:reviewId', AuthMiddleware(UserRole.super_admin), ReviewController.deleteReview)
+router.get('/get-my-restaurant-reviews', AuthMiddleware(UserRole.admin), ReviewController.getMyRestaurantReviews);
 router.get('/get-restaurant-reviews/:restaurantId', AuthMiddleware(UserRole.super_admin, UserRole.admin, UserRole.user), ReviewController.getRestaurantReviews);
 
 

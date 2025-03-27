@@ -14,6 +14,7 @@ import { MenuReviewRoutes } from '../modules/MenuReview/menuReview.route';
 import { ScheduleRoutes } from '../modules/Schedule/schedule.route';
 import { BookingRoutes } from '../modules/Booking/booking.route';
 import { SlotRoutes } from '../modules/Slot/slot.route';
+import { AdministratorRoutes } from '../modules/Administrator/administrator.route';
 
 const router = express.Router();
 
@@ -78,7 +79,11 @@ const moduleRoutes = [
     {
         path: '/slot',
         route: SlotRoutes
-    }   
+    },
+    {
+        path: '/administrator',
+        route: AdministratorRoutes
+    }    
 ]
 
 moduleRoutes.forEach((item, i)=> router.use(item.path, item.route));

@@ -17,11 +17,12 @@ export interface ISchedule extends Document {
 
 
 export type TSchedulePayload = {
-    duration:number;
     startDate: string;
     endDate: string
-    startTime: string
-    endTime: string;
+    slot: {
+       startTime: string;
+       endTime: string;
+    }[];
     availableSeats: number;
     bookingFee: number;
     availability: IAvailability;

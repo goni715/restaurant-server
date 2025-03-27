@@ -8,3 +8,9 @@ export interface ISlot {
     startDateTime: Date,
     endDateTime: Date
 }
+
+
+export type TSlotQuery = {
+    page?: string;
+    limit?: string;
+};

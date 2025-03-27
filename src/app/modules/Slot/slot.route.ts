@@ -20,4 +20,11 @@ router.get(
   SlotController.getSlots
 );
 
+
+router.get(
+  "/get-slot-drop-down",
+  AuthMiddleware(UserRole.admin),
+  SlotController.getSlotDropDown
+);
+
 export const SlotRoutes = router;

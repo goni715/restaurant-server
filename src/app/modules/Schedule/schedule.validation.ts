@@ -1,4 +1,5 @@
-import { z, ZodTypeAny } from 'zod';
+import { z } from 'zod';
+
 
 const startTimeSchema = z
   .string({
@@ -32,8 +33,6 @@ const endTimeSchema = z
   );
 
 
-
-
 const startDateSchema = z.string({
     required_error: "Please select Start Date"
 })
@@ -47,7 +46,6 @@ const startDateSchema = z.string({
       message: `Invalid Date format , expected 'yyyy-MM-dd' format`,
     },
 );
-
 
 
 
@@ -70,27 +68,25 @@ const endDateSchema = z.string({
 
 
 
-
-
-
 export const createScheduleSchema = z
   .object({
     startDate: startDateSchema,
     endDate: endDateSchema,
-    startTime: startTimeSchema,
-    endTime: endTimeSchema,
-    duration: z.number().positive("Duration must be a positive number").min(0, "Duration must be at least 0"),
+    slot: z.array(z.object({
+      startTime: startTimeSchema,
+      endTime:endTimeSchema
+    })),
     availableSeats: z.number().positive("available seats must be a positive number").optional(),
     availability: z.enum(["Immediate Seating", "Open Reservations", "Waitlist"], {
       errorMap: () => ({ message: "{VALUE} is not supported" }),
-    }),
+    }).optional(),
     bookingFee: z.number().nonnegative().default(0),
     paymentRequired: z.enum(["Yes", "No"], {
       errorMap: () => ({ message: "{VALUE} is not supported" }),
-    }),
+    }).default('No'),
   })
   .superRefine((values, ctx) => {
-    const { startDate, endDate, startTime, endTime } = values;
+    const { startDate, endDate, slot } = values;
   
     // Create Date objects using the provided startDate and endDate
     const StartDate = new Date(startDate);
@@ -110,27 +106,32 @@ export const createScheduleSchema = z
           message: "Start date & EndDate must be same or EndDate is greater than startDate ",
           code: z.ZodIssueCode.custom,
         });
-      }
-    
-    // Create Date objects using the provided startTime and endTime
-    const start = new Date(`2024-01-01T${startTime}:00`);
-    const end = new Date(`2024-01-01T${endTime}:00`);
-    
-    if (end <= start) {
-      // Set the error on the `endTime` field
-      ctx.addIssue({
+    }
+
+    for (let i = 0; i < slot.length; i++) {
+      const { startTime, endTime } = slot[i];
+      // Create Date objects using the provided startTime and endTime
+      const start = new Date(`2024-01-01T${startTime}:00`);
+      const end = new Date(`2024-01-01T${endTime}:00`);
+
+      if (end <= start) {
+        // Set the error on the `endTime` field
+        ctx.addIssue({
           path: ["endTime"],
           message: "End time must be later than start time!",
-          code:  z.ZodIssueCode.custom,
-      });
-      
-      // Alternatively, you could set the error on `startTime`
-      ctx.addIssue({
-        path: ['startTime'],
-        message: "Start time must be before end time!",
-        code: z.ZodIssueCode.custom,
-      });
+          code: z.ZodIssueCode.custom,
+        });
+
+        // Alternatively, you could set the error on `startTime`
+        ctx.addIssue({
+          path: ["startTime"],
+          message: "Start time must be before end time!",
+          code: z.ZodIssueCode.custom,
+        });
+      }
     }
+    
+
   });
 
 

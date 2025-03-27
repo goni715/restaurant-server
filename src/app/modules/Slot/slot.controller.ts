@@ -1,6 +1,8 @@
 import catchAsync from "../../utils/catchAsync";
+import pickValidFields from "../../utils/pickValidFields";
 import sendResponse from "../../utils/sendResponse";
-import { createSlotService, getSlotsService } from "./slot.service";
+import { SlotValidFields } from "./slot.constant";
+import { createSlotService, getSlotDropDownService, getSlotsService } from "./slot.service";
 
 
 
@@ -20,7 +22,22 @@ const createSlot = catchAsync(async (req, res) => {
 
 const getSlots = catchAsync(async (req, res) => {
   const loginUserId = req.headers.id;
-  const result = await getSlotsService(loginUserId as string);
+  const validatedQuery = pickValidFields(req.query, SlotValidFields);
+  const result = await getSlotsService(loginUserId as string, validatedQuery);
+  
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: "Slots are retrieved successfully",
+      meta: result.meta,
+      data: result.data
+    });
+});
+
+
+const getSlotDropDown = catchAsync(async (req, res) => {
+  const loginUserId = req.headers.id;
+  const result = await getSlotDropDownService(loginUserId as string);
   
     sendResponse(res, {
       statusCode: 200,
@@ -30,10 +47,10 @@ const getSlots = catchAsync(async (req, res) => {
     });
 });
 
-
 const SlotController = {
     createSlot,
-    getSlots
+    getSlots,
+    getSlotDropDown
 };
 
 export default SlotController;

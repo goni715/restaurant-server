@@ -1,7 +1,7 @@
 import { Types } from "mongoose";
 import AppError from "../../errors/AppError";
 import RestaurantModel from "../Restaurant/restaurant.model";
-import { ISlot } from "./slot.interface";
+import { ISlot, TSlotQuery } from "./slot.interface";
 import SlotModel from "./slot.model";
 
 
@@ -70,12 +70,85 @@ const createSlotService = async (loginUserId: string, payload: ISlot) => {
   return result;
 }
 
-const getSlotsService = async (loginUserId: string) => {
+const getSlotsService = async (loginUserId: string, query:TSlotQuery) => {
+    const ObjectId = Types.ObjectId;
+   
+  // 1. Extract query parameters
+  const {
+    page = 1, 
+    limit = 10, 
+  } = query;
+
+
+  // 2. Set up pagination
+  const skip = (Number(page) - 1) * Number(limit);
+
+    const result = await SlotModel.aggregate([
+        {
+            $match: {
+                ownerId: new ObjectId(loginUserId)
+            }
+        },
+        {
+            $sort: { startDateTime:1, endDateTime:1}
+        },
+        {
+            $project: {
+                startDateTime: 1,
+                endDateTime:1,
+                startTime:1,
+                endTime:1
+            }
+        },
+        { $skip: skip },
+        { $limit: Number(limit) },
+    ]);
+
+
+    //count the total slot
+    const totalSlotResult = await SlotModel.aggregate([
+        {
+            $match: {
+                ownerId: new ObjectId(loginUserId)
+            }
+        },
+        {
+            $sort: { startDateTime:1, endDateTime:1}
+        },
+        { $count: "totalCount" }
+    ]);
+
+
+    
+  const totalCount = totalSlotResult[0]?.totalCount || 0;
+  const totalPages = Math.ceil(totalCount / Number(limit));
+
+return {
+  meta: {
+    page: Number(page), //currentPage
+    limit: Number(limit),
+    totalPages,
+    total: totalCount,
+  },
+  data: result,
+};
+}
+
+
+const getSlotDropDownService = async (loginUserId: string) => {
     const ObjectId = Types.ObjectId;
     const result = await SlotModel.aggregate([
         {
             $match: {
                 ownerId: new ObjectId(loginUserId)
+            }
+        },
+        {
+            $project: {
+                startDateTime: 1,
+                endDateTime:1,
+                startTime:1,
+                endTime:1
             }
         },
         {
@@ -86,7 +159,9 @@ const getSlotsService = async (loginUserId: string) => {
     return result;
 }
 
+
 export {
     createSlotService,
-    getSlotsService
+    getSlotsService,
+    getSlotDropDownService
 }

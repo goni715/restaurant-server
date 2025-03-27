@@ -37,6 +37,7 @@ const scehduleSchema = new Schema<ISchedule>(
       type: String,
       required: true,
       enum: ["Immediate Seating", "Open Reservations", "Waitlist"],
+      default: "Immediate Seating"
     },
     bookingFee: { //per guest
       type: Number,
@@ -46,6 +47,7 @@ const scehduleSchema = new Schema<ISchedule>(
       type: String,
       required: true,
       enum: ["Yes", "No"],
+      default: "No"
     },
   },
   {

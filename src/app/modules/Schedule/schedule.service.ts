@@ -8,7 +8,7 @@ import isDifferenceDuration from "../../utils/isDifferenceDuration";
 
 
 const createScheduleService = async (loginUserId: string, payload: TSchedulePayload) => {
-    const {duration, startDate, endDate, startTime, endTime, availableSeats, bookingFee, availability, paymentRequired } = payload;
+    const {startDate, endDate, slot, availableSeats, bookingFee, availability, paymentRequired } = payload;
     //check restaurant not found
     const restaurant = await RestaurantModel.findOne({
         ownerId: loginUserId
@@ -20,56 +20,72 @@ const createScheduleService = async (loginUserId: string, payload: TSchedulePayl
 
     // schedule creation part
 
-    const schedules = [];
+    const schedules:any[] = [];
     //duration = const timeSlotMinutes = 30; // Schedule interval = unit = minutes
 
     // Convert start and end date to UTC
     const startDateObj = new Date(`${startDate}T00:00:00.000Z`);
     const endDateObj = new Date(`${endDate}T00:00:00.000Z`);
 
+
+
     for (let currentDate = new Date(startDateObj); currentDate <= endDateObj; currentDate.setUTCDate(currentDate.getUTCDate() + 1)) {
         let currentDay = new Date(currentDate);
 
-        // Parse start and end time as UTC
-        const [startHour, startMinute] = startTime.split(":").map(Number);
-        let startDateTime = new Date(Date.UTC(currentDay.getUTCFullYear(), currentDay.getUTCMonth(), currentDay.getUTCDate(), startHour, startMinute, 0));
+      
+         for(let i=0; i < slot.length; i++){
+          const { startTime, endTime} = slot[i];
+          const [startHour, startMinute] = startTime.split(":").map(Number);
+          let startDateTime = new Date(
+            Date.UTC(
+              currentDay.getUTCFullYear(),
+              currentDay.getUTCMonth(),
+              currentDay.getUTCDate(),
+              startHour,
+              startMinute,
+              0
+            )
+          );
 
-        const [endHour, endMinute] = endTime.split(":").map(Number);
-        let endDateTimeLimit = new Date(Date.UTC(currentDay.getUTCFullYear(), currentDay.getUTCMonth(), currentDay.getUTCDate(), endHour, endMinute, 0));
+          const [endHour, endMinute] = endTime.split(":").map(Number);
+          let endDateTime = new Date(
+            Date.UTC(
+              currentDay.getUTCFullYear(),
+              currentDay.getUTCMonth(),
+              currentDay.getUTCDate(),
+              endHour,
+              endMinute,
+              0
+            )
+          );
 
-       // console.log(isDifferenceDuration(startDateTime, endDateTimeLimit, duration)); true or false
-       //check if startDateTime is less than endDateTimeLimit
-       //check if difference between startDateTime & endDateTimeLimit = duration time
-       //or check if difference between startDateTime & endDateTimeLimit is greater than duration time
-        while (startDateTime < endDateTimeLimit && isDifferenceDuration(startDateTime, endDateTimeLimit, duration)) {
-            let endDateTime = new Date(startDateTime.getTime() + duration * 60 * 1000); // Add duration minutes
-            
-            const scheduleData = {
-              ownerId: loginUserId,
-              restaurantId: restaurant._id,
-              startDateTime: startDateTime,
-              endDateTime: endDateTime,
-            };
 
-            //check if schedule exist
-            const existingSchedule = await ScheduleModel.findOne(scheduleData);
+          const scheduleData = {
+            ownerId: loginUserId,
+            restaurantId: restaurant._id,
+            startDateTime: startDateTime,
+            endDateTime: endDateTime,
+          };
 
-            if(!existingSchedule){
-                schedules.push({
-                  ...scheduleData,
-                  availableSeats,
-                  bookingFee,
-                  availability,
-                  paymentRequired
-                })
-            }
+          //check if schedule exist
+          const existingSchedule = await ScheduleModel.findOne(scheduleData);
 
-            startDateTime = endDateTime; // Move to the next slot
-        }
+          if(!existingSchedule){
+              schedules.push({
+                ...scheduleData,
+                availableSeats,
+                bookingFee,
+                availability,
+                paymentRequired
+              })
+          }
+         }
+        
+       
     }
 
     const result = await ScheduleModel.insertMany(schedules);
-    return result;
+    return result
 }
 
 const getSchedulesService =  async (loginUserId: string, query:TScheduleQuery) => {
@@ -272,6 +288,70 @@ const deleteScheduleService = async (loginUserId: string, scheduleId: string) =>
  return result;
 }
 
+const createScheduleOldService = async (loginUserId: string, payload: TSchedulePayload) => {
+  const {duration, startDate, endDate, startTime, endTime, availableSeats, bookingFee, availability, paymentRequired } = payload;
+  //check restaurant not found
+  const restaurant = await RestaurantModel.findOne({
+      ownerId: loginUserId
+    });
+    if (!restaurant) {
+      throw new AppError(404, "Restaurant not found");
+    }
+
+
+  // schedule creation part
+
+  const schedules = [];
+  //duration = const timeSlotMinutes = 30; // Schedule interval = unit = minutes
+
+  // Convert start and end date to UTC
+  const startDateObj = new Date(`${startDate}T00:00:00.000Z`);
+  const endDateObj = new Date(`${endDate}T00:00:00.000Z`);
+
+  for (let currentDate = new Date(startDateObj); currentDate <= endDateObj; currentDate.setUTCDate(currentDate.getUTCDate() + 1)) {
+      let currentDay = new Date(currentDate);
+
+      // Parse start and end time as UTC
+      const [startHour, startMinute] = startTime.split(":").map(Number);
+      let startDateTime = new Date(Date.UTC(currentDay.getUTCFullYear(), currentDay.getUTCMonth(), currentDay.getUTCDate(), startHour, startMinute, 0));
+
+      const [endHour, endMinute] = endTime.split(":").map(Number);
+      let endDateTimeLimit = new Date(Date.UTC(currentDay.getUTCFullYear(), currentDay.getUTCMonth(), currentDay.getUTCDate(), endHour, endMinute, 0));
+
+     // console.log(isDifferenceDuration(startDateTime, endDateTimeLimit, duration)); true or false
+     //check if startDateTime is less than endDateTimeLimit
+     //check if difference between startDateTime & endDateTimeLimit = duration time
+     //or check if difference between startDateTime & endDateTimeLimit is greater than duration time
+      while (startDateTime < endDateTimeLimit && isDifferenceDuration(startDateTime, endDateTimeLimit, duration)) {
+          let endDateTime = new Date(startDateTime.getTime() + duration * 60 * 1000); // Add duration minutes
+          
+          const scheduleData = {
+            ownerId: loginUserId,
+            restaurantId: restaurant._id,
+            startDateTime: startDateTime,
+            endDateTime: endDateTime,
+          };
+
+          //check if schedule exist
+          const existingSchedule = await ScheduleModel.findOne(scheduleData);
+
+          if(!existingSchedule){
+              schedules.push({
+                ...scheduleData,
+                availableSeats,
+                bookingFee,
+                availability,
+                paymentRequired
+              })
+          }
+
+          startDateTime = endDateTime; // Move to the next slot
+      }
+  }
+
+  const result = await ScheduleModel.insertMany(schedules);
+  return result;
+}
 export {
     createScheduleService,
     getSchedulesService,

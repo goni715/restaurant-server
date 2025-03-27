@@ -13,6 +13,7 @@ import { MenuRoutes } from '../modules/Menu/menu.route';
 import { MenuReviewRoutes } from '../modules/MenuReview/menuReview.route';
 import { ScheduleRoutes } from '../modules/Schedule/schedule.route';
 import { BookingRoutes } from '../modules/Booking/booking.route';
+import { SlotRoutes } from '../modules/Slot/slot.route';
 
 const router = express.Router();
 
@@ -73,7 +74,11 @@ const moduleRoutes = [
     {
         path: '/booking',
         route: BookingRoutes
-    }  
+    },
+    {
+        path: '/slot',
+        route: SlotRoutes
+    }   
 ]
 
 moduleRoutes.forEach((item, i)=> router.use(item.path, item.route));

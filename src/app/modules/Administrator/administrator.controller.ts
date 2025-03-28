@@ -1,6 +1,8 @@
 import catchAsync from "../../utils/catchAsync";
+import pickValidFields from "../../utils/pickValidFields";
 import sendResponse from "../../utils/sendResponse";
-import { createAdministratorService, updateAdministratorService } from "./administrator.service";
+import { AdministratorValidFields } from "./administrator.constant";
+import { createAdministratorService, deleteAdministratorService, getAdministratorsService, updateAdministratorService } from "./administrator.service";
 
 
 const createAdministrator = catchAsync(async (req, res) => {
@@ -21,7 +23,7 @@ const updateAdministrator = catchAsync(async (req, res) => {
   const result = await updateAdministratorService(administratorId, access);
 
   sendResponse(res, {
-    statusCode: 201,
+    statusCode: 200,
     success: true,
     message: "Administrator is updated successfully",
     data: result,
@@ -29,9 +31,36 @@ const updateAdministrator = catchAsync(async (req, res) => {
 });
 
 
+const getAdministrators = catchAsync(async (req, res) => {
+  const validatedQuery = pickValidFields(req.query, AdministratorValidFields);
+  const result = await getAdministratorsService(validatedQuery);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Administrators are retrieved successfully",
+    meta: result.meta,
+    data: result.data
+  });
+});
+
+
+const deleteAdministrator = catchAsync(async (req, res) => {
+  const { administratorId } = req.params;
+  const result = await deleteAdministratorService(administratorId);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Administrator is deleted successfully",
+    data: result,
+  });
+});
+
 const AdministratorController = {
     createAdministrator,
-    updateAdministrator
+    updateAdministrator,
+    getAdministrators,
+    deleteAdministrator
 };
   
 export default AdministratorController;

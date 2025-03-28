@@ -12,3 +12,13 @@ export interface IAdministratorPayload {
     administratorData: IUser,
     access: TAccess[]
 }
+
+
+export type TAdministratorQuery = {
+  searchTerm?: string;
+  page?: string;
+  limit?: string;
+  sortBy?: string;
+  sortOrder?: "asc" | "desc";
+  status?: string;
+};

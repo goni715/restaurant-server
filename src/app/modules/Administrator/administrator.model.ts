@@ -18,6 +18,9 @@ const administratorSchema = new Schema<IAdministrator>({
         message: props => `Invalid access values: ${props.value}. Allowed values are ${VALID_ACCESS_VALUES.join(", ")}.`
     }
   }
+}, {
+  timestamps: true,
+  versionKey: false
 });
 
 

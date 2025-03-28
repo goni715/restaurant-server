@@ -1,4 +1,3 @@
-
 import express, { NextFunction, Request, Response } from 'express';
 import AuthMiddleware from '../../middlewares/AuthMiddleware';
 import { UserRole } from '../User/user.constant';
@@ -21,7 +20,6 @@ router.post(
   AdministratorController.createAdministrator
 );
 
-
 router.patch(
   "/update-administrator-access/:administratorId",
   AuthMiddleware(UserRole.super_admin),
@@ -29,5 +27,16 @@ router.patch(
   AdministratorController.updateAdministrator
 );
 
+router.get(
+  "/get-administrators",
+  AuthMiddleware("super_admin"),
+  AdministratorController.getAdministrators
+);
+
+router.delete(
+  "/delete-administrator/:administratorId",
+  AuthMiddleware("super_admin"),
+  AdministratorController.deleteAdministrator
+);
 
 export const AdministratorRoutes = router;

@@ -24,9 +24,9 @@ router.get(
   AuthMiddleware(UserRole.super_admin, UserRole.admin, UserRole.user),
   CuisineController.getCuisines
 );
-router.put(
+router.patch(
   "/update-cuisine/:cuisineId",
-  AuthMiddleware(UserRole.super_admin),
+  AuthMiddleware(UserRole.super_admin, UserRole.administrator),
   upload.single('file'),
   (req: Request, res: Response, next: NextFunction) => {
     req.body = JSON.parse(req.body.data);

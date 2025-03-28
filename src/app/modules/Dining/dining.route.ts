@@ -9,7 +9,7 @@ const router = express.Router();
 
 router.post('/create-dining', AuthMiddleware(UserRole.super_admin), validationMiddleware(diningValidationSchema), DiningController.createDining);
 router.get('/get-dining-list', AuthMiddleware(UserRole.super_admin, UserRole.admin, UserRole.user), DiningController.getDiningList);
-router.put('/update-dining/:diningId', AuthMiddleware(UserRole.super_admin), validationMiddleware(diningValidationSchema), DiningController.updateDining);
+router.patch('/update-dining/:diningId', AuthMiddleware(UserRole.super_admin), validationMiddleware(diningValidationSchema), DiningController.updateDining);
 router.delete('/delete-dining/:diningId', AuthMiddleware(UserRole.super_admin),  DiningController.deleteDining);
 
 

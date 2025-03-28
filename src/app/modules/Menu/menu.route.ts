@@ -26,7 +26,7 @@ router.get(
   MenuController.getMenus
 );
 
-router.put(
+router.patch(
   "/update-menu/:menuId",
   AuthMiddleware(UserRole.admin),
   upload.single('file'),

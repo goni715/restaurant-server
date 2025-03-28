@@ -13,6 +13,7 @@ import {
 import AuthMiddleware from "../../middlewares/AuthMiddleware";
 import { UserRole } from "../User/user.constant";
 import AuthController from "./authController";
+import isAccess from "../../middlewares/isAccess";
 
 const router = express.Router();
 
@@ -51,15 +52,16 @@ router.post(
   AuthController.forgotPassCreateNewPass
 );
 
-router.put(
+router.patch(
   "/change-password",
-  AuthMiddleware(UserRole.admin, UserRole.super_admin, UserRole.user),
+  AuthMiddleware(UserRole.admin, UserRole.super_admin, UserRole.user, UserRole.administrator),
   validationMiddleware(changePasswordSchema),
   AuthController.changePassword
 );
-router.put(
+router.patch(
   "/change-status/:id",
-  AuthMiddleware(UserRole.super_admin),
+  AuthMiddleware(UserRole.super_admin, UserRole.administrator),
+  isAccess('userManagement'),
   validationMiddleware(changeStatusValidationSchema),
   AuthController.changeStatus
 );

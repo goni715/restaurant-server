@@ -14,7 +14,7 @@ router.post(
   NotificationController.createNotification
 );
 
-router.put(
+router.patch(
   "/mark-read/:notificationId",
   AuthMiddleware(UserRole.admin, UserRole.user),
   NotificationController.markAsRead

@@ -65,7 +65,7 @@ const loginSuperAdmin = catchAsync(async (req, res) => {
   sendResponse(res, {
     statusCode: 200,
     success: true,
-    message: "Super Admin is logged in successfully",
+    message: "'Super Admin' or 'Administratior' is logged in successfully",
     data: {
       accessToken
     }

@@ -26,21 +26,21 @@ router.get('/get-single-restaurant/:restaurantId', RestaurantController.getSingl
 router.get('/get-user-restaurants', AuthMiddleware(UserRole.user), RestaurantController.getUserRestaurants)
 router.get('/get-owner-restaurants', AuthMiddleware(UserRole.admin), RestaurantController.getOwnerRestaurant)
 
-router.put(
+router.patch(
   "/change-restaurant-status/:restaurantId",
   AuthMiddleware(UserRole.super_admin),
   validationMiddleware(changeRestaurantStatusSchema),
   RestaurantController.changeRestaurantStatus
 );
 
-router.put(
+router.patch(
   "/approve-restaurant/:restaurantId",
   AuthMiddleware(UserRole.super_admin),
   validationMiddleware(approveRestaurantSchema),
   RestaurantController.approveRestaurant
 );
 
-router.put(
+router.patch(
   "/update-restaurant",
   AuthMiddleware(UserRole.admin),
   validationMiddleware(updateRestaurantValidationSchema),

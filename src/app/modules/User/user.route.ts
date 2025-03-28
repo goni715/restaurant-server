@@ -5,7 +5,6 @@ import UserController from './user.controller';
 import validationMiddleware from '../../middlewares/validationMiddleware';
 import { createUserValidationSchema } from './user.validation';
 import upload from '../../helper/upload';
-import isAccess from '../../middlewares/isAccess';
 
 const router = express.Router();
 
@@ -23,28 +22,27 @@ router.post(
 router.get(
   "/get-users",
   AuthMiddleware(UserRole.super_admin, UserRole.admin, UserRole.administrator),
-  isAccess("restaurantManagement"),
   UserController.getUsers
 );
 router.get(
   "/get-single-user/:id",
-  AuthMiddleware(UserRole.super_admin, UserRole.admin),
+  AuthMiddleware(UserRole.super_admin, UserRole.admin, UserRole.administrator),
   UserController.getSingleUser
 );
 router.get(
   "/get-me",
-  AuthMiddleware(UserRole.super_admin, UserRole.admin, UserRole.user),
+  AuthMiddleware(UserRole.super_admin, UserRole.admin, UserRole.user, UserRole.administrator),
   UserController.getMe
 );
-router.put(
+router.patch(
   "/edit-my-profile",
-  AuthMiddleware(UserRole.super_admin, UserRole.admin, UserRole.user),
+  AuthMiddleware(UserRole.super_admin, UserRole.admin, UserRole.user, UserRole.administrator),
   UserController.editMyProfile
 );
 
-router.put(
+router.patch(
   "/update-profile-img",
-  AuthMiddleware(UserRole.super_admin, UserRole.admin, UserRole.user),
+  AuthMiddleware(UserRole.super_admin, UserRole.admin, UserRole.user, UserRole.administrator),
   upload.single('file'),
   UserController.updateProfileImg
 );

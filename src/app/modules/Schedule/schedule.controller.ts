@@ -10,7 +10,7 @@ const createSchedule = catchAsync(async (req, res) => {
   const result = await createScheduleService(loginUserId as string, req.body);
   
     sendResponse(res, {
-      statusCode: 200,
+      statusCode: 201,
       success: true,
       message: "Schedule created successfully",
       data: result

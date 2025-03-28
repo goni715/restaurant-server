@@ -39,4 +39,9 @@ router.delete(
   AdministratorController.deleteAdministrator
 );
 
+router.get(
+  "/get-single-administrator/:administratorId",
+  AuthMiddleware("super_admin"),
+  AdministratorController.getSingleAdministrator
+);
 export const AdministratorRoutes = router;

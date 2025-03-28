@@ -231,9 +231,19 @@ const deleteAdministratorService = async (administratorId: string) => {
   }
 }
 
+const getSingleAdministratorService = async (administratorId: string) => {
+  const administrator = await AdministratorModel.findById(administratorId);
+  if(!administrator){
+    throw new AppError(404, "Administrator Not found");
+  }
+
+  return administrator;
+}
+
 export {
     createAdministratorService,
     updateAdministratorService,
     getAdministratorsService,
-    deleteAdministratorService
+    deleteAdministratorService,
+    getSingleAdministratorService
 }

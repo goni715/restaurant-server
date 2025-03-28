@@ -9,7 +9,7 @@ const createBookingWithoutPayment = catchAsync(async (req, res) => {
   const result = await createBookingWithoutPaymentService(loginUserId as string, req.body);
 
   sendResponse(res, {
-    statusCode: 200,
+    statusCode: 201,
     success: true,
     message: "Booking is created successfully",
     data: result,

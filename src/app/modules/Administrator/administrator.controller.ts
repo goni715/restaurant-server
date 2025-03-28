@@ -2,7 +2,7 @@ import catchAsync from "../../utils/catchAsync";
 import pickValidFields from "../../utils/pickValidFields";
 import sendResponse from "../../utils/sendResponse";
 import { AdministratorValidFields } from "./administrator.constant";
-import { createAdministratorService, deleteAdministratorService, getAdministratorsService, updateAdministratorService } from "./administrator.service";
+import { createAdministratorService, deleteAdministratorService, getAdministratorsService, getSingleAdministratorService, updateAdministratorService } from "./administrator.service";
 
 
 const createAdministrator = catchAsync(async (req, res) => {
@@ -56,11 +56,25 @@ const deleteAdministrator = catchAsync(async (req, res) => {
   });
 });
 
+
+const getSingleAdministrator = catchAsync(async (req, res) => {
+  const { administratorId } = req.params;
+  const result = await getSingleAdministratorService(administratorId);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Administrator is retrieved successfully",
+    data: result,
+  });
+});
+
 const AdministratorController = {
     createAdministrator,
     updateAdministrator,
     getAdministrators,
-    deleteAdministrator
+    deleteAdministrator,
+    getSingleAdministrator
 };
   
 export default AdministratorController;

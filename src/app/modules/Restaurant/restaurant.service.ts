@@ -467,8 +467,6 @@ const changeRestaurantStatusService = async (restaurantId: string, status: TRest
 }
 
 
-
-
 const approveRestaurantService = async (restaurantId: string, approved: TApprovedStatus) => {
   const ObjectId = Types.ObjectId;
   const restaurant = await RestaurantModel.findById(restaurantId);

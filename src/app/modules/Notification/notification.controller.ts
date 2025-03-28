@@ -9,7 +9,7 @@ const createNotification = catchAsync(async (req, res) => {
   const result = await createNotificationService(req.body);
 
   sendResponse(res, {
-    statusCode: 200,
+    statusCode: 201,
     success: true,
     message: "Notification is created successfully",
     data: result,

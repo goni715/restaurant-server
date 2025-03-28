@@ -8,7 +8,7 @@ const createCuisine = catchAsync(async (req, res) => {
   const result = await createCuisineService(req, name);
 
   sendResponse(res, {
-    statusCode: 200,
+    statusCode: 201,
     success: true,
     message: "Cuisine is created successfully",
     data: result

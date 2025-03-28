@@ -8,7 +8,7 @@ const createDining = catchAsync(async (req, res) => {
   const result = await createDiningService(name);
 
   sendResponse(res, {
-    statusCode: 200,
+    statusCode: 201,
     success: true,
     message: "Dining is created successfully",
     data: result

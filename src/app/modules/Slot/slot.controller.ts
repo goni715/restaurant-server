@@ -11,7 +11,7 @@ const createSlot = catchAsync(async (req, res) => {
   const result = await createSlotService(loginUserId as string, req.body);
   
     sendResponse(res, {
-      statusCode: 200,
+      statusCode: 201,
       success: true,
       message: "Slot is created successfully",
       data: result

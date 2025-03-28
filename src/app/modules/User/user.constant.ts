@@ -3,7 +3,8 @@
 export const UserRole = {
     user: 'user',
     admin: 'admin',
-    super_admin: 'super_admin'
+    super_admin: 'super_admin',
+    administrator: "administrator"
 } as const;
 
 
@@ -12,7 +13,6 @@ export const UserSearchFields = [
     "email",
     "phone"
 ]
-
 
 export const UserValidFields: string[] = [
   "searchTerm",

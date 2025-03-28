@@ -24,11 +24,6 @@ const userSchema = new Schema<IUser>({
         type: String,
         default: ''
     },
-    gender: {
-        type: String,
-        enum: ["male", "female", "other"],
-        required: true
-    },
     password: {
         type: String,
         required: [true, 'password is required'],
@@ -39,7 +34,7 @@ const userSchema = new Schema<IUser>({
     },
     role: {
         type: String,
-        enum: ["user", "admin", "super_admin"],
+        enum: ["user", "admin", "super_admin", "administrator"],
         required: true
     },
     status: {

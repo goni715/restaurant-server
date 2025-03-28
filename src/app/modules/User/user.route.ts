@@ -5,6 +5,7 @@ import UserController from './user.controller';
 import validationMiddleware from '../../middlewares/validationMiddleware';
 import { createUserValidationSchema } from './user.validation';
 import upload from '../../helper/upload';
+import isAccess from '../../middlewares/isAccess';
 
 const router = express.Router();
 
@@ -19,10 +20,10 @@ router.post(
   UserController.createUser
 );
 
-
 router.get(
   "/get-users",
-  AuthMiddleware(UserRole.super_admin, UserRole.admin),
+  AuthMiddleware(UserRole.super_admin, UserRole.admin, UserRole.administrator),
+  isAccess("restaurantManagement"),
   UserController.getUsers
 );
 router.get(

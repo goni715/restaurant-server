@@ -97,9 +97,10 @@ const loginSuperAdminService = async (payload: ILoginUser) => {
       throw new AppError(404, `Couldn't find this email address`);
   }
 
-  //check you are not admin
-  if(user.role !=="super_admin"){
-    throw new AppError(400, `Sorry! You are not Super admin`);
+
+  //check you are not super_admin or administrator
+  if((user.role !== "administrator") && (user.role !== "super_admin")){
+    throw new AppError(400, `Sorry! You are not 'super_admin' or 'administrator'`);
   }
 
   //check password

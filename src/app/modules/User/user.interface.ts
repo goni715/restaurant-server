@@ -5,10 +5,9 @@ export interface IUser {
   email: string;
   phone: string;
   address?: string; //for admin
-  gender: 'male' | 'female' | 'other',
   password: string;
   passwordChangedAt?: Date;
-  role: "user" | "admin" | "super_admin";
+  role: "user" | "admin" | "super_admin" | "administrator";
   status: "blocked" | "unblocked";
   profileImg?: string
 }

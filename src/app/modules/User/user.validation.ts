@@ -12,9 +12,6 @@ export const createUserValidationSchema = z.object({
   phone: z.string({
     required_error: "phone number is required",
   }),
-  gender: z.enum(["male", "female", "other"], {
-    errorMap: () => ({ message: "{VALUE} is not supported" }),
-  }),
   password: z
     .string({
       required_error: "password is required",
@@ -30,9 +27,6 @@ export const updateProfileValidationSchema = z.object({
   }).optional(),
   phone: z.string({
     required_error: "phone number is required",
-  }).optional(),
-  gender: z.enum(["male", "female", "other"], {
-    errorMap: () => ({ message: "{VALUE} is not supported" }),
   }).optional(),
   address: z.string({
     required_error: "address is required",

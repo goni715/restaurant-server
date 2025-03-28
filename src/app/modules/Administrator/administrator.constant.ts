@@ -4,4 +4,4 @@ export const VALID_ACCESS_VALUES = [
   "userManagement",
   "restaurantManagement",
   "settings",
-];
+] as const;

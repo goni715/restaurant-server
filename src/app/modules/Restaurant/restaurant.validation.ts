@@ -4,7 +4,7 @@ export const objectIdSchema = z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid Obj
 
 export const createRestaurantValidationSchema = z.object({
   name: z.string().min(1, "Name is required"),
-  dining: z.array(objectIdSchema).min(1, "There must be at least two options"),
+  dining: z.array(objectIdSchema).min(1, "There must be at least one value"),
   location: z.string().min(1, "Location is required"),
   keywords: z.array(z.string()).optional(),
   features: z.array(z.string()).optional(),

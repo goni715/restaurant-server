@@ -5,7 +5,6 @@ import { Request } from "express";
 import { Types } from "mongoose";
 import { makeFilterQuery, makeSearchQuery } from "../../helper/QueryBuilder";
 import { UserSearchFields } from "./user.constant";
-import RestaurantModel from "../Restaurant/restaurant.model";
 
 
 
@@ -30,6 +29,7 @@ const createUserService = async (req:Request, payload: IUser) => {
   result.password=""
   return result;
 }
+
 
 
 const getUsersService = async (query: TUserQuery) => {

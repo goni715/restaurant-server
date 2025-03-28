@@ -5,12 +5,14 @@ import validationMiddleware from '../../middlewares/validationMiddleware';
 import CuisineController from './cuisine.controller';
 import { cuisineValidationSchema } from './cuisine.validation';
 import upload from '../../helper/upload';
+import isAccess from '../../middlewares/isAccess';
 
 const router = express.Router();
 
 router.post(
   "/create-cuisine",
-  AuthMiddleware(UserRole.super_admin),
+  AuthMiddleware(UserRole.super_admin, UserRole.administrator),
+  isAccess("restaurantManagement"),
   upload.single('file'),
   (req: Request, res: Response, next: NextFunction) => {
     req.body = JSON.parse(req.body.data);
@@ -21,12 +23,13 @@ router.post(
 );
 router.get(
   "/get-cuisines",
-  AuthMiddleware(UserRole.super_admin, UserRole.admin, UserRole.user),
+  AuthMiddleware(UserRole.super_admin, UserRole.admin, UserRole.user, UserRole.administrator),
   CuisineController.getCuisines
 );
 router.patch(
   "/update-cuisine/:cuisineId",
   AuthMiddleware(UserRole.super_admin, UserRole.administrator),
+  isAccess("restaurantManagement"),
   upload.single('file'),
   (req: Request, res: Response, next: NextFunction) => {
     req.body = JSON.parse(req.body.data);
@@ -37,7 +40,8 @@ router.patch(
 );
 router.delete(
   "/delete-cuisine/:cuisineId",
-  AuthMiddleware(UserRole.super_admin),
+  AuthMiddleware(UserRole.super_admin, UserRole.administrator),
+  isAccess("restaurantManagement"),
   CuisineController.deleteCuisine
 );
 

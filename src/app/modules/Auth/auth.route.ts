@@ -73,6 +73,10 @@ router.delete(
   AuthController.deleteMyAccount
 );
 
-router.post('/refresh-token', validationMiddleware(refreshTokenValidationSchema), AuthController.refreshToken);
+router.post(
+  "/refresh-token",
+  validationMiddleware(refreshTokenValidationSchema),
+  AuthController.refreshToken
+);
 
 export const AuthRoutes = router;

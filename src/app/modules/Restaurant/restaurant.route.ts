@@ -5,6 +5,7 @@ import AuthMiddleware from '../../middlewares/AuthMiddleware';
 import { UserRole } from '../User/user.constant';
 import { approveRestaurantSchema, changeRestaurantStatusSchema, createRestaurantValidationSchema, updateRestaurantValidationSchema, } from './restaurant.validation';
 import upload from '../../helper/upload';
+import isAccess from '../../middlewares/isAccess';
 
 const router = express.Router();
 
@@ -21,21 +22,39 @@ router.post(
 );
 
 
-router.get('/get-restaurants', AuthMiddleware('super_admin'), RestaurantController.getRestaurants);
-router.get('/get-single-restaurant/:restaurantId', RestaurantController.getSingleRestaurant)
-router.get('/get-user-restaurants', AuthMiddleware(UserRole.user), RestaurantController.getUserRestaurants)
-router.get('/get-owner-restaurants', AuthMiddleware(UserRole.admin), RestaurantController.getOwnerRestaurant)
+router.get(
+  "/get-restaurants",
+  AuthMiddleware("super_admin", "administrator"),
+  RestaurantController.getRestaurants
+);
+router.get(
+  "/get-single-restaurant/:restaurantId",
+  AuthMiddleware("super_admin", "administrator", "admin", "user"),
+  RestaurantController.getSingleRestaurant
+);
+router.get(
+  "/get-user-restaurants",
+  AuthMiddleware(UserRole.user),
+  RestaurantController.getUserRestaurants
+);
+router.get(
+  "/get-owner-restaurants",
+  AuthMiddleware(UserRole.admin),
+  RestaurantController.getOwnerRestaurant
+);
 
 router.patch(
   "/change-restaurant-status/:restaurantId",
-  AuthMiddleware(UserRole.super_admin),
+  AuthMiddleware(UserRole.super_admin, UserRole.administrator),
+  isAccess("restaurantManagement"),
   validationMiddleware(changeRestaurantStatusSchema),
   RestaurantController.changeRestaurantStatus
 );
 
 router.patch(
   "/approve-restaurant/:restaurantId",
-  AuthMiddleware(UserRole.super_admin),
+  AuthMiddleware(UserRole.super_admin, UserRole.administrator),
+  isAccess("restaurantManagement"),
   validationMiddleware(approveRestaurantSchema),
   RestaurantController.approveRestaurant
 );
@@ -46,7 +65,6 @@ router.patch(
   validationMiddleware(updateRestaurantValidationSchema),
   RestaurantController.updateRestaurant
 );
-
 
 router.delete(
   "/delete-restaurant",

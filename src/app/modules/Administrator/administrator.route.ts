@@ -4,7 +4,7 @@ import AuthMiddleware from '../../middlewares/AuthMiddleware';
 import { UserRole } from '../User/user.constant';
 import validationMiddleware from '../../middlewares/validationMiddleware';
 import AdministratorController from './administrator.controller';
-import { createAdministratorSchema } from './administrator.validation';
+import { createAdministratorSchema, updateAdministratorAccessSchema } from './administrator.validation';
 import upload from '../../helper/upload';
 
 const router = express.Router();
@@ -21,6 +21,13 @@ router.post(
   AdministratorController.createAdministrator
 );
 
+
+router.patch(
+  "/update-administrator-access/:administratorId",
+  AuthMiddleware(UserRole.super_admin),
+  validationMiddleware(updateAdministratorAccessSchema),
+  AdministratorController.updateAdministrator
+);
 
 
 export const AdministratorRoutes = router;

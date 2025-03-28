@@ -1,7 +1,7 @@
 import { Request } from "express";
 import AppError from "../../errors/AppError";
 import UserModel from "../User/user.model";
-import { IAdministratorPayload } from "./administrator.interface";
+import { IAdministratorPayload, TAccess } from "./administrator.interface";
 import mongoose from "mongoose";
 import AdministratorModel from "./administrator.model";
 import config from "../../config";
@@ -61,6 +61,22 @@ const createAdministratorService = async (req:Request, payload:IAdministratorPay
    }   
 }
 
+
+const updateAdministratorService = async (administratorId: string, access: TAccess[]) => {
+  const administrator = await AdministratorModel.findById(administratorId);
+  if(!administrator){
+    throw new AppError(404, "Administrator Not found");
+  }
+
+  //update the administrator
+  const result = await AdministratorModel.updateOne(
+    { _id: administratorId },
+    { access }
+  )
+  return result;
+}
+
 export {
-    createAdministratorService
+    createAdministratorService,
+    updateAdministratorService
 }

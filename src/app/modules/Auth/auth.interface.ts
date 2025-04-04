@@ -19,3 +19,8 @@ export interface IChangePass {
     currentPassword: string;
     newPassword: string;
 }
+
+export interface OAuth {
+    provider: 'google' | 'apple';
+    idToken: string;
+}

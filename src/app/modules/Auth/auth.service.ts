@@ -2,7 +2,7 @@ import { Secret } from "jsonwebtoken";
 import AppError from "../../errors/AppError";
 import checkPassword from "../../utils/checkPassword";
 import UserModel from "../User/user.model";
-import { IChangePass, ILoginUser, INewPassword, IVerifyOTp } from "./auth.interface";
+import { IChangePass, ILoginUser, INewPassword, IVerifyOTp, OAuth } from "./auth.interface";
 import createToken, { TExpiresIn } from "../../utils/createToken";
 import config from "../../config";
 import sendEmailUtility from "../../utils/sendEmailUtility";
@@ -372,6 +372,10 @@ const refreshTokenService = async (token: string) => {
 };
 
 
+const oAuthLoginService = async (payload: OAuth) => {
+    return "OAuthLogin Service"
+}
+
 export {
     loginUserService,
     loginAdminService,
@@ -382,5 +386,6 @@ export {
     changePasswordService,
     changeStatusService,
     deleteMyAccountService,
-    refreshTokenService
+    refreshTokenService,
+    oAuthLoginService
 }

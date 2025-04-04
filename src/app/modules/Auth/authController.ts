@@ -165,6 +165,30 @@ const refreshToken = catchAsync(async (req, res) => {
 
 
 
+const oAuthLogin = catchAsync(async (req, res) => {
+  const result = await loginUserService(req.body);
+  const { role, accessToken, refreshToken} = result;
+  
+  res.cookie("refreshToken", refreshToken, {
+    httpOnly: true,  
+    secure: config.node_env === "production", 
+    maxAge: 7 * 24 * 60 * 60 * 1000, // Expires in 7 day
+    sameSite: "strict", // Prevents CSRF attacks
+  });
+ 
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "User is logged in successfully",
+    data: {
+      role,
+      accessToken,
+      refreshToken
+    }
+  })
+ })
+ 
+
  const AuthController = {
   loginUser,
   loginAdmin,
@@ -175,7 +199,8 @@ const refreshToken = catchAsync(async (req, res) => {
   changePassword,
   changeStatus,
   deleteMyAccount,
-  refreshToken
+  refreshToken,
+  oAuthLogin
 }
 
 export default AuthController;

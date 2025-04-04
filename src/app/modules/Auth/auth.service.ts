@@ -382,6 +382,8 @@ const oAuthLoginService = async (payload: OAuth) => {
 
     let email, fullName;
     
+    try{
+
     if(provider === "google"){
         const ticket = await client.verifyIdToken({
             idToken,
@@ -438,6 +440,9 @@ const oAuthLoginService = async (payload: OAuth) => {
     refreshToken,
   };
 
+  }catch(err:any){
+    throw new Error(err)
+  }
 }
 
 export {

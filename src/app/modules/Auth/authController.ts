@@ -1,7 +1,7 @@
 import config from "../../config";
 import catchAsync from "../../utils/catchAsync";
 import sendResponse from "../../utils/sendResponse";
-import { changePasswordService, changeStatusService, deleteMyAccountService, forgotPassCreateNewPassService, forgotPassSendOtpService, forgotPassVerifyOtpService, loginAdminService, loginSuperAdminService, loginUserService, refreshTokenService } from "./auth.service";
+import { changePasswordService, changeStatusService, deleteMyAccountService, forgotPassCreateNewPassService, forgotPassSendOtpService, forgotPassVerifyOtpService, loginAdminService, loginSuperAdminService, loginUserService, oAuthLoginService, refreshTokenService } from "./auth.service";
 
 
 
@@ -166,7 +166,7 @@ const refreshToken = catchAsync(async (req, res) => {
 
 
 const oAuthLogin = catchAsync(async (req, res) => {
-  const result = await loginUserService(req.body);
+  const result = await oAuthLoginService(req.body);
   const { role, accessToken, refreshToken} = result;
   
   res.cookie("refreshToken", refreshToken, {

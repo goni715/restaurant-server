@@ -79,4 +79,8 @@ router.post(
   AuthController.refreshToken
 );
 
+router.post(
+  "/oauth-login",
+  AuthController.oAuthLogin
+);
 export const AuthRoutes = router;

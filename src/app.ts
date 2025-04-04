@@ -16,7 +16,7 @@ app.use(cookieParser())
 app.use(morgan('dev'))
 
 app.get('/', (req:Request, res:Response) => {
-    res.send('This is Quiz app server');
+    res.send('This is Restaurant server');
 });
 
 

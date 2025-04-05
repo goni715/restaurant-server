@@ -1,5 +1,7 @@
 import catchAsync from "../../utils/catchAsync";
+import pickValidFields from "../../utils/pickValidFields";
 import sendResponse from "../../utils/sendResponse";
+import { TableValidFields } from "./table.constant";
 import { createTableService, getTablesService } from "./table.service";
 
 
@@ -19,13 +21,15 @@ const createTable = catchAsync(async (req, res) => {
 const getTables = catchAsync(async (req, res) => {
   const loginUserId = req.headers.id;
   const { scheduleId, diningId } = req.params;
-  const result = await getTablesService(loginUserId as string, scheduleId, diningId);
+  const validatedQuery = pickValidFields(req.query, TableValidFields);
+  const result = await getTablesService(loginUserId as string, scheduleId, diningId, validatedQuery);
   
     sendResponse(res, {
       statusCode: 200,
       success: true,
       message: "Tables are retrieved successfully",
-      data: result
+      meta: result.meta,
+      data: result.data
     });
 });
 

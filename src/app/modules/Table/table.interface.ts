@@ -10,3 +10,11 @@ export interface ITable {
     ownerId: Types.ObjectId;
     seats: number;
 }
+
+export type TTableQuery = {
+    searchTerm?: string;
+    page?: string;
+    limit?: string;
+    sortBy?: string;
+    sortOrder?: "asc" | "desc";
+};

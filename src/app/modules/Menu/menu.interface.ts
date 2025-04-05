@@ -21,4 +21,4 @@ export type TMenuQuery = {
     sortBy?: string;
     sortOrder?: "asc" | "desc";
     cuisineId?:string
-  };
+};

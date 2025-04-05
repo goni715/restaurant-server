@@ -35,6 +35,7 @@ const createTableBookingService = async (loginUserId:string, payload: ITableBook
     const newBooking = await TableBookingModel.create([{
         name,
         guest,
+        tableId,
         scheduleId: table.scheduleId,
         restaurantId: table.restaurantId,
         diningId: table.diningId,
@@ -44,7 +45,7 @@ const createTableBookingService = async (loginUserId:string, payload: ITableBook
     //database-process-02
     //update the table
     await TableModel.updateOne(
-        { _id: tableId, availableSeats: { $gt: 0 }},
+        { _id: tableId, seats: { $gt: 0 }},
         { $inc: { seats: - guest } }, // Decrease availableSeats
         { session }
     )

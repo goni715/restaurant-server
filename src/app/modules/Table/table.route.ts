@@ -14,5 +14,10 @@ router.post(
   TableController.createTable
 );
 
+router.get(
+  "/get-tables/:scheduleId/:diningId",
+  AuthMiddleware(UserRole.admin),
+  TableController.getTables
+);
 
 export const TableRoutes = router;

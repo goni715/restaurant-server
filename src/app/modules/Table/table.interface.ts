@@ -3,6 +3,7 @@ import { Types } from "mongoose";
 
 export interface ITable {
     name: string;
+    slug: string;
     scheduleId: Types.ObjectId;
     diningId: Types.ObjectId;
     restaurantId: Types.ObjectId;

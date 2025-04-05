@@ -10,10 +10,20 @@ const tableSchema = new Schema<ITable>(
       required: true,
       trim: true
     },
+    slug: {
+      type: String,
+      required: true,
+      trim: true
+    },
     scheduleId: {
         type: Schema.Types.ObjectId,
         required: true,
         ref: "Schedule"
+    },
+    diningId: {
+      type: Schema.Types.ObjectId,
+      required: true,
+      ref: "Dining"
     },
     restaurantId: {
       type: Schema.Types.ObjectId,

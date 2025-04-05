@@ -2,7 +2,7 @@ import catchAsync from "../../utils/catchAsync";
 import pickValidFields from "../../utils/pickValidFields";
 import sendResponse from "../../utils/sendResponse";
 import { UserValidFields } from "./user.constant";
-import { createUserService, editMyProfileService, getMeService, getSingleUserService, getUsersService, updateProfileImgService, } from "./user.service";
+import { createUserService, editMyProfileService, getMeService, getSingleUserService, getUsersService, updateProfileImgService } from "./user.service";
 
 
 const createUser = catchAsync(async (req, res) => {
@@ -18,6 +18,7 @@ const createUser = catchAsync(async (req, res) => {
 
 const getUsers = catchAsync(async (req, res) => {
   const validatedQuery = pickValidFields(req.query, UserValidFields);
+  console.log(validatedQuery);
   const result = await getUsersService(validatedQuery);
   sendResponse(res, {
     statusCode: 200,

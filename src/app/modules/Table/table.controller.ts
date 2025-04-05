@@ -1,6 +1,6 @@
 import catchAsync from "../../utils/catchAsync";
 import sendResponse from "../../utils/sendResponse";
-import { createTableService } from "./table.service";
+import { createTableService, getTablesService } from "./table.service";
 
 
 const createTable = catchAsync(async (req, res) => {
@@ -16,8 +16,23 @@ const createTable = catchAsync(async (req, res) => {
 });
 
 
+const getTables = catchAsync(async (req, res) => {
+  const loginUserId = req.headers.id;
+  const { scheduleId, diningId } = req.params;
+  const result = await getTablesService(loginUserId as string, scheduleId, diningId);
+  
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: "Tables are retrieved successfully",
+      data: result
+    });
+});
+
+
 const TableController = {
-    createTable
+    createTable,
+    getTables
 };
 
 export default TableController;

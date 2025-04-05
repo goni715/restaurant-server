@@ -1,6 +1,6 @@
 import mongoose, { Types } from "mongoose";
 import AppError from "../../errors/AppError";
-import { IRestaurant, TApprovedStatus, TRestaurantQuery, TRestaurantStatus, TUserRestaurantQuery } from "./restaurant.interface";
+import { IChangeRestaurantStatus, IRestaurant, TApprovedStatus, TRestaurantQuery, TRestaurantStatus, TUserRestaurantQuery } from "./restaurant.interface";
 import RestaurantModel from "./restaurant.model";
 import { makeFilterQuery, makeSearchQuery } from "../../helper/QueryBuilder";
 import { RestaurantSearchFields, UserRestaurantSearchFields } from "./restaurant.constant";
@@ -12,6 +12,10 @@ import ReviewModel from "../Review/review.model";
 import MenuReviewModel from "../MenuReview/menuReview.model";
 import ScheduleModel from "../Schedule/schedule.model";
 import BookingModel from "../Booking/booking.model";
+import UserModel from "../User/user.model";
+import { INotification } from "../Notification/notification.interface";
+import NotificationModel from "../Notification/notification.model";
+import ObjectId from "../../utils/ObjectId";
 
 
 
@@ -451,19 +455,43 @@ const getSingleRestaurantService = async (restaurantId: string) => {
 }
   
 
-const changeRestaurantStatusService = async (restaurantId: string, status: TRestaurantStatus) => {
-  const ObjectId = Types.ObjectId;
+const changeRestaurantStatusService = async (restaurantId: string, payload: IChangeRestaurantStatus) => {
+  const { status, userId } = payload;
+
   const restaurant = await RestaurantModel.findById(restaurantId);
   if(!restaurant){
     throw new AppError(404, "Restaurant Not Found");
   }
 
-  const result = await RestaurantModel.updateOne(
-    { _id: new ObjectId(restaurantId) },
-    { status }
-  )
+  //check user
+  const user = await UserModel.findById(payload.userId)
+  if (!user) {
+    throw new AppError(404, "User Not Found");
+  }
 
-  return result;
+
+  //transaction & rollback part
+  const session = await mongoose.startSession();
+  try{
+    session.startTransaction();
+
+    //database-process-01
+    //update the restaurant
+    const result = await RestaurantModel.updateOne(
+      { _id: new ObjectId(restaurantId) },
+      { status: status },
+      { session }
+    )
+    
+     //database-process-02
+    //create a notification
+    await NotificationModel.create(payload);
+    return result;
+
+  }catch(err:any){
+
+  }
+
 }
 
 

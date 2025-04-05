@@ -14,8 +14,9 @@ const createNotificationService = async (payload: INotification) => {
   if (!user) {
     throw new AppError(404, "User Not Found");
   }
-    const result = await NotificationModel.create(payload);
-    return result;
+  
+  const result = await NotificationModel.create(payload);
+  return result;
 }
 
 

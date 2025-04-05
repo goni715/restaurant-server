@@ -1,4 +1,5 @@
 import { Types } from "mongoose";
+import { INotification } from "../Notification/notification.interface";
 
 export type TRestaurantStatus = "active" | "deactive";
 export type TApprovedStatus = "pending" | "accepted" | "cancelled";
@@ -43,3 +44,9 @@ export type TUserRestaurantQuery = {
   dining?:string;
   ratings?:number;
 };
+
+
+export type IChangeRestaurantStatus = {
+  status: TRestaurantStatus;
+  userId: string;
+}

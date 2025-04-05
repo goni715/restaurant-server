@@ -73,8 +73,7 @@ const getSingleRestaurant = catchAsync(async (req, res) => {
 
 const changeRestaurantStatus = catchAsync(async (req, res) => {
   const { restaurantId } = req.params;
-  const { status } = req.body; 
-  const result = await changeRestaurantStatusService(restaurantId, status);
+  const result = await changeRestaurantStatusService(restaurantId, req.body);
   sendResponse(res, {
     statusCode: 200,
     success: true,

@@ -2,7 +2,9 @@ import slugify from "slugify";
 import AppError from "../../errors/AppError";
 import DiningModel from "./dining.model";
 import RestaurantModel from "../Restaurant/restaurant.model";
-import { Types } from "mongoose";
+import ObjectId from "../../utils/ObjectId";
+
+
 
 
 const createDiningService = async (name: string) => {
@@ -20,9 +22,40 @@ const createDiningService = async (name: string) => {
 
 
 const getDiningListService = async () => {
-    const result = await DiningModel.find().select('-createdAt -updatedAt').sort('-createdAt')
+    const result = await DiningModel.find().select('-createdAt -updatedAt').sort('-createdAt');
+    console.log("result");
     return result;
 }
+
+const getMyDiningsService = async (loginUserId: string) => {
+    const result = await RestaurantModel.aggregate([
+        {
+            $match: {
+                ownerId: new ObjectId(loginUserId) 
+            }
+        },
+        {
+            $lookup: {
+                from: "dinings",
+                localField: "dining",
+                foreignField: "_id",
+                as: "dinings"
+            }
+        },
+        {
+            $unwind: "$dinings"
+        },
+        {
+            $project: {
+                _id: "$dinings._id",
+                name: "$dinings.name"
+            }
+        }
+    ])
+
+    return result;
+}
+
 
 const updateDiningService = async (diningId: string, name: string) => {
     const dining = await DiningModel.findById(diningId)
@@ -63,9 +96,12 @@ const deleteDiningService = async (diningId: string) => {
     return result;
 }
 
+
+
 export {
     createDiningService,
     getDiningListService,
+    getMyDiningsService,
     updateDiningService,
     deleteDiningService
 }

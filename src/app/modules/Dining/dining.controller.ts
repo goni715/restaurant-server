@@ -1,6 +1,6 @@
 import catchAsync from "../../utils/catchAsync";
 import sendResponse from "../../utils/sendResponse";
-import { createDiningService, deleteDiningService, getDiningListService, updateDiningService } from "./dining.service";
+import { createDiningService, deleteDiningService, getDiningListService, getMyDiningsService, updateDiningService } from "./dining.service";
 
 
 const createDining = catchAsync(async (req, res) => {
@@ -19,6 +19,19 @@ const createDining = catchAsync(async (req, res) => {
 
 const getDiningList = catchAsync(async (req, res) => {
   const result = await getDiningListService();
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Dinings are retrived successfully",
+    data: result
+  });
+});
+
+
+const getMyDinings = catchAsync(async (req, res) => {
+  const loginUserId = req.headers.id;
+  const result = await getMyDiningsService(loginUserId as string);
 
   sendResponse(res, {
     statusCode: 200,
@@ -59,6 +72,7 @@ const deleteDining = catchAsync(async (req, res) => {
 const DiningController = {
   createDining,
   getDiningList,
+  getMyDinings,
   updateDining,
   deleteDining
 }

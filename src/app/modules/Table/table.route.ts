@@ -7,7 +7,7 @@ import TableController from "./table.controller";
 const router = express.Router();
 
 router.post(
-  "/create-table",
+  "/create-new-table",
   AuthMiddleware(UserRole.admin),
   TableController.createTable
 );

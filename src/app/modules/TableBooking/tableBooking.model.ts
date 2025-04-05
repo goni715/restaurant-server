@@ -30,6 +30,17 @@ const tableBookingSchema = new Schema<ITableBooking>(
       required: true,
       ref: "Restaurant",
     },
+    guest: {
+      type: Number,
+      required: true,
+      trim:true
+    },
+    availability: {
+      type: String,
+      required: true,
+      enum: ["Immediate Seating", "Open Reservations", "Waitlist"],
+      default: "Immediate Seating"
+    },
   },
   {
     timestamps: true,

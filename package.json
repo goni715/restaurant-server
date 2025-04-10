@@ -6,6 +6,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon src/server.ts",
     "dev": "ts-node-dev --respawn --transpile-only ./src/server.ts",
+    "create:module": "node create-module.js",
     "build": "tsc --w"
   },
   "keywords": [],

@@ -39,8 +39,8 @@ const loginUserService = async (payload: ILoginUser) => {
   }
 
   //check you are not admin or admin
-  if (user.role === "super_admin") {
-    throw new AppError(400, `Sorry! You have no right to log in`);
+  if((user.role !== "user") && (user.role !== "admin")){
+    throw new AppError(400, `Sorry! You have no access to login`);
   }
 
   //create accessToken
@@ -71,7 +71,7 @@ const loginAdminService = async (payload: ILoginUser) => {
 
   //check you are not admin
   if(user.role !=="admin"){
-    throw new AppError(400, `Sorry! You are not admin`);
+    throw new AppError(400, `Sorry! You are not Owner`);
   }
 
   //check password
@@ -212,7 +212,7 @@ const forgotPassCreateNewPassService = async (payload: INewPassword) => {
   
   
         if (!OtpExpired) {
-          throw new AppError(404, `This Otp Code is expired`);
+          throw new AppError(400, `This Otp Code is expired`);
         }
 
          //update the password

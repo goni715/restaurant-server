@@ -24,9 +24,9 @@ router.post(
 );
 
 router.post(
-  "/login-admin",
+  "/login-owner",
   validationMiddleware(loginValidationSchema),
-  AuthController.loginAdmin
+  AuthController.loginOwner
 );
 
 router.post(

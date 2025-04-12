@@ -101,16 +101,21 @@ return {
 };
 }
 
+const getCuisineDropDownService = async () => {
+  const result = await CuisineModel.find().select('-createdAt -updatedAt').sort('-createdAt');
+  return result;
+}
+
 const updateCuisineService = async (req:Request, cuisineId: string, name: string) => {
     const cuisine = await CuisineModel.findById(cuisineId)
     if(!cuisine){
-        throw new AppError(404, 'This quisine not found');
+        throw new AppError(404, 'This cuisine not found');
     }
 
     const slug = slugify(name).toLowerCase();
     const cuisineExist = await CuisineModel.findOne({ _id: { $ne: cuisineId }, slug })
     if(cuisineExist){
-        throw new AppError(409, 'Sorry! This quisine name is already taken');
+        throw new AppError(409, 'Sorry! This cuisine is already taken');
     }
 
     let image=cuisine.image;
@@ -150,6 +155,7 @@ const deleteCuisineService = async (cuisineId: string) => {
 export {
     createCuisineService,
     getCuisinesService,
+    getCuisineDropDownService,
     updateCuisineService,
     deleteCuisineService
 }

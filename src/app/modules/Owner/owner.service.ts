@@ -4,7 +4,7 @@ import { IUser } from "../User/user.interface";
 import UserModel from "../User/user.model";
 
 
-const createAdminService = async (req:Request, payload: IUser) => {
+const createOwnerService = async (req:Request, payload: IUser) => {
   const user = await UserModel.findOne({ email: payload.email });
   if (user) {
     throw new AppError(409, "Email is already existed");
@@ -17,7 +17,7 @@ const createAdminService = async (req:Request, payload: IUser) => {
 
   const result = await UserModel.create({
     ...payload,
-    role: "admin",
+    role: "owner",
   });
 
   result.password = "";
@@ -27,5 +27,5 @@ const createAdminService = async (req:Request, payload: IUser) => {
 
 
 export {
-    createAdminService
+    createOwnerService
 }

@@ -22,6 +22,11 @@ router.get(
   AuthMiddleware(UserRole.super_admin, UserRole.admin, UserRole.user, UserRole.administrator),
   CuisineController.getCuisines
 );
+router.get(
+  "/get-cuisine-drop-down",
+  AuthMiddleware(UserRole.admin),
+  CuisineController.getCuisineDropDown
+);
 router.patch(
   "/update-cuisine/:cuisineId",
   AuthMiddleware(UserRole.super_admin, UserRole.administrator),

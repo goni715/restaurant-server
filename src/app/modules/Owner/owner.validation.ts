@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const createAdminValidationSchema = z.object({
+export const createOwnerValidationSchema = z.object({
   fullName: z.string({
     required_error: "full Name is required",
   }),

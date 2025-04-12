@@ -1,4 +1,4 @@
-import express, { NextFunction, Request, Response } from 'express';
+import express from 'express';
 import AuthMiddleware from '../../middlewares/AuthMiddleware';
 import { UserRole } from '../User/user.constant';
 import validationMiddleware from '../../middlewares/validationMiddleware';
@@ -19,12 +19,12 @@ router.post(
 );
 router.get(
   "/get-cuisines",
-  AuthMiddleware(UserRole.super_admin, UserRole.admin, UserRole.user, UserRole.administrator),
+  AuthMiddleware(UserRole.super_admin, UserRole.user, UserRole.administrator),
   CuisineController.getCuisines
 );
 router.get(
   "/get-cuisine-drop-down",
-  AuthMiddleware(UserRole.admin),
+  AuthMiddleware(UserRole.owner),
   CuisineController.getCuisineDropDown
 );
 router.patch(

@@ -12,5 +12,4 @@ export type TCuisineQuery = {
     limit?: string;
     sortBy?: string;
     sortOrder?: "asc" | "desc";
-    cuisineId?:string
 };

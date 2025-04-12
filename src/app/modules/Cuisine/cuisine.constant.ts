@@ -8,5 +8,4 @@ export const CuisineValidFields: string[] = [
   "limit",
   "sortBy",
   "sortOrder",
-  "name"
 ];

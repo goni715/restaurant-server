@@ -102,7 +102,7 @@ return {
 }
 
 const getCuisineDropDownService = async () => {
-  const result = await CuisineModel.find().select('-createdAt -updatedAt').sort('-createdAt');
+  const result = await CuisineModel.find().select('-createdAt -updatedAt -slug').sort('-createdAt');
   return result;
 }
 

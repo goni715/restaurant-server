@@ -14,10 +14,6 @@ router.post(
   AuthMiddleware(UserRole.super_admin, UserRole.administrator),
   isAccess("restaurantManagement"),
   upload.single('file'),
-  (req: Request, res: Response, next: NextFunction) => {
-    req.body = JSON.parse(req.body.data);
-    next();
-  },
   validationMiddleware(cuisineValidationSchema),
   CuisineController.createCuisine
 );

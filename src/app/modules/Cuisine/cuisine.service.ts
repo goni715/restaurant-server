@@ -3,6 +3,9 @@ import CuisineModel from "./cuisine.model";
 import AppError from "../../errors/AppError";
 import { Request } from "express";
 import MenuModel from "../Menu/menu.model";
+import { TCuisineQuery } from "./cuisine.interface";
+import { makeFilterQuery, makeSearchQuery } from "../../helper/QueryBuilder";
+import { CuisineSearchFields } from "./cuisine.constant";
 
 
 const createCuisineService = async (req:Request, name: string) => {
@@ -14,9 +17,9 @@ const createCuisineService = async (req:Request, name: string) => {
         throw new AppError(409, 'This cuisine is already existed');
     }
 
-    if(!req.file){
-        throw new AppError(400, "image is required");
-    }
+    // if(!req.file){
+    //     throw new AppError(400, "image is required");
+    // }
     let image="";
     if(req.file) {
         //for local machine file path
@@ -33,9 +36,69 @@ const createCuisineService = async (req:Request, name: string) => {
 }
 
 
-const getCuisinesService = async () => {
-    const result = await CuisineModel.find().select('-slug -createdAt -updatedAt').sort('-createdAt')
-    return result;
+const getCuisinesService = async (query: TCuisineQuery) => {
+      // 1. Extract query parameters
+        const {
+          searchTerm, 
+          page = 1, 
+          limit = 10, 
+          sortOrder = "desc",
+          sortBy = "createdAt", 
+          ...filters  // Any additional filters
+        } = query;
+      
+        // 2. Set up pagination
+        const skip = (Number(page) - 1) * Number(limit);
+      
+        //3. setup sorting
+        const sortDirection = sortOrder === "asc" ? 1 : -1;
+      
+        //4. setup searching
+        let searchQuery = {};
+        if (searchTerm) {
+          searchQuery = makeSearchQuery(searchTerm, CuisineSearchFields);
+        }
+      
+        //5 setup filters
+        let filterQuery = {};
+        if (filters) {
+          filterQuery = makeFilterQuery(filters);
+        }
+    const result = await CuisineModel.aggregate([
+        {
+            $match: {
+                ...searchQuery,
+                ...filterQuery
+            }
+        },
+        { $sort: { [sortBy]: sortDirection } },
+        { $skip: skip },
+        { $limit: Number(limit) },
+    ])
+
+  //total count
+  const totalCuisineResult = await CuisineModel.aggregate([
+    {
+      $match: {
+        ...searchQuery,
+        ...filterQuery
+      }
+    },
+    { $count: "totalCount" }
+  ])
+
+  const totalCount = totalCuisineResult[0]?.totalCount || 0;
+  const totalPages = Math.ceil(totalCount / Number(limit));
+
+return {
+  meta: {
+    page: Number(page), //currentPage
+    limit: Number(limit),
+    totalPages,
+    total: totalCount,
+  },
+  data: result,
+};
 }
 
 const updateCuisineService = async (req:Request, cuisineId: string, name: string) => {

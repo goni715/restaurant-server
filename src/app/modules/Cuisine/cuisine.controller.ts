@@ -1,5 +1,7 @@
 import catchAsync from "../../utils/catchAsync";
+import pickValidFields from "../../utils/pickValidFields";
 import sendResponse from "../../utils/sendResponse";
+import { CuisineValidFields } from "./cuisine.constant";
 import { createCuisineService, deleteCuisineService, getCuisinesService, updateCuisineService } from "./cuisine.service";
 
 
@@ -18,13 +20,15 @@ const createCuisine = catchAsync(async (req, res) => {
 
 
 const getCuisines = catchAsync(async (req, res) => {
-  const result = await getCuisinesService();
+  const validatedQuery = pickValidFields(req.query, CuisineValidFields);
+  const result = await getCuisinesService(validatedQuery);
 
   sendResponse(res, {
     statusCode: 200,
     success: true,
     message: "Cuisines are retrived successfully",
-    data: result
+    meta: result.meta,
+    data: result.data
   });
 });
 

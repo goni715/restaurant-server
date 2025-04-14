@@ -11,7 +11,7 @@ const router = express.Router();
 
 router.post(
   "/create-restaurant",
-  AuthMiddleware(UserRole.admin),
+  AuthMiddleware(UserRole.owner),
   upload.single('file'),
   (req: Request, res: Response, next: NextFunction) => {
     req.body = JSON.parse(req.body.data);
@@ -29,7 +29,7 @@ router.get(
 );
 router.get(
   "/get-single-restaurant/:restaurantId",
-  AuthMiddleware("super_admin", "administrator", "admin", "user"),
+  AuthMiddleware("super_admin", "administrator", "user"),
   RestaurantController.getSingleRestaurant
 );
 router.get(
@@ -39,14 +39,14 @@ router.get(
 );
 router.get(
   "/get-owner-restaurants",
-  AuthMiddleware(UserRole.admin),
+  AuthMiddleware(UserRole.owner),
   RestaurantController.getOwnerRestaurant
 );
 
 router.patch(
   "/change-restaurant-status/:restaurantId",
   AuthMiddleware(UserRole.super_admin, UserRole.administrator),
-  isAccess("restaurantManagement"),
+  isAccess("restaurant"),
   validationMiddleware(changeRestaurantStatusSchema),
   RestaurantController.changeRestaurantStatus
 );
@@ -54,21 +54,21 @@ router.patch(
 router.patch(
   "/approve-restaurant/:restaurantId",
   AuthMiddleware(UserRole.super_admin, UserRole.administrator),
-  isAccess("restaurantManagement"),
+  isAccess("restaurant"),
   validationMiddleware(approveRestaurantSchema),
   RestaurantController.approveRestaurant
 );
 
 router.patch(
   "/update-restaurant",
-  AuthMiddleware(UserRole.admin),
+  AuthMiddleware(UserRole.owner),
   validationMiddleware(updateRestaurantValidationSchema),
   RestaurantController.updateRestaurant
 );
 
 router.delete(
   "/delete-restaurant",
-  AuthMiddleware(UserRole.admin),
+  AuthMiddleware(UserRole.owner),
   RestaurantController.deleteRestaurant
 );
 

@@ -1,6 +1,6 @@
 import mongoose, { Types } from "mongoose";
 import AppError from "../../errors/AppError";
-import { IChangeRestaurantStatus, IRestaurant, TApprovedStatus, TRestaurantQuery, TRestaurantStatus, TUserRestaurantQuery } from "./restaurant.interface";
+import { IChangeApprovalStatus, IChangeRestaurantStatus, IRestaurant, TApprovedStatus, TRestaurantQuery, TRestaurantStatus, TUserRestaurantQuery } from "./restaurant.interface";
 import RestaurantModel from "./restaurant.model";
 import { makeFilterQuery, makeSearchQuery } from "../../helper/QueryBuilder";
 import { RestaurantSearchFields, UserRestaurantSearchFields } from "./restaurant.constant";
@@ -148,6 +148,7 @@ const getRestaurantsService = async (query: TRestaurantQuery) => {
         cancellationCharge:1,
         discount:1,
         ratings: 1,
+        restaurantImg:1,
         totalReview:1,
         status:1,
         approved:1,
@@ -456,19 +457,12 @@ const getSingleRestaurantService = async (restaurantId: string) => {
   
 
 const changeRestaurantStatusService = async (restaurantId: string, payload: IChangeRestaurantStatus) => {
-  const { status, userId } = payload;
+  const { status} = payload;
 
   const restaurant = await RestaurantModel.findById(restaurantId);
   if(!restaurant){
     throw new AppError(404, "Restaurant Not Found");
   }
-
-  //check user
-  const user = await UserModel.findById(payload.userId)
-  if (!user) {
-    throw new AppError(404, "User Not Found");
-  }
-
 
   //transaction & rollback part
   const session = await mongoose.startSession();
@@ -485,29 +479,59 @@ const changeRestaurantStatusService = async (restaurantId: string, payload: ICha
     
      //database-process-02
     //create a notification
-    await NotificationModel.create(payload);
+    await NotificationModel.create({
+      userId: restaurant?.ownerId,
+      title: "Restaurant Status",
+      message: `Your Restaurant is ${status === "active" ? "activated" : "deactivated"} successfully`,
+      type: `${status=== "active" ? "success" : "error"}`
+    });
+    await session.commitTransaction();
+    await session.endSession();
     return result;
-
   }catch(err:any){
-
+    await session.abortTransaction();
+    await session.endSession();
+    throw new Error(err)
   }
-
 }
 
 
-const approveRestaurantService = async (restaurantId: string, approved: TApprovedStatus) => {
+const approveRestaurantService = async (restaurantId: string, approved: IChangeApprovalStatus) => {
   const ObjectId = Types.ObjectId;
   const restaurant = await RestaurantModel.findById(restaurantId);
-  if(!restaurant){
+  if (!restaurant) {
     throw new AppError(404, "Restaurant Not Found");
   }
 
-  const result = await RestaurantModel.updateOne(
-    { _id: new ObjectId(restaurantId) },
-    { approved }
-  )
+  //transaction & rollback part
+  const session = await mongoose.startSession();
+  try {
+    session.startTransaction();
 
-  return result;
+    //database-process-01
+    //update the restaurant
+    const result = await RestaurantModel.updateOne(
+      { _id: new ObjectId(restaurantId) },
+      { approved }
+    );
+
+
+    //database-process-02
+    //create a notification
+    await NotificationModel.create({
+      userId: restaurant?.ownerId,
+      title: "Approval Status",
+      message: `Your Restaurant is ${approved} successfully`,
+      type: `${approved === "accepted" ? "success" : "error"}`,
+    });
+    await session.commitTransaction();
+    await session.endSession();
+    return result;
+  } catch (err: any) {
+    await session.abortTransaction();
+    await session.endSession();
+    throw new Error(err);
+  }
 }
 
 

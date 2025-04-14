@@ -23,7 +23,7 @@ export const createAdministratorSchema = z.object({
       .trim()
       .optional(),
   }),
-  access: z.array(z.enum(VALID_ACCESS_VALUES)).min(1, "There must be at least one value"),
+  access: z.array(z.enum(VALID_ACCESS_VALUES)).default([]),
 });
 
 

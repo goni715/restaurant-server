@@ -21,28 +21,28 @@ router.post(
 
 router.get(
   "/get-users",
-  AuthMiddleware(UserRole.super_admin, UserRole.admin, UserRole.administrator),
+  AuthMiddleware(UserRole.super_admin, UserRole.administrator),
   UserController.getUsers
 );
 router.get(
   "/get-single-user/:id",
-  AuthMiddleware(UserRole.super_admin, UserRole.admin, UserRole.administrator),
+  AuthMiddleware(UserRole.super_admin, UserRole.owner, UserRole.administrator),
   UserController.getSingleUser
 );
 router.get(
   "/get-me",
-  AuthMiddleware(UserRole.super_admin, UserRole.admin, UserRole.user, UserRole.administrator),
+  AuthMiddleware(UserRole.super_admin, UserRole.owner, UserRole.user, UserRole.administrator),
   UserController.getMe
 );
 router.patch(
   "/edit-my-profile",
-  AuthMiddleware(UserRole.super_admin, UserRole.admin, UserRole.user, UserRole.administrator),
+  AuthMiddleware(UserRole.super_admin, UserRole.owner, UserRole.user, UserRole.administrator),
   UserController.editMyProfile
 );
 
 router.patch(
   "/update-profile-img",
-  AuthMiddleware(UserRole.super_admin, UserRole.admin, UserRole.user, UserRole.administrator),
+  AuthMiddleware(UserRole.super_admin, UserRole.owner, UserRole.user, UserRole.administrator),
   upload.single('file'),
   UserController.updateProfileImg
 );

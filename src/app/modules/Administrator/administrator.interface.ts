@@ -1,7 +1,7 @@
 import { Types } from "mongoose";
 import { IUser } from "../User/user.interface";
 
-export type TAccess = "dashboard" | "userManagement" | "restaurantManagement" | "settings";
+export type TAccess = "dashboard" | "user" | "restaurant" | "settings";
 
 export interface IAdministrator {
     userId: Types.ObjectId;

@@ -2,7 +2,7 @@ import catchAsync from "../../utils/catchAsync";
 import pickValidFields from "../../utils/pickValidFields";
 import sendResponse from "../../utils/sendResponse";
 import { UserValidFields } from "./user.constant";
-import { createUserService, editMyProfileService, getMeService, getSingleUserService, getUsersService, updateProfileImgService } from "./user.service";
+import { createUserService, editMyProfileService, getMeForSuperAdminService, getMeService, getSingleUserService, getUsersService, updateProfileImgService } from "./user.service";
 
 
 const createUser = catchAsync(async (req, res) => {
@@ -44,6 +44,17 @@ const getSingleUser = catchAsync(async (req, res) => {
 
 
 
+const getMeForSuperAdmin = catchAsync(async (req, res) => {
+  const loginUserId = req.headers.id;
+  const result = await getMeForSuperAdminService(loginUserId as string);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "My Information is retrieved successfully",
+    data: result
+  });
+});
+
 const getMe = catchAsync(async (req, res) => {
   const loginUserId = req.headers.id;
   const result = await getMeService(loginUserId as string);
@@ -59,7 +70,7 @@ const getMe = catchAsync(async (req, res) => {
 
 const editMyProfile = catchAsync(async (req, res) => {
   const loginUserId = req.headers.id;
-  const result = await editMyProfileService(loginUserId as string, req.body);
+  const result = await editMyProfileService(req, loginUserId as string, req.body);
   sendResponse(res, {
     statusCode: 200,
     success: true,
@@ -87,6 +98,7 @@ const UserController = {
     getUsers,
     getSingleUser,
     getMe,
+    getMeForSuperAdmin,
     editMyProfile,
     updateProfileImg
 }

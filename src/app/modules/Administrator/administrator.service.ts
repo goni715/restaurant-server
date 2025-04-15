@@ -1,7 +1,7 @@
 import { Request } from "express";
 import AppError from "../../errors/AppError";
 import UserModel from "../User/user.model";
-import { IAdministratorPayload, TAccess, TAdministratorQuery } from "./administrator.interface";
+import { IAdministratorPayload, TAccess, TAdministratorQuery, TUpdateAdministrator } from "./administrator.interface";
 import mongoose from "mongoose";
 import AdministratorModel from "./administrator.model";
 import config from "../../config";
@@ -64,7 +64,7 @@ const createAdministratorService = async (req:Request, payload:IAdministratorPay
 }
 
 
-const updateAdministratorService = async (administratorId: string, access: TAccess[]) => {
+const updateAccessService = async (administratorId: string, access: TAccess[]) => {
   const administrator = await AdministratorModel.findById(administratorId);
   if(!administrator){
     throw new AppError(404, "Administrator Not found");
@@ -77,7 +77,6 @@ const updateAdministratorService = async (administratorId: string, access: TAcce
   )
   return result;
 }
-
 
 const getAdministratorsService = async (query: TAdministratorQuery) => {
       // 1. Extract query parameters
@@ -240,8 +239,22 @@ const getSingleAdministratorService = async (administratorId: string) => {
   return administrator;
 }
 
+const updateAdministratorService = async (userId: string, payload:TUpdateAdministrator) => {
+  const administrator = await AdministratorModel.findOne({ userId });
+  if(!administrator){
+    throw new AppError(404, "Administrator Not Found");
+  }
+  const result = UserModel.updateOne(
+    { _id: userId },
+    payload
+  )
+
+  return result;
+}
+
 export {
     createAdministratorService,
+    updateAccessService,
     updateAdministratorService,
     getAdministratorsService,
     deleteAdministratorService,

@@ -262,8 +262,6 @@ const changeStatusService = async (id: string, payload: { status: string }) => {
     throw new AppError(404, "User Not Found");
   }
 
-  console.log(user);
-
    const result = await UserModel.updateOne(
     {_id: new ObjectId(id)},
     payload

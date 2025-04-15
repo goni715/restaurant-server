@@ -3,7 +3,7 @@ import CuisineModel from "./cuisine.model";
 import AppError from "../../errors/AppError";
 import { Request } from "express";
 import MenuModel from "../Menu/menu.model";
-import { TCuisineQuery } from "./cuisine.interface";
+import { ICuisine, TCuisineQuery } from "./cuisine.interface";
 import { makeFilterQuery, makeSearchQuery } from "../../helper/QueryBuilder";
 import { CuisineSearchFields } from "./cuisine.constant";
 
@@ -106,31 +106,34 @@ const getCuisineDropDownService = async () => {
   return result;
 }
 
-const updateCuisineService = async (req:Request, cuisineId: string, name: string) => {
+const updateCuisineService = async (req:Request, cuisineId: string, payload: Partial<ICuisine>) => {
     const cuisine = await CuisineModel.findById(cuisineId)
     if(!cuisine){
         throw new AppError(404, 'This cuisine not found');
     }
 
-    const slug = slugify(name).toLowerCase();
-    const cuisineExist = await CuisineModel.findOne({ _id: { $ne: cuisineId }, slug })
-    if(cuisineExist){
-        throw new AppError(409, 'Sorry! This cuisine is already taken');
+    if (payload?.name) {
+      const slug = slugify(payload.name).toLowerCase();
+      payload.slug = slug;
+      const cuisineExist = await CuisineModel.findOne({
+        _id: { $ne: cuisineId },
+        slug
+      });
+      if (cuisineExist) {
+        throw new AppError(409, "Sorry! This cuisine is already taken");
+      }
     }
 
-    let image=cuisine.image;
+    //upload image
     if(req.file) {
         //for local machine file path
-        image = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`; //for local machine
+        payload.image = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`; //for local machine
     }
+   
 
     const result = await CuisineModel.updateOne(
         { _id: cuisineId},
-        {
-            name,
-            image,
-            slug
-        }
+        payload
     )
 
     return result;

@@ -47,8 +47,7 @@ const getCuisineDropDown = catchAsync(async (req, res) => {
 
 const updateCuisine = catchAsync(async (req, res) => {
   const { cuisineId } = req.params;
-  const { name } = req.body;
-  const result = await updateCuisineService(req, cuisineId, name);
+  const result = await updateCuisineService(req, cuisineId, req.body);
 
   sendResponse(res, {
     statusCode: 200,

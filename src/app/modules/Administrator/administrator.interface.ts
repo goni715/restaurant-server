@@ -22,3 +22,8 @@ export type TAdministratorQuery = {
   sortOrder?: "asc" | "desc";
   status?: string;
 };
+
+export type TUpdateAdministrator = {
+  fullName?: string;
+  phone?: string;
+}

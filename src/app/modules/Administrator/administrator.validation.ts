@@ -30,3 +30,13 @@ export const createAdministratorSchema = z.object({
 export const updateAdministratorAccessSchema = z.object({
   access: z.array(z.enum(VALID_ACCESS_VALUES)).default([])
 });
+
+
+export const updateAdministratorSchema = z.object({
+  fullName: z.string({
+    required_error: "full Name is required",
+  }),
+  phone: z.string({
+    required_error: "phone number is required",
+  }),
+});

@@ -1,7 +1,6 @@
 import express from 'express';
 import { UserRoutes } from '../modules/User/user.route';
 import { AuthRoutes } from '../modules/Auth/auth.route';
-import { AdminRoutes } from '../modules/Admin/admin.route';
 import { RestaurantRoutes } from '../modules/Restaurant/restaurant.route';
 import { FavouriteRoutes } from '../modules/Favourite/favourite.route';
 import { ReviewRoutes } from '../modules/Review/review.route';
@@ -17,6 +16,7 @@ import { SlotRoutes } from '../modules/Slot/slot.route';
 import { AdministratorRoutes } from '../modules/Administrator/administrator.route';
 import { TableRoutes } from '../modules/Table/table.route';
 import { TableBookingRoutes } from '../modules/TableBooking/tableBooking.route';
+import { OwnerRoutes } from '../modules/Owner/owner.route';
 
 const router = express.Router();
 
@@ -31,8 +31,8 @@ const moduleRoutes = [
         route: UserRoutes
     },  
     {
-        path: '/admin',
-        route: AdminRoutes
+        path: '/owner',
+        route: OwnerRoutes
     }, 
     {
         path: '/cuisine',

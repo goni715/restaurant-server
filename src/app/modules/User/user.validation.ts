@@ -22,13 +22,7 @@ export const createUserValidationSchema = z.object({
 
 
 export const updateProfileValidationSchema = z.object({
-  fullName: z.string({
-    required_error: "full Name is required",
-  }).optional(),
-  phone: z.string({
-    required_error: "phone number is required",
-  }).optional(),
-  address: z.string({
-    required_error: "address is required",
-  }).optional()
+  fullName: z.string().optional(),
+  phone: z.string().optional(),
+  address: z.string().optional()
 });

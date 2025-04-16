@@ -1,6 +1,8 @@
 import catchAsync from "../../utils/catchAsync";
+import pickValidFields from "../../utils/pickValidFields";
 import sendResponse from "../../utils/sendResponse";
-import { createCuisineService, deleteCuisineService, getCuisinesService, updateCuisineService } from "./cuisine.service";
+import { CuisineValidFields } from "./cuisine.constant";
+import { createCuisineService, deleteCuisineService, getCuisineDropDownService, getCuisinesService, updateCuisineService } from "./cuisine.service";
 
 
 const createCuisine = catchAsync(async (req, res) => {
@@ -18,7 +20,21 @@ const createCuisine = catchAsync(async (req, res) => {
 
 
 const getCuisines = catchAsync(async (req, res) => {
-  const result = await getCuisinesService();
+  const validatedQuery = pickValidFields(req.query, CuisineValidFields);
+  const result = await getCuisinesService(validatedQuery);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Cuisines are retrived successfully",
+    meta: result.meta,
+    data: result.data
+  });
+});
+
+
+const getCuisineDropDown = catchAsync(async (req, res) => {
+  const result = await getCuisineDropDownService()
 
   sendResponse(res, {
     statusCode: 200,
@@ -31,8 +47,7 @@ const getCuisines = catchAsync(async (req, res) => {
 
 const updateCuisine = catchAsync(async (req, res) => {
   const { cuisineId } = req.params;
-  const { name } = req.body;
-  const result = await updateCuisineService(req, cuisineId, name);
+  const result = await updateCuisineService(req, cuisineId, req.body);
 
   sendResponse(res, {
     statusCode: 200,
@@ -59,6 +74,7 @@ const deleteCuisine = catchAsync(async (req, res) => {
 const CuisineController = {
   createCuisine,
   getCuisines,
+  getCuisineDropDown,
   updateCuisine,
   deleteCuisine
 }

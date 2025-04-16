@@ -23,10 +23,20 @@ export const createAdministratorSchema = z.object({
       .trim()
       .optional(),
   }),
-  access: z.array(z.enum(VALID_ACCESS_VALUES)).min(1, "There must be at least one value"),
+  access: z.array(z.enum(VALID_ACCESS_VALUES)).default([]),
 });
 
 
 export const updateAdministratorAccessSchema = z.object({
   access: z.array(z.enum(VALID_ACCESS_VALUES)).default([])
+});
+
+
+export const updateAdministratorSchema = z.object({
+  fullName: z.string({
+    required_error: "full Name is required",
+  }),
+  phone: z.string({
+    required_error: "phone number is required",
+  }),
 });

@@ -39,7 +39,7 @@ const loginUserService = async (payload: ILoginUser) => {
   }
 
   //check you are not admin or admin
-  if((user.role !== "user") && (user.role !== "admin")){
+  if((user.role !== "user") && (user.role !== "owner")){
     throw new AppError(400, `Sorry! You have no access to login`);
   }
 
@@ -63,14 +63,14 @@ const loginUserService = async (payload: ILoginUser) => {
   };
 }
 
-const loginAdminService = async (payload: ILoginUser) => {
+const loginOwnerService = async (payload: ILoginUser) => {
   const user = await UserModel.findOne({ email: payload.email }).select('+password');
   if (!user) {
       throw new AppError(404, `Couldn't find this email address`);
   }
 
   //check you are not admin
-  if(user.role !=="admin"){
+  if(user.role !=="owner"){
     throw new AppError(400, `Sorry! You are not Owner`);
   }
 
@@ -120,7 +120,8 @@ const loginSuperAdminService = async (payload: ILoginUser) => {
 
   return {
       accessToken,
-      refreshToken
+      refreshToken,
+      message: `${user.role} is logged in successfully`
   }
 }
 
@@ -260,8 +261,6 @@ const changeStatusService = async (id: string, payload: { status: string }) => {
   if(!user){
     throw new AppError(404, "User Not Found");
   }
-
-  console.log(user);
 
    const result = await UserModel.updateOne(
     {_id: new ObjectId(id)},
@@ -447,7 +446,7 @@ const oAuthLoginService = async (payload: OAuth) => {
 
 export {
     loginUserService,
-    loginAdminService,
+    loginOwnerService,
     loginSuperAdminService,
     forgotPassSendOtpService,
     forgotPassVerifyOtpService,

@@ -5,6 +5,7 @@ import { Request } from "express";
 import { Types } from "mongoose";
 import { makeFilterQuery, makeSearchQuery } from "../../helper/QueryBuilder";
 import { UserSearchFields } from "./user.constant";
+import ObjectId from "../../utils/ObjectId";
 
 
 
@@ -20,7 +21,6 @@ const createUserService = async (req:Request, payload: IUser) => {
      payload.profileImg = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`; //for local machine
   }
 
-
   const result = await UserModel.create({
     ...payload,
     role: "user"
@@ -29,7 +29,6 @@ const createUserService = async (req:Request, payload: IUser) => {
   result.password=""
   return result;
 }
-
 
 
 const getUsersService = async (query: TUserQuery) => {
@@ -119,6 +118,35 @@ const getSingleUserService = async (userId: string) => {
 
 
 
+const getMeForSuperAdminService = async (userId: string) => {
+  const result = await UserModel.aggregate([
+    {
+      $match: {
+        _id: new ObjectId(userId)
+      }
+    },
+    {
+      $lookup: {
+        from: "administrators",
+        localField: "_id",
+        foreignField: "userId",
+        as: "administrator"
+      }
+    },
+  ])
+  
+  const returnData = {
+    fullName: result[0]?.fullName,
+    email: result[0]?.email,
+    phone: result[0]?.phone,
+    role: result[0]?.role,
+    profileImg: result[0]?.profileImg,
+    access: result[0]?.administrator?.length > 0 ? result[0]?.administrator[0]?.access : ["user", "dashboard", "restaurant", "settings"]
+  }
+  return returnData;
+}
+
+
 const getMeService = async (userId: string) => {
   const user = await UserModel.findById(userId);
   if(!user){
@@ -127,8 +155,13 @@ const getMeService = async (userId: string) => {
   return user;
 }
 
+const editMyProfileService = async (req:Request, loginUserId: string, payload: Partial<IUser>) => {
+  //upload the image
+  if(req.file) {
+    //for local machine file path
+    payload.profileImg = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`; //for local machine
+  }
 
-const editMyProfileService = async (loginUserId: string, payload: Partial<IUser>) => {
   const result = UserModel.updateOne(
     { _id: loginUserId },
     payload
@@ -157,4 +190,4 @@ const updateProfileImgService = async (req:Request, loginUserId: string) => {
 };
 
 
-export { createUserService, getUsersService, getSingleUserService, getMeService, editMyProfileService, updateProfileImgService };
+export { createUserService, getUsersService, getSingleUserService, getMeForSuperAdminService, getMeService, editMyProfileService, updateProfileImgService };

@@ -5,7 +5,7 @@ import verifyToken from "../utils/verifyToken";
 import UserModel from "../modules/User/user.model";
 import { isJWTIssuedBeforePassChanged } from "../utils/isJWTIssuedBeforePassChanged";
 
-type TUserRole = "user" | "admin" | "super_admin" | "administrator";
+type TUserRole = "user" | "owner" | "super_admin" | "administrator";
 
 const AuthMiddleware = (...roles: TUserRole[]) => {
   return async (req: Request & {user?: any}, res: Response, next: NextFunction) : Promise<any> => {

@@ -1,6 +1,8 @@
 import catchAsync from "../../utils/catchAsync";
+import pickValidFields from "../../utils/pickValidFields";
 import sendResponse from "../../utils/sendResponse";
-import { createDiningService, deleteDiningService, getDiningListService, getMyDiningsService, updateDiningService } from "./dining.service";
+import { DiningValidFields } from "./dining.constant";
+import { createDiningService, deleteDiningService, getDiningDropDownService, getDiningListService, getMyDiningsService, updateDiningService } from "./dining.service";
 
 
 const createDining = catchAsync(async (req, res) => {
@@ -18,7 +20,20 @@ const createDining = catchAsync(async (req, res) => {
 
 
 const getDiningList = catchAsync(async (req, res) => {
-  const result = await getDiningListService();
+  const validatedQuery = pickValidFields(req.query, DiningValidFields);
+  const result = await getDiningListService(validatedQuery);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Dinings are retrived successfully",
+    meta: result.meta,
+    data: result.data
+  });
+});
+
+const getDiningDropDown = catchAsync(async (req, res) => {
+  const result = await getDiningDropDownService();
 
   sendResponse(res, {
     statusCode: 200,
@@ -27,7 +42,6 @@ const getDiningList = catchAsync(async (req, res) => {
     data: result
   });
 });
-
 
 const getMyDinings = catchAsync(async (req, res) => {
   const loginUserId = req.headers.id;
@@ -72,6 +86,7 @@ const deleteDining = catchAsync(async (req, res) => {
 const DiningController = {
   createDining,
   getDiningList,
+  getDiningDropDown,
   getMyDinings,
   updateDining,
   deleteDining

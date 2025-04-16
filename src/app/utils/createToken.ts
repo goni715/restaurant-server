@@ -1,11 +1,11 @@
-import jwt, { JwtPayload, Secret, SignOptions } from 'jsonwebtoken';
+import jwt, { Secret, SignOptions } from 'jsonwebtoken';
 
 export type TExpiresIn = number | `${number}${'s' | 'm' | 'h' | 'd'}`
 
 type TPayload = {
     email: string;
     id: string;
-    role: 'user' | 'admin' | 'super_admin' | "administrator"
+    role: 'user' | 'owner' | 'super_admin' | "administrator"
 }
 
 const createToken = (payload: TPayload, secretKey: Secret, expiresIn: TExpiresIn) => {

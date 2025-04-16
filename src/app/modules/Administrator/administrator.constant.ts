@@ -7,8 +7,8 @@ export const AdministratorSearchFields = [
 
 export const VALID_ACCESS_VALUES = [
   "dashboard",
-  "userManagement",
-  "restaurantManagement",
+  "user",
+  "restaurant",
   "settings",
 ] as const;
 

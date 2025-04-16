@@ -7,7 +7,7 @@ export interface IUser {
   address?: string; //for admin
   password: string;
   passwordChangedAt?: Date;
-  role: "user" | "admin" | "super_admin" | "administrator";
+  role: "user" | "owner" | "super_admin" | "administrator";
   status: "blocked" | "unblocked";
   profileImg?: string
 }

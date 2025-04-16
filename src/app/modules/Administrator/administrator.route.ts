@@ -3,7 +3,7 @@ import AuthMiddleware from '../../middlewares/AuthMiddleware';
 import { UserRole } from '../User/user.constant';
 import validationMiddleware from '../../middlewares/validationMiddleware';
 import AdministratorController from './administrator.controller';
-import { createAdministratorSchema, updateAdministratorAccessSchema } from './administrator.validation';
+import { createAdministratorSchema, updateAdministratorAccessSchema, updateAdministratorSchema } from './administrator.validation';
 import upload from '../../helper/upload';
 
 const router = express.Router();
@@ -24,12 +24,18 @@ router.patch(
   "/update-administrator-access/:administratorId",
   AuthMiddleware(UserRole.super_admin),
   validationMiddleware(updateAdministratorAccessSchema),
-  AdministratorController.updateAdministrator
+  AdministratorController.updateAccess
 );
 
+router.patch(
+  "/update-administrator/:userId",
+  AuthMiddleware(UserRole.super_admin),
+  validationMiddleware(updateAdministratorSchema),
+  AdministratorController.updateAdministrator
+);
 router.get(
   "/get-administrators",
-  AuthMiddleware("super_admin"),
+  AuthMiddleware("super_admin", "administrator"),
   AdministratorController.getAdministrators
 );
 

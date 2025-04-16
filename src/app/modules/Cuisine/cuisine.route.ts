@@ -1,43 +1,44 @@
-import express, { NextFunction, Request, Response } from 'express';
+import express from 'express';
 import AuthMiddleware from '../../middlewares/AuthMiddleware';
 import { UserRole } from '../User/user.constant';
 import validationMiddleware from '../../middlewares/validationMiddleware';
 import CuisineController from './cuisine.controller';
-import { cuisineValidationSchema } from './cuisine.validation';
 import upload from '../../helper/upload';
 import isAccess from '../../middlewares/isAccess';
+import { createCuisineValidationSchema, updateCuisineValidationSchema } from './cuisine.validation';
 
 const router = express.Router();
 
 router.post(
   "/create-cuisine",
   AuthMiddleware(UserRole.super_admin, UserRole.administrator),
-  isAccess("restaurantManagement"),
+  isAccess("restaurant"),
   upload.single('file'),
-  validationMiddleware(cuisineValidationSchema),
+  validationMiddleware(createCuisineValidationSchema),
   CuisineController.createCuisine
 );
 router.get(
   "/get-cuisines",
-  AuthMiddleware(UserRole.super_admin, UserRole.admin, UserRole.user, UserRole.administrator),
+  AuthMiddleware(UserRole.super_admin, UserRole.user, UserRole.administrator),
   CuisineController.getCuisines
+);
+router.get(
+  "/get-cuisine-drop-down",
+  AuthMiddleware(UserRole.owner),
+  CuisineController.getCuisineDropDown
 );
 router.patch(
   "/update-cuisine/:cuisineId",
   AuthMiddleware(UserRole.super_admin, UserRole.administrator),
-  isAccess("restaurantManagement"),
+  isAccess("restaurant"),
   upload.single('file'),
-  (req: Request, res: Response, next: NextFunction) => {
-    req.body = JSON.parse(req.body.data);
-    next();
-  },
-  validationMiddleware(cuisineValidationSchema),
+  validationMiddleware(updateCuisineValidationSchema),
   CuisineController.updateCuisine
 );
 router.delete(
   "/delete-cuisine/:cuisineId",
   AuthMiddleware(UserRole.super_admin, UserRole.administrator),
-  isAccess("restaurantManagement"),
+  isAccess("restaurant"),
   CuisineController.deleteCuisine
 );
 

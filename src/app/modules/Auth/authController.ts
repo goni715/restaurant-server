@@ -1,7 +1,7 @@
 import config from "../../config";
 import catchAsync from "../../utils/catchAsync";
 import sendResponse from "../../utils/sendResponse";
-import { changePasswordService, changeStatusService, deleteMyAccountService, forgotPassCreateNewPassService, forgotPassSendOtpService, forgotPassVerifyOtpService, loginAdminService, loginSuperAdminService, loginUserService, oAuthLoginService, refreshTokenService } from "./auth.service";
+import { changePasswordService, changeStatusService, deleteMyAccountService, forgotPassCreateNewPassService, forgotPassSendOtpService, forgotPassVerifyOtpService,  loginOwnerService,  loginSuperAdminService, loginUserService, oAuthLoginService, refreshTokenService } from "./auth.service";
 
 
 
@@ -29,8 +29,8 @@ const loginUser = catchAsync(async (req, res) => {
 })
 
 
-const loginAdmin = catchAsync(async (req, res) => {
-  const result = await loginAdminService(req.body);
+const loginOwner = catchAsync(async (req, res) => {
+  const result = await loginOwnerService(req.body);
   const { accessToken, refreshToken} = result;
   
   res.cookie("refreshToken", refreshToken, {
@@ -43,7 +43,7 @@ const loginAdmin = catchAsync(async (req, res) => {
   sendResponse(res, {
     statusCode: 200,
     success: true,
-    message: "Admin is logged in successfully",
+    message: "Owner is logged in successfully",
     data: {
       accessToken
     }
@@ -53,7 +53,7 @@ const loginAdmin = catchAsync(async (req, res) => {
 
 const loginSuperAdmin = catchAsync(async (req, res) => {
   const result = await loginSuperAdminService(req.body);
-  const { accessToken, refreshToken} = result;
+  const { accessToken, refreshToken, message} = result;
   
   res.cookie("refreshToken", refreshToken, {
     httpOnly: true,  // Prevents client-side access to the cookie (more secure)
@@ -65,7 +65,7 @@ const loginSuperAdmin = catchAsync(async (req, res) => {
   sendResponse(res, {
     statusCode: 200,
     success: true,
-    message: "'Super Admin' or 'Administratior' is logged in successfully",
+    message: message,
     data: {
       accessToken
     }
@@ -191,7 +191,7 @@ const oAuthLogin = catchAsync(async (req, res) => {
 
  const AuthController = {
   loginUser,
-  loginAdmin,
+  loginOwner,
   loginSuperAdmin,
   forgotPassSendOtp,
   forgotPassVerifyOtp,

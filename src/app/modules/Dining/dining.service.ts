@@ -3,6 +3,9 @@ import AppError from "../../errors/AppError";
 import DiningModel from "./dining.model";
 import RestaurantModel from "../Restaurant/restaurant.model";
 import ObjectId from "../../utils/ObjectId";
+import { TDiningQuery } from "./dining.interface";
+import { makeFilterQuery, makeSearchQuery } from "../../helper/QueryBuilder";
+import { DiningSearchFields } from "./dining.constant";
 
 
 
@@ -20,10 +23,73 @@ const createDiningService = async (name: string) => {
     return result;
 }
 
+const getDiningListService = async (query: TDiningQuery) => {
+    // 1. Extract query parameters
+      const {
+        searchTerm, 
+        page = 1, 
+        limit = 10, 
+        sortOrder = "desc",
+        sortBy = "createdAt", 
+        ...filters  // Any additional filters
+      } = query;
+    
+      // 2. Set up pagination
+      const skip = (Number(page) - 1) * Number(limit);
+    
+      //3. setup sorting
+      const sortDirection = sortOrder === "asc" ? 1 : -1;
+    
+      //4. setup searching
+      let searchQuery = {};
+      if (searchTerm) {
+        searchQuery = makeSearchQuery(searchTerm, DiningSearchFields);
+      }
+    
+      //5 setup filters
+      let filterQuery = {};
+      if (filters) {
+        filterQuery = makeFilterQuery(filters);
+      }
+  const result = await DiningModel.aggregate([
+      {
+          $match: {
+              ...searchQuery,
+              ...filterQuery
+          }
+      },
+      { $sort: { [sortBy]: sortDirection } },
+      { $skip: skip },
+      { $limit: Number(limit) },
+  ])
 
-const getDiningListService = async () => {
+//total count
+const totalDiningResult = await DiningModel.aggregate([
+  {
+    $match: {
+      ...searchQuery,
+      ...filterQuery
+    }
+  },
+  { $count: "totalCount" }
+])
+
+const totalCount = totalDiningResult[0]?.totalCount || 0;
+const totalPages = Math.ceil(totalCount / Number(limit));
+
+return {
+meta: {
+  page: Number(page), //currentPage
+  limit: Number(limit),
+  totalPages,
+  total: totalCount,
+},
+data: result,
+};
+}
+
+const getDiningDropDownService = async () => {
     const result = await DiningModel.find().select('-createdAt -updatedAt').sort('-createdAt');
-    console.log("result");
     return result;
 }
 
@@ -101,6 +167,7 @@ const deleteDiningService = async (diningId: string) => {
 export {
     createDiningService,
     getDiningListService,
+    getDiningDropDownService,
     getMyDiningsService,
     updateDiningService,
     deleteDiningService

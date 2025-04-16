@@ -2,7 +2,7 @@ import catchAsync from "../../utils/catchAsync";
 import pickValidFields from "../../utils/pickValidFields";
 import sendResponse from "../../utils/sendResponse";
 import { AdministratorValidFields } from "./administrator.constant";
-import { createAdministratorService, deleteAdministratorService, getAdministratorsService, getSingleAdministratorService, updateAdministratorService } from "./administrator.service";
+import { createAdministratorService, deleteAdministratorService, getAdministratorsService, getSingleAdministratorService, updateAccessService, updateAdministratorService } from "./administrator.service";
 
 
 const createAdministrator = catchAsync(async (req, res) => {
@@ -17,10 +17,23 @@ const createAdministrator = catchAsync(async (req, res) => {
 });
 
 
-const updateAdministrator = catchAsync(async (req, res) => {
+const updateAccess = catchAsync(async (req, res) => {
   const { administratorId } = req.params;
   const { access } = req.body;
-  const result = await updateAdministratorService(administratorId, access);
+  const result = await updateAccessService(administratorId, access);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Administrator is updated successfully",
+    data: result,
+  });
+});
+
+
+const updateAdministrator = catchAsync(async (req, res) => {
+  const { userId } = req.params;
+  const result = await updateAdministratorService(userId, req.body);
 
   sendResponse(res, {
     statusCode: 200,
@@ -71,6 +84,7 @@ const getSingleAdministrator = catchAsync(async (req, res) => {
 
 const AdministratorController = {
     createAdministrator,
+    updateAccess,
     updateAdministrator,
     getAdministrators,
     deleteAdministrator,

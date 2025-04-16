@@ -54,21 +54,21 @@ router.post(
 
 router.patch(
   "/change-password",
-  AuthMiddleware(UserRole.admin, UserRole.super_admin, UserRole.user, UserRole.administrator),
+  AuthMiddleware(UserRole.owner, UserRole.super_admin, UserRole.user, UserRole.administrator),
   validationMiddleware(changePasswordSchema),
   AuthController.changePassword
 );
 router.patch(
   "/change-status/:id",
   AuthMiddleware(UserRole.super_admin, UserRole.administrator),
-  isAccess('userManagement'),
+  isAccess('user'),
   validationMiddleware(changeStatusValidationSchema),
   AuthController.changeStatus
 );
 
 router.delete(
   "/delete-my-account",
-  AuthMiddleware(UserRole.admin, UserRole.user),
+  AuthMiddleware(UserRole.owner, UserRole.user),
   validationMiddleware(deleteAccountValidationSchema),
   AuthController.deleteMyAccount
 );

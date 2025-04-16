@@ -10,7 +10,7 @@ const router = express.Router();
 
 router.post(
   "/create-menu",
-  AuthMiddleware(UserRole.admin),
+  AuthMiddleware(UserRole.owner),
   upload.single('file'),
   (req: Request, res: Response, next: NextFunction) => {
     req.body = JSON.parse(req.body.data);
@@ -21,14 +21,20 @@ router.post(
 );
 
 router.get(
-  "/get-menus/:restaurantId",
-  AuthMiddleware(UserRole.admin, UserRole.user),
+  "/get-menus",
+  AuthMiddleware(UserRole.owner),
   MenuController.getMenus
+);
+
+router.get(
+  "/get-menus-by-restaurant-id/:restaurantId",
+  AuthMiddleware(UserRole.user),
+  MenuController.getMenusByRestaurantId
 );
 
 router.patch(
   "/update-menu/:menuId",
-  AuthMiddleware(UserRole.admin),
+  AuthMiddleware(UserRole.owner),
   upload.single('file'),
   (req: Request, res: Response, next: NextFunction) => {
     req.body = JSON.parse(req.body.data);
@@ -41,7 +47,7 @@ router.patch(
 
 router.delete(
   "/delete-menu/:menuId",
-  AuthMiddleware(UserRole.admin),
+  AuthMiddleware(UserRole.owner),
   MenuController.deleteMenu
 );
 

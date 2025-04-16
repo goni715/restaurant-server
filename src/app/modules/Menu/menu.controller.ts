@@ -2,7 +2,7 @@ import catchAsync from "../../utils/catchAsync";
 import pickValidFields from "../../utils/pickValidFields";
 import sendResponse from "../../utils/sendResponse";
 import { MenuValidFields } from "./menu.constant";
-import { createMenuService, deleteMenuService, getMenusService, updateMenuService } from "./menu.service";
+import { createMenuService, deleteMenuService, getMenusByRestaurantIdService, getMenusService, updateMenuService } from "./menu.service";
 
 
 const createMenu = catchAsync(async (req, res) => {
@@ -20,9 +20,9 @@ const createMenu = catchAsync(async (req, res) => {
 
 
 const getMenus = catchAsync(async (req, res) => {
-  const { restaurantId } = req.params;
+  const loginUserId = req.headers.id;
   const validatedQuery = pickValidFields(req.query, MenuValidFields);
-  const result = await getMenusService(restaurantId, validatedQuery);
+  const result = await getMenusService(loginUserId as string, validatedQuery);
 
   sendResponse(res, {
     statusCode: 200,
@@ -33,7 +33,19 @@ const getMenus = catchAsync(async (req, res) => {
   });
 });
 
+const getMenusByRestaurantId = catchAsync(async (req, res) => {
+  const { restaurantId } = req.params;
+  const validatedQuery = pickValidFields(req.query, MenuValidFields);
+  const result = await getMenusByRestaurantIdService(restaurantId, validatedQuery);
 
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Menus are retrieved successfully",
+    meta: result.meta,
+    data: result.data,
+  });
+});
 
 const updateMenu = catchAsync(async (req, res) => {
   const loginUserId = req.headers.id;
@@ -65,6 +77,7 @@ const deleteMenu = catchAsync(async (req, res) => {
 const MenuController = {
   createMenu,
   getMenus,
+  getMenusByRestaurantId,
   updateMenu,
   deleteMenu
 };

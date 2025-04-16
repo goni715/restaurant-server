@@ -14,9 +14,9 @@ const createCuisineService = async (req:Request, name: string) => {
         throw new AppError(409, 'This cuisine is already existed');
     }
 
-    if(!req.file){
-        throw new AppError(400, "image is required");
-    }
+    // if(!req.file){
+    //     throw new AppError(400, "image is required");
+    // }
     let image="";
     if(req.file) {
         //for local machine file path

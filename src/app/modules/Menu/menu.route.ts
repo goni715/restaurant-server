@@ -36,11 +36,7 @@ router.patch(
   "/update-menu/:menuId",
   AuthMiddleware(UserRole.owner),
   upload.single('file'),
-  (req: Request, res: Response, next: NextFunction) => {
-    req.body = JSON.parse(req.body.data);
-    next();
-  },
-  validationMiddleware(updateMenuValidationSchema),
+ validationMiddleware(updateMenuValidationSchema),
   MenuController.updateMenu
 );
 

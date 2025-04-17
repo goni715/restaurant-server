@@ -32,7 +32,15 @@ export const updateMenuValidationSchema = z.object({
   name: z.string({
     required_error: "name is required",
   }).optional(),
-  price: z.number().positive("Price must be a positive number").min(0, "Price must be at least 0").optional(),
+  price: z
+    .union([
+      z.number(),
+      z.string().transform((val) => Number(val)),
+    ])
+    .transform((val) => Number(val))
+    .refine((val) => !isNaN(val), { message: "Price must be a number" })
+    .refine((val) => val > 0, { message: "Price must be at least 1" })
+    .optional(),
   ingredient: z.string({
     required_error: "ingredient is required",
   }).optional(),

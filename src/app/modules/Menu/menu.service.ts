@@ -67,6 +67,7 @@ const createMenuService = async (req:Request, loginUserId: string, payload: IMen
 
 
 const getMenusService = async (loginUserId:string, query: TMenuQuery) => {
+  
   const ObjectId = Types.ObjectId;
     // 1. Extract query parameters
     const {
@@ -300,39 +301,34 @@ return {
 };
 }
 
-const updateMenuService = async (req:Request, loginUserId: string, menuId:string, payload: IMenu) => {
-  const { cuisineId, name } = payload;
- 
-
-  //check cuisine not found
-  const cuisine = await CuisineModel.findById(cuisineId);
-  if (!cuisine) {
-    throw new AppError(404, "This cuisine not found");
-  }
-
- 
-
+const updateMenuService = async (req:Request, loginUserId: string, menuId:string, payload: Partial<IMenu>) => {
+  const { name, cuisineId } = payload;
   //check menu not found
   const menu = await MenuModel.findOne({
     _id: menuId,
     ownerId: loginUserId,
   });
-
-  if (!menu) {
+  if(!menu) {
     throw new AppError(404, "Menu not found");
   }
 
-  let slug = menu.slug;
-  if(name){
-    slug = slugify(name).toLowerCase();
+  //check cuisine not found
+  if (cuisineId) {
+    const cuisine = await CuisineModel.findById(cuisineId);
+    if (!cuisine) {
+      throw new AppError(404, "This cuisine not found");
+    }
   }
   
-  let image=cuisine.image;
-  if(req.file) {
-      //for local machine file path
-      image = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`; //for local machine
+  //set slug
+  if(name){
+    payload.slug = slugify(name).toLowerCase();
   }
-
+  
+  //upload the image
+  if(req.file) {
+      payload.image = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`; //for local machine
+  }
 
   //update the menu
   const result = await MenuModel.updateOne(
@@ -340,11 +336,8 @@ const updateMenuService = async (req:Request, loginUserId: string, menuId:string
       _id: menuId,
       ownerId: loginUserId
     },
-    {
-      ...payload,
-      image,
-      slug
-  })
+    payload
+   )
   
   return result;
 }

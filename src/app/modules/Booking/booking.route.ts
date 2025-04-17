@@ -23,7 +23,7 @@ router.post(
 
 router.get(
   "/get-bookings",
-  AuthMiddleware(UserRole.admin),
+  AuthMiddleware(UserRole.owner),
   BookingController.getBookings
 );
 

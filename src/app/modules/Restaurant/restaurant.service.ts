@@ -16,6 +16,7 @@ import UserModel from "../User/user.model";
 import { INotification } from "../Notification/notification.interface";
 import NotificationModel from "../Notification/notification.model";
 import ObjectId from "../../utils/ObjectId";
+import uploadImage from "../../utils/uploadImage";
 
 
 
@@ -42,8 +43,7 @@ const createRestaurantService = async (
     throw new AppError(400, "image is required");
   }
   if (req.file) {
-    //for local machine file path
-    payload.restaurantImg = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`; //for local machine
+    payload.restaurantImg = await uploadImage(req);
   }
 
 
@@ -570,7 +570,7 @@ const updateRestaurantImgService = async (req:Request, loginUserId: string) => {
   }
 
   //uploaded-image
-  const image = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`; //for local machine
+  const image = await uploadImage(req);
   
   const result = await RestaurantModel.updateOne(
     { ownerId: loginUserId },

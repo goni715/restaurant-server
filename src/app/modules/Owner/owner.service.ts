@@ -2,6 +2,7 @@ import { Request } from "express";
 import AppError from "../../errors/AppError";
 import { IUser } from "../User/user.interface";
 import UserModel from "../User/user.model";
+import uploadImage from "../../utils/uploadImage";
 
 
 const createOwnerService = async (req:Request, payload: IUser) => {
@@ -11,8 +12,7 @@ const createOwnerService = async (req:Request, payload: IUser) => {
   }
 
   if (req.file) {
-    //for local machine file path
-    payload.profileImg = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`; //for local machine
+    payload.profileImg = await uploadImage(req);
  }
 
   const result = await UserModel.create({

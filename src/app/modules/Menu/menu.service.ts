@@ -8,6 +8,7 @@ import { Request } from "express";
 import { Types } from "mongoose";
 import { makeFilterQuery, makeSearchQuery } from "../../helper/QueryBuilder";
 import { MenuSearchFields } from "./menu.constant";
+import uploadImage from "../../utils/uploadImage";
 
 
 
@@ -49,8 +50,7 @@ const createMenuService = async (req:Request, loginUserId: string, payload: IMen
     }
     let image="";
     if (req.file) {
-      //for local machine file path
-      image = `${req.protocol}://${req.get("host")}/uploads/${ req.file.filename}`; //for local machine
+      image = await uploadImage(req);
     }
 
     //create the menu
@@ -322,12 +322,20 @@ const updateMenuService = async (req:Request, loginUserId: string, menuId:string
   
   //set slug
   if(name){
-    payload.slug = slugify(name).toLowerCase();
+    const slug = slugify(name).toLowerCase();
+    payload.slug = slug;
+    const menuExist = await MenuModel.findOne({
+      _id: { $ne: menuId },
+      slug
+    });
+    if (menuExist) {
+      throw new AppError(409, "Sorry! This Menu is already existed");
+    }
   }
   
   //upload the image
   if(req.file) {
-      payload.image = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`; //for local machine
+      payload.image = await uploadImage(req);
   }
 
   //update the menu

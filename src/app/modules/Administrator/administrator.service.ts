@@ -7,6 +7,7 @@ import AdministratorModel from "./administrator.model";
 import config from "../../config";
 import { makeFilterQuery, makeSearchQuery } from "../../helper/QueryBuilder";
 import { AdministratorSearchFields } from "./administrator.constant";
+import uploadImage from "../../utils/uploadImage";
 
 
 const createAdministratorService = async (req:Request, payload:IAdministratorPayload) => {
@@ -19,17 +20,18 @@ const createAdministratorService = async (req:Request, payload:IAdministratorPay
     if(!administratorData.password){
         administratorData.password=config.default_password as string;
     }
+
+    
+    if(req.file){
+      administratorData.profileImg = await uploadImage(req);
+    }
+
  
    const session = await mongoose.startSession();
    
    try{
 
     session.startTransaction();
-
-    if(req.file){
-        //for local machine file path
-        administratorData.profileImg = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`; //for local machine
-    }
 
     const newUser = await UserModel.create(
       [

@@ -6,6 +6,7 @@ import { Types } from "mongoose";
 import { makeFilterQuery, makeSearchQuery } from "../../helper/QueryBuilder";
 import { UserSearchFields } from "./user.constant";
 import ObjectId from "../../utils/ObjectId";
+import uploadImage from "../../utils/uploadImage";
 
 
 
@@ -15,10 +16,8 @@ const createUserService = async (req:Request, payload: IUser) => {
       throw new AppError(409, 'Email is already existed')
   }
         
-
   if (req.file) {
-     //for local machine file path
-     payload.profileImg = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`; //for local machine
+     payload.profileImg = await uploadImage(req);
   }
 
   const result = await UserModel.create({
@@ -158,8 +157,7 @@ const getMeService = async (userId: string) => {
 const editMyProfileService = async (req:Request, loginUserId: string, payload: Partial<IUser>) => {
   //upload the image
   if(req.file) {
-    //for local machine file path
-    payload.profileImg = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`; //for local machine
+    payload.profileImg = await uploadImage(req);
   }
 
   const result = UserModel.updateOne(
@@ -178,7 +176,7 @@ const updateProfileImgService = async (req:Request, loginUserId: string) => {
   }
 
   //uploaded-image
-  const image = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`; //for local machine
+  const image = await uploadImage(req);
   
   const result = await UserModel.updateOne(
     { _id: loginUserId },

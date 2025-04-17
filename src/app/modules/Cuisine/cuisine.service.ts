@@ -6,6 +6,7 @@ import MenuModel from "../Menu/menu.model";
 import { ICuisine, TCuisineQuery } from "./cuisine.interface";
 import { makeFilterQuery, makeSearchQuery } from "../../helper/QueryBuilder";
 import { CuisineSearchFields } from "./cuisine.constant";
+import uploadImage from "../../utils/uploadImage";
 
 
 const createCuisineService = async (req:Request, name: string) => {
@@ -127,7 +128,7 @@ const updateCuisineService = async (req:Request, cuisineId: string, payload: Par
     //upload image
     if(req.file) {
         //for local machine file path
-        payload.image = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`; //for local machine
+        payload.image = await uploadImage(req);
     }
    
 

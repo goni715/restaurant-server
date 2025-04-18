@@ -2,7 +2,7 @@ import catchAsync from "../../utils/catchAsync";
 import pickValidFields from "../../utils/pickValidFields";
 import sendResponse from "../../utils/sendResponse";
 import { SlotValidFields } from "./slot.constant";
-import { createSlotService, getSlotDropDownService, getSlotsService } from "./slot.service";
+import { createSlotService, deleteSlotService, getSlotDropDownService, getSlotsService } from "./slot.service";
 
 
 
@@ -47,10 +47,24 @@ const getSlotDropDown = catchAsync(async (req, res) => {
     });
 });
 
+const deleteSlot = catchAsync(async (req, res) => {
+  const loginUserId = req.headers.id;
+  const { slotId } = req.params;
+  const result = await deleteSlotService(loginUserId as string, slotId);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Slot is deleted successfully",
+    data: result,
+  });
+});
+
 const SlotController = {
     createSlot,
     getSlots,
-    getSlotDropDown
+    getSlotDropDown,
+    deleteSlot
 };
 
 export default SlotController;

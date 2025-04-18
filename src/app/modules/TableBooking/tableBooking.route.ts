@@ -9,7 +9,7 @@ const router = express.Router();
 
 router.post(
   "/create-table-booking",
-  AuthMiddleware(UserRole.admin),
+  AuthMiddleware(UserRole.owner),
   validationMiddleware(createTableBookingSchema),
   TableBookingController.createTableBooking
 );

@@ -9,22 +9,28 @@ const router = express.Router();
 
 router.post(
   "/create-slot",
-  AuthMiddleware(UserRole.admin),
+  AuthMiddleware(UserRole.owner),
   validationMiddleware(createSlotSchema),
   SlotController.createSlot
 );
 
 router.get(
   "/get-slots",
-  AuthMiddleware(UserRole.admin),
+  AuthMiddleware(UserRole.owner),
   SlotController.getSlots
 );
 
 
 router.get(
   "/get-slot-drop-down",
-  AuthMiddleware(UserRole.admin),
+  AuthMiddleware(UserRole.owner),
   SlotController.getSlotDropDown
+);
+
+router.delete(
+  "/delete-slot/:slotId",
+  AuthMiddleware(UserRole.owner),
+  SlotController.deleteSlot
 );
 
 export const SlotRoutes = router;

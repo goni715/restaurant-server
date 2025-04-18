@@ -9,14 +9,14 @@ const router = express.Router();
 
 router.post(
   "/create-table",
-  AuthMiddleware(UserRole.admin),
+  AuthMiddleware(UserRole.owner),
   validationMiddleware(createTableValidationSchema),
   TableController.createTable
 );
 
 router.get(
   "/get-tables/:scheduleId/:diningId",
-  AuthMiddleware(UserRole.admin),
+  AuthMiddleware(UserRole.owner),
   TableController.getTables
 );
 

@@ -9,14 +9,14 @@ const router = express.Router();
 
 router.post(
   "/create-schedule",
-  AuthMiddleware(UserRole.admin),
+  AuthMiddleware(UserRole.owner),
   validationMiddleware(createScheduleSchema),
   ScheduleController.createSchedule
 );
 
 router.get(
   "/get-schedules",
-  AuthMiddleware(UserRole.admin),
+  AuthMiddleware(UserRole.owner),
   ScheduleController.getSchedules
 );
 
@@ -28,13 +28,13 @@ router.get(
 
 router.get(
   "/get-single-schedule/:scheduleId",
-  AuthMiddleware(UserRole.admin),
+  AuthMiddleware(UserRole.owner),
   ScheduleController.getSingleSchedule
 );
 
 router.delete(
   "/delete-schedule/:scheduleId",
-  AuthMiddleware(UserRole.admin),
+  AuthMiddleware(UserRole.owner),
   ScheduleController.deleteSchedule
 );
 

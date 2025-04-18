@@ -159,9 +159,27 @@ const getSlotDropDownService = async (loginUserId: string) => {
     return result;
 }
 
+const deleteSlotService = async (loginUserId: string, slotId: string) => {
+  //check slot not found
+  const slot = await SlotModel.findOne({
+   _id: slotId,
+   ownerId: loginUserId,
+ });
+
+ if (!slot) {
+   throw new AppError(404, "Slot not found");
+ }
+
+ const result = await SlotModel.deleteOne({
+   _id: slotId,
+   ownerId: loginUserId
+ },)
+ return result;
+}
 
 export {
     createSlotService,
     getSlotsService,
-    getSlotDropDownService
+    getSlotDropDownService,
+    deleteSlotService
 }

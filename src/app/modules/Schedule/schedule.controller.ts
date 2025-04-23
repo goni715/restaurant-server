@@ -1,8 +1,8 @@
 import catchAsync from "../../utils/catchAsync";
 import pickValidFields from "../../utils/pickValidFields";
 import sendResponse from "../../utils/sendResponse";
-import { ScheduleValidFields, UserScheduleValidFields } from "./schedule.constant";
-import { createScheduleService, deleteScheduleService, getSchedulesService, getSingleScheduleService, getUserSchedulesService } from "./schedule.service";
+import { ScheduleDropDownValidFields, ScheduleValidFields, UserScheduleValidFields } from "./schedule.constant";
+import { createScheduleService, deleteScheduleService, getScheduleDropDownService, getSchedulesService, getSingleScheduleService, getUserSchedulesService } from "./schedule.service";
 
 
 const createSchedule = catchAsync(async (req, res) => {
@@ -32,6 +32,18 @@ const getSchedules = catchAsync(async (req, res) => {
     });
 });
 
+const getScheduleDropDown = catchAsync(async (req, res) => {
+  const loginUserId = req.headers.id;
+  const validatedQuery = pickValidFields(req.query, ScheduleDropDownValidFields);
+  const result = await getScheduleDropDownService(loginUserId as string, validatedQuery);
+  
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: "Schedules are retrived successfully",
+      data: result
+    });
+});
 
 const getUserSchedules = catchAsync(async (req, res) => {
   const { restaurantId } = req.params;
@@ -76,6 +88,7 @@ const deleteSchedule = catchAsync(async (req, res) => {
 const ScheduleController = {
     createSchedule,
     getSchedules,
+    getScheduleDropDown,
     getUserSchedules,
     getSingleSchedule,
     deleteSchedule

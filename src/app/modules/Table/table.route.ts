@@ -15,9 +15,15 @@ router.post(
 );
 
 router.get(
-  "/get-tables/:scheduleId/:diningId",
+  "/get-tables",
   AuthMiddleware(UserRole.owner),
   TableController.getTables
+);
+
+router.get(
+  "/get-tables-by-schedule-and-dining/:scheduleId/:diningId",
+  AuthMiddleware(UserRole.owner),
+  TableController.getTablesByScheduleAndDining
 );
 
 export const TableRoutes = router;

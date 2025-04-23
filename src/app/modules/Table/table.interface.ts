@@ -11,10 +11,15 @@ export interface ITable {
     seats: number;
 }
 
+export interface ITablePayload {
+    totalTable: number;
+    scheduleId: Types.ObjectId;
+    diningId: Types.ObjectId;
+    seats: number;
+}
+
 export type TTableQuery = {
-    searchTerm?: string;
     page?: string;
     limit?: string;
-    sortBy?: string;
-    sortOrder?: "asc" | "desc";
+    date?: string;
 };

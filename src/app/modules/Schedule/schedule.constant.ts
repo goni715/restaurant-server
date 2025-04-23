@@ -9,6 +9,9 @@ export const ScheduleValidFields: string[] = [
     "endDate"
 ];
 
+export const ScheduleDropDownValidFields: string[] = [
+    "date"
+];
 
 export const UserScheduleValidFields: string[] = [
     "page",
@@ -17,3 +20,5 @@ export const UserScheduleValidFields: string[] = [
     "sortOrder",
     "date",
 ];
+
+

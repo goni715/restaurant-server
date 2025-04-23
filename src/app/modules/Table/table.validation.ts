@@ -1,9 +1,6 @@
 import { Types } from "mongoose";
 import { z } from "zod";
 
-
-
-
 export const createTableValidationSchema = z.object({
   scheduleId: z
     .string({
@@ -19,8 +16,6 @@ export const createTableValidationSchema = z.object({
     .refine((id) => Types.ObjectId.isValid(id), {
       message: "diningId must be a valid ObjectId",
     }),
-  name: z.string({
-    required_error: "name is required",
-  }),
+  totalTable: z.number().positive("seats must be a positive number"),
   seats: z.number().positive("seats must be a positive number"),
 });

@@ -11,6 +11,14 @@ export interface ITable {
     seats: number;
 }
 
+export interface ITablePayload{
+  scheduleId: Types.ObjectId;
+  diningId: Types.ObjectId;
+  totalTable:number;
+  seats: number;
+} 
+
+
 export type TTableQuery = {
     searchTerm?: string;
     page?: string;

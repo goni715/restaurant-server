@@ -3,15 +3,14 @@ import AppError from "../../errors/AppError";
 import ObjectId from "../../utils/ObjectId";
 import RestaurantModel from "../Restaurant/restaurant.model";
 import ScheduleModel from "../Schedule/schedule.model";
-import { ITable, TTableQuery } from "./table.interface";
+import { ITable, ITablePayload, TTableQuery } from "./table.interface";
 import TableModel from "./table.model";
 import { makeSearchQuery } from "../../helper/QueryBuilder";
 import { TableSearchFields } from "./table.constant";
 
 
-const createTableService = async (loginUserId: string, payload: ITable) => {
-    const { name, seats, diningId, scheduleId } = payload;
-    const slug = slugify(name).toLowerCase();
+const createTableService = async (loginUserId: string, payload: ITablePayload) => {
+    const {totalTable, seats, diningId, scheduleId } = payload;
 
     const restaurant = await RestaurantModel.findOne({
         ownerId: loginUserId,
@@ -37,30 +36,31 @@ const createTableService = async (loginUserId: string, payload: ITable) => {
         throw new AppError(404, "This dining does not belong to your restaurant, please add this dining to your restaurant")
     }
 
-
-    //check table is already existed
-    const table = await TableModel.findOne({
-        slug,
+    const tables = await TableModel.countDocuments({
         scheduleId,
         ownerId:loginUserId,
         restaurantId: restaurant._id,
-        diningId,
-    });
+        diningId, 
+    })
 
-    if(table){
-        throw new AppError(409, "Table is already existed");
+    const tableData: any[] = [];
+    for (let i = 1; i <= totalTable; i++) {
+        const tableName = `T${Number(tables+i)}`;
+        const slug = slugify(tableName).toLowerCase();
+        
+        tableData.push({
+          name: tableName,
+          slug,
+          scheduleId,
+          ownerId: loginUserId,
+          restaurantId: restaurant._id,
+          diningId,
+          seats,
+        });
     }
 
-    //create the table 
-    const result = await TableModel.create({
-        name,
-        slug,
-        scheduleId,
-        ownerId:loginUserId,
-        restaurantId: restaurant._id,
-        diningId,
-        seats
-    })
+  
+    const result = await TableModel.insertMany(tableData)
     
     return result;
 }

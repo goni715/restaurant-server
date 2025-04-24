@@ -1,6 +1,6 @@
 import { Types } from "mongoose";
-import { IAvailability } from "../Schedule/schedule.interface";
 
+export type ITableAvailability = "Immediate Seating" | "Waitlist";
 
 export interface ITableBooking {
     name: string;
@@ -9,5 +9,5 @@ export interface ITableBooking {
     scheduleId: Types.ObjectId;
     diningId: Types.ObjectId;
     restaurantId: Types.ObjectId;
-    availability: IAvailability;
+    availability: ITableAvailability;
 }

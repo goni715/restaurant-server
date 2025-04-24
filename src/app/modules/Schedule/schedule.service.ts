@@ -148,7 +148,7 @@ const getSchedulesService =  async (loginUserId: string, query:TScheduleQuery) =
                 ...filterQuery
             }
         },
-        { $sort: { [sortBy]: sortDirection, endDateTime:1 } },
+        { $sort: { startDateTime:-1, endDateTime:-1 } },
         { $skip: skip },
         { $limit: Number(limit) }
     ])

@@ -6,6 +6,7 @@ import ScheduleModel from "../Schedule/schedule.model";
 import { ITablePayload, TTableQuery } from "./table.interface";
 import TableModel from "./table.model";
 import DiningModel from "../Dining/dining.model";
+import TableBookingModel from "../TableBooking/tableBooking.model";
 
 
 const createTableService = async (loginUserId: string, payload: ITablePayload) => {
@@ -35,7 +36,7 @@ const createTableService = async (loginUserId: string, payload: ITablePayload) =
         throw new AppError(404, "This dining does not belong to your restaurant, please add this dining to your restaurant")
     }
 
-
+     ///isssue table value creation
      //check table is already existed
      const tables = await TableModel.countDocuments({
         scheduleId,
@@ -273,16 +274,72 @@ const getTablesByScheduleAndDiningService = async (loginUserId: string, schedule
         scheduleId: new ObjectId(scheduleId),
         diningId: new ObjectId(diningId),
       },
+    },
+    {
+      $project: {
+        restaurantId:0,
+        ownerId:0,
+        createdAt:0,
+        updatedAt:0,
+        slug:0
+      }
     }
   ]);
 
 
-  return result;
+  return {
+    diningName:dining?.name,
+    startDateTime: schedule?.startDateTime,
+    endDateTime: schedule?.endDateTime,
+    tables:result
+  };
 
+}
+
+const deleteTableService = async (loginUserId: string, tableId: string) => {
+  const table = await TableModel.findOne({
+    _id:tableId,
+    ownerId: loginUserId
+  })
+
+  if(!table){
+    throw new AppError(404, "Table Not Found");
+  }
+   //check if tableId is associated with tableBooking
+   const associateWithTableBooking = await TableBookingModel.findOne({
+     tableId
+   });
+   if(associateWithTableBooking){
+       throw new AppError(409, 'Failled to delete, This Table is associated with Booking');
+   }
+
+   const result = await TableModel.deleteOne({ _id: tableId});
+   return result;
+}
+
+
+
+const updateTableService = async (loginUserId: string, tableId: string, payload: Partial<ITablePayload>) => {
+  const table = await TableModel.findOne({
+    _id:tableId,
+    ownerId: loginUserId
+  })
+
+  if(!table){
+    throw new AppError(404, "Table Not Found");
+  }
+
+  const result = await TableModel.updateOne(
+    { _id: tableId },
+    payload
+  );
+  return result;
 }
 
 export {
     createTableService,
     getTablesService,
-    getTablesByScheduleAndDiningService
+    getTablesByScheduleAndDiningService,
+    updateTableService,
+    deleteTableService
 }

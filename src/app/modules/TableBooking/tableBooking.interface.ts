@@ -4,6 +4,7 @@ export type ITableAvailability = "Immediate Seating" | "Waitlist";
 
 export interface ITableBooking {
     name: string;
+    token: string;
     guest: number;
     tableId: Types.ObjectId;
     scheduleId: Types.ObjectId;

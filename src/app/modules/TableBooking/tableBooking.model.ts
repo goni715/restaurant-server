@@ -30,6 +30,11 @@ const tableBookingSchema = new Schema<ITableBooking>(
       required: true,
       ref: "Restaurant",
     },
+    token: {
+      type: String,
+      minlength: [6, "Token must be 6 characters long"],
+      maxlength: [6, "Token must be 6 characters long"]
+    },
     guest: {
       type: Number,
       required: true,

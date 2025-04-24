@@ -256,6 +256,15 @@ const getTablesByScheduleAndDiningService = (loginUserId, scheduleId, diningId) 
                 scheduleId: new ObjectId_1.default(scheduleId),
                 diningId: new ObjectId_1.default(diningId),
             },
+        },
+        {
+            $project: {
+                restaurantId: 0,
+                ownerId: 0,
+                createdAt: 0,
+                updatedAt: 0,
+                slug: 0
+            }
         }
     ]);
     return result;

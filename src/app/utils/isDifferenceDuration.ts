@@ -1,16 +1,15 @@
-
-//check if difference between startDateTime & endDateTimeLimit = duration time
-//or check if difference between startDateTime & endDateTimeLimit is greater than duration time
-function isDifferenceDuration(startDateTimeLimit: any, endDateTimeLimit: any, duration:number) {
-    // Convert both dates to timestamps (milliseconds)
-    const diffInMs = Math.abs(new Date(endDateTimeLimit) - new Date(startDateTimeLimit));
-    console.log(diffInMs);
-
-    // Convert milliseconds to minutes
-    const diffInMinutes = diffInMs / (1000 * 60);
-    console.log(diffInMinutes);
-
-    return diffInMinutes === duration || diffInMinutes > duration;
-}
-
-export default isDifferenceDuration;
+function isDifferenceDuration(
+    startDateTimeLimit: string | Date,
+    endDateTimeLimit: string | Date,
+    duration: number
+  ): boolean {
+    const start = new Date(startDateTimeLimit).getTime();
+    const end = new Date(endDateTimeLimit).getTime();
+  
+    const diffInMinutes = Math.abs(end - start) / (1000 * 60);
+  
+    return diffInMinutes >= duration;
+  }
+  
+  export default isDifferenceDuration;
+  

@@ -15,12 +15,12 @@ router.post(
 );
 router.delete(
   "/delete-menu-review/:reviewId",
-  AuthMiddleware(UserRole.admin),
+  AuthMiddleware(UserRole.owner),
   MenuReviewController.deleteMenuReview
 );
 router.get(
   "/get-menu-reviews/:menuId",
-  AuthMiddleware(UserRole.admin),
+  AuthMiddleware(UserRole.owner),
   MenuReviewController.getMenuReviews
 );
 

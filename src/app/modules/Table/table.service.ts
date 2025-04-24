@@ -47,7 +47,7 @@ const createTableService = async (loginUserId: string, payload: ITablePayload) =
     const tableData: any[] = [];
 
     for (let i = 1; i <= Number(totalTable); i++) {
-      const tableName = `T${i + tables}`;
+      const tableName = `T-${i + tables}`;
       const slug = slugify(tableName).toLowerCase();
       tableData.push({
         name: tableName,

@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const config_1 = __importDefault(require("../config"));
 const verifyToken_1 = __importDefault(require("../utils/verifyToken"));
 const user_model_1 = __importDefault(require("../modules/User/user.model"));
+const isJWTIssuedBeforePassChanged_1 = require("../utils/isJWTIssuedBeforePassChanged");
 const AuthMiddleware = (...roles) => {
     return (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
         try {
@@ -24,11 +25,10 @@ const AuthMiddleware = (...roles) => {
                     success: false,
                     message: "You are not authorized",
                     error: {
-                        message: "jwt token must be provided"
-                    }
+                        message: "jwt token must be provided",
+                    },
                 });
             }
-            //console.log(token);
             //token-verify
             const decoded = (0, verifyToken_1.default)(token, config_1.default.jwt_access_secret);
             //check if role is matching
@@ -37,19 +37,41 @@ const AuthMiddleware = (...roles) => {
                     success: false,
                     message: "You are not authorized",
                     error: {
-                        message: `Please, provide ${roles.join(' or ')} token`
-                    }
+                        message: `Please, provide ${roles.map(role => `'${role}'`).join(" or ")} token`,
+                    },
                 });
             }
-            const user = yield user_model_1.default.findOne({ email: decoded.email });
+            const user = yield user_model_1.default.findById(decoded.id);
             //check if user is not exist
             if (!user) {
                 return res.status(401).json({
                     success: false,
                     message: "You are not authorized",
                     error: {
-                        message: "This user is not existed"
-                    }
+                        message: "This user is not existed",
+                    },
+                });
+            }
+            //check if the user is blocked
+            const blockStatus = user.status;
+            if (blockStatus === "blocked") {
+                return res.status(401).json({
+                    success: false,
+                    message: "You are not authorized",
+                    error: {
+                        message: "This user is blocked",
+                    },
+                });
+            }
+            //check if passwordChangedAt is greater than token iat
+            if ((user === null || user === void 0 ? void 0 : user.passwordChangedAt) &&
+                (0, isJWTIssuedBeforePassChanged_1.isJWTIssuedBeforePassChanged)(user === null || user === void 0 ? void 0 : user.passwordChangedAt, decoded.iat)) {
+                return res.status(401).json({
+                    success: false,
+                    message: "You are not authorized",
+                    error: {
+                        message: "Your password has been changed, please login again",
+                    },
                 });
             }
             req.user = decoded;

@@ -17,44 +17,46 @@ const hashedPassword_1 = __importDefault(require("../../utils/hashedPassword"));
 const userSchema = new mongoose_1.Schema({
     fullName: {
         type: String,
-        required: true,
+        required: [true, 'fullName is required'],
         trim: true
     },
     email: {
         type: String,
-        required: true,
+        required: [true, 'email is required'],
         unique: true,
         trim: true
     },
-    country: {
+    phone: {
         type: String,
-        required: true,
+        required: [true, 'phone is required'],
         trim: true
     },
-    university: {
+    address: {
         type: String,
-        required: true,
-        trim: true
-    },
-    profession: {
-        type: String,
-        required: true,
-        trim: true
+        default: ''
     },
     password: {
         type: String,
-        required: true,
+        required: [true, 'password is required'],
         select: 0
+    },
+    passwordChangedAt: {
+        type: Date,
     },
     role: {
         type: String,
-        enum: ['user', 'admin'],
-        default: 'user'
+        enum: ["user", "owner", "super_admin", "administrator"],
+        required: true
     },
-    xp: {
-        type: Number,
-        default: 0
-    }
+    status: {
+        type: String,
+        enum: ['blocked', 'unblocked'],
+        default: 'unblocked'
+    },
+    profileImg: {
+        type: String,
+        default: ''
+    },
 }, {
     timestamps: true,
     versionKey: false

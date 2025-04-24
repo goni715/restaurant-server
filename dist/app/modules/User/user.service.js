@@ -23,20 +23,31 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getSuggestedUsersService = void 0;
-const mongoose_1 = require("mongoose");
+exports.updateProfileImgService = exports.editMyProfileService = exports.getMeService = exports.getMeForSuperAdminService = exports.getSingleUserService = exports.getUsersService = exports.createUserService = void 0;
 const user_model_1 = __importDefault(require("./user.model"));
-const friend_model_1 = __importDefault(require("../Friend/friend.model"));
+const AppError_1 = __importDefault(require("../../errors/AppError"));
+const mongoose_1 = require("mongoose");
 const QueryBuilder_1 = require("../../helper/QueryBuilder");
 const user_constant_1 = require("./user.constant");
-const getSuggestedUsersService = (loginUserId, query) => __awaiter(void 0, void 0, void 0, function* () {
+const ObjectId_1 = __importDefault(require("../../utils/ObjectId"));
+const uploadImage_1 = __importDefault(require("../../utils/uploadImage"));
+const createUserService = (req, payload) => __awaiter(void 0, void 0, void 0, function* () {
+    const user = yield user_model_1.default.findOne({ email: payload.email });
+    if (user) {
+        throw new AppError_1.default(409, 'Email is already existed');
+    }
+    if (req.file) {
+        payload.profileImg = yield (0, uploadImage_1.default)(req);
+    }
+    const result = yield user_model_1.default.create(Object.assign(Object.assign({}, payload), { role: "user" }));
+    result.password = "";
+    return result;
+});
+exports.createUserService = createUserService;
+const getUsersService = (query) => __awaiter(void 0, void 0, void 0, function* () {
     const ObjectId = mongoose_1.Types.ObjectId;
     // 1. Extract query parameters
-    const { searchTerm, // Text to search
-    page = 1, // Default to page 1
-    limit = 10, // Default to 10 results per page // Default sort field
-    sortOrder = "desc", sortBy = "createdAt" } = query, // Default sort order
-    filters = __rest(query, ["searchTerm", "page", "limit", "sortOrder", "sortBy"]) // Any additional filters
+    const { searchTerm, page = 1, limit = 10, sortOrder = "desc", sortBy = "createdAt" } = query, filters = __rest(query, ["searchTerm", "page", "limit", "sortOrder", "sortBy"]) // Any additional filters
     ;
     // 2. Set up pagination
     const skip = (Number(page) - 1) * Number(limit);
@@ -52,54 +63,30 @@ const getSuggestedUsersService = (loginUserId, query) => __awaiter(void 0, void 
     if (filters) {
         filterQuery = (0, QueryBuilder_1.makeFilterQuery)(filters);
     }
-    //get friendIds
-    const data = yield friend_model_1.default.aggregate([
-        {
-            $match: { friends: { $in: [new ObjectId(loginUserId)] } },
-        },
-        {
-            $unwind: "$friends", // Unwind to process each friend separately
-        },
-        {
-            $match: { friends: { $ne: new ObjectId(loginUserId) } }, // Exclude the logged-in user
-        },
-        {
-            $group: {
-                _id: null,
-                friendIds: { $addToSet: "$friends" }, // Collect friend IDs into an array
-            },
-        },
-        {
-            $project: { _id: 0, friendIds: 1 }, // Return only the array of friend IDs
-        },
-    ]);
-    const friendIds = data.length > 0 ? data[0].friendIds : [];
     const result = yield user_model_1.default.aggregate([
         {
-            $match: Object.assign(Object.assign({ _id: {
-                    $nin: [...friendIds, new ObjectId(loginUserId)],
-                }, role: {
-                    $ne: "admin",
-                } }, searchQuery), filterQuery),
+            $match: Object.assign(Object.assign({ role: "user" }, searchQuery), filterQuery),
         },
         {
             $project: {
-                _id: "$_id",
-                fullName: "$fullName",
-                email: "$email",
-                country: "$country",
-                university: "$university",
-                profession: "$profession",
-                role: "$role",
-                createdAt: "$createdAt",
+                _id: 1,
+                fullName: 1,
+                email: 1,
+                phone: 1,
+                gender: 1,
+                role: 1,
+                status: 1,
+                profileImg: 1,
+                createdAt: 1,
+                updatedAt: 1,
             },
         },
-        { $sort: { [sortBy]: sortDirection } }, // Sorting
-        { $skip: skip }, // Pagination: Skip previous pages
-        { $limit: Number(limit) }, // Pagination: Limit the number of results
+        { $sort: { [sortBy]: sortDirection } },
+        { $skip: skip },
+        { $limit: Number(limit) },
     ]);
     // total count of matching users
-    const totalCount = yield user_model_1.default.countDocuments(Object.assign(Object.assign({ _id: { $nin: [...friendIds, new ObjectId(loginUserId)] }, role: { $ne: "admin" } }, searchQuery), filterQuery));
+    const totalCount = yield user_model_1.default.countDocuments(Object.assign(Object.assign({ role: "user" }, searchQuery), filterQuery));
     return {
         meta: {
             page: Number(page), //currentPage
@@ -110,4 +97,67 @@ const getSuggestedUsersService = (loginUserId, query) => __awaiter(void 0, void 
         data: result,
     };
 });
-exports.getSuggestedUsersService = getSuggestedUsersService;
+exports.getUsersService = getUsersService;
+const getSingleUserService = (userId) => __awaiter(void 0, void 0, void 0, function* () {
+    const user = yield user_model_1.default.findById(userId).select('-role -status -address');
+    if (!user) {
+        throw new AppError_1.default(404, "No User Found");
+    }
+    return user;
+});
+exports.getSingleUserService = getSingleUserService;
+const getMeForSuperAdminService = (userId) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a, _b, _c, _d, _e, _f, _g, _h, _j;
+    const result = yield user_model_1.default.aggregate([
+        {
+            $match: {
+                _id: new ObjectId_1.default(userId)
+            }
+        },
+        {
+            $lookup: {
+                from: "administrators",
+                localField: "_id",
+                foreignField: "userId",
+                as: "administrator"
+            }
+        },
+    ]);
+    const returnData = {
+        fullName: (_a = result[0]) === null || _a === void 0 ? void 0 : _a.fullName,
+        email: (_b = result[0]) === null || _b === void 0 ? void 0 : _b.email,
+        phone: (_c = result[0]) === null || _c === void 0 ? void 0 : _c.phone,
+        role: (_d = result[0]) === null || _d === void 0 ? void 0 : _d.role,
+        profileImg: (_e = result[0]) === null || _e === void 0 ? void 0 : _e.profileImg,
+        access: ((_g = (_f = result[0]) === null || _f === void 0 ? void 0 : _f.administrator) === null || _g === void 0 ? void 0 : _g.length) > 0 ? (_j = (_h = result[0]) === null || _h === void 0 ? void 0 : _h.administrator[0]) === null || _j === void 0 ? void 0 : _j.access : ["user", "dashboard", "restaurant", "settings"]
+    };
+    return returnData;
+});
+exports.getMeForSuperAdminService = getMeForSuperAdminService;
+const getMeService = (userId) => __awaiter(void 0, void 0, void 0, function* () {
+    const user = yield user_model_1.default.findById(userId);
+    if (!user) {
+        throw new AppError_1.default(404, "No User Found");
+    }
+    return user;
+});
+exports.getMeService = getMeService;
+const editMyProfileService = (req, loginUserId, payload) => __awaiter(void 0, void 0, void 0, function* () {
+    //upload the image
+    if (req.file) {
+        payload.profileImg = yield (0, uploadImage_1.default)(req);
+    }
+    const result = user_model_1.default.updateOne({ _id: loginUserId }, payload);
+    return result;
+});
+exports.editMyProfileService = editMyProfileService;
+const updateProfileImgService = (req, loginUserId) => __awaiter(void 0, void 0, void 0, function* () {
+    if (!req.file) {
+        throw new AppError_1.default(400, "image is required");
+    }
+    //uploaded-image
+    const image = yield (0, uploadImage_1.default)(req);
+    const result = yield user_model_1.default.updateOne({ _id: loginUserId }, { profileImg: image });
+    return result;
+});
+exports.updateProfileImgService = updateProfileImgService;

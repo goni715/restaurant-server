@@ -17,5 +17,6 @@ exports.default = {
     jwt_refresh_expires_in: process.env.JWT_REFRESH_EXPIRES_IN,
     smtp_username: process.env.SMTP_USERNAME,
     smtp_password: process.env.SMTP_PASSWORD,
-    smtp_from: process.env.SMTP_FROM
+    smtp_from: process.env.SMTP_FROM,
+    default_password: process.env.DEFAULT_PASSWORD
 };

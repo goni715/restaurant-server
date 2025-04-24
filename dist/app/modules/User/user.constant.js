@@ -3,14 +3,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserValidFields = exports.UserSearchFields = exports.UserRole = void 0;
 exports.UserRole = {
     user: 'user',
-    admin: 'admin',
+    owner: 'owner',
+    super_admin: 'super_admin',
+    administrator: "administrator"
 };
 exports.UserSearchFields = [
     "fullName",
     "email",
-    "country",
-    "university",
-    "profession"
+    "phone"
 ];
 exports.UserValidFields = [
     "searchTerm",
@@ -18,7 +18,6 @@ exports.UserValidFields = [
     "limit",
     "sortBy",
     "sortOrder",
-    "country",
-    "university",
-    "profession",
+    "status",
+    "gender"
 ];

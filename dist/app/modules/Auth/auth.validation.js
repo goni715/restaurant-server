@@ -1,35 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.changePasswordSchema = exports.forgotPassCreateNewPassSchema = exports.forgotPassVerifyOtpSchema = exports.forgotPassSendOtpSchema = exports.loginUserSchema = exports.registerUserSchema = void 0;
+exports.refreshTokenValidationSchema = exports.deleteAccountValidationSchema = exports.changeStatusValidationSchema = exports.changePasswordSchema = exports.forgotPassCreateNewPassSchema = exports.forgotPassVerifyOtpSchema = exports.forgotPassSendOtpSchema = exports.loginValidationSchema = void 0;
 const zod_1 = require("zod");
-exports.registerUserSchema = zod_1.z.object({
-    fullName: zod_1.z.string({
-        required_error: "Full Name is required",
-    }),
-    email: zod_1.z.string().email(),
-    country: zod_1.z.string({
-        required_error: "Country is required",
-    }),
-    university: zod_1.z.string({
-        required_error: "University is required",
-    }),
-    profession: zod_1.z.string({
-        required_error: "Profession is required",
-    }),
-    password: zod_1.z
-        .string({
-        required_error: "Password is required",
-    })
-        .min(6, "Password minimum 6 characters long")
-        .trim(),
-    role: zod_1.z
-        .enum(["user", "admin"], {
-        errorMap: () => ({ message: "{VALUE} is not supported" }),
-    })
-        .default("user"),
-});
-exports.loginUserSchema = zod_1.z.object({
-    email: zod_1.z.string().email(),
+exports.loginValidationSchema = zod_1.z.object({
+    email: zod_1.z.string({
+        required_error: "email is required"
+    }).email(),
     password: zod_1.z
         .string({
         required_error: "Password is required",
@@ -94,4 +70,22 @@ exports.changePasswordSchema = zod_1.z.object({
     })
         .min(6, "New Password minimum 6 characters long")
         .trim()
+});
+exports.changeStatusValidationSchema = zod_1.z.object({
+    status: zod_1.z.enum(["blocked", "unblocked"], {
+        errorMap: () => ({ message: "{VALUE} is not supported" }),
+    })
+});
+exports.deleteAccountValidationSchema = zod_1.z.object({
+    password: zod_1.z
+        .string({
+        required_error: "Password is required",
+    })
+        .min(6, "Password minimum 6 characters long")
+        .trim(),
+});
+exports.refreshTokenValidationSchema = zod_1.z.object({
+    refreshToken: zod_1.z.string({
+        required_error: 'Refresh token is required !'
+    })
 });

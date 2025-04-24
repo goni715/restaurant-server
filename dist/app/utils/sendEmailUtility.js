@@ -26,9 +26,9 @@ const sendEmailUtility = (EmailTo, EmailText) => __awaiter(void 0, void 0, void 
         },
     });
     const mailOptions = {
-        from: `Quiz App ${config_1.default.smtp_from}`, //sender email address//smtp-username
+        from: `Restaurant Management ${config_1.default.smtp_from}`, //sender email address//smtp-username
         to: EmailTo, //receiver email address
-        subject: "Quiz App Reset Password",
+        subject: "Restaurant Management Reset Password",
         html: `
              <p>Your Verification Code is: <span style="font-size: 16px; font-weight: bold;">${EmailText}</span>
               The OTP code is valid for 10 minutes.</p>`,

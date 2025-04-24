@@ -7,10 +7,10 @@ import SocialMediaController from './socialMedia.controller';
 
 const router = express.Router();
 
-router.post('/create-social-media', AuthMiddleware(UserRole.admin), validationMiddleware(socialMediaSchema), SocialMediaController.createSocialMedia);
-router.get('/get-social-media', AuthMiddleware(UserRole.admin), SocialMediaController.getSocialMedia);
-router.patch('/update-social-media', AuthMiddleware(UserRole.admin), validationMiddleware(socialMediaSchema), SocialMediaController.updateSocialMedia);
-router.delete('/delete-social-media', AuthMiddleware(UserRole.admin),  SocialMediaController.deleteSocialMedia);
+router.post('/create-social-media', AuthMiddleware(UserRole.owner), validationMiddleware(socialMediaSchema), SocialMediaController.createSocialMedia);
+router.get('/get-social-media', AuthMiddleware(UserRole.owner), SocialMediaController.getSocialMedia);
+router.patch('/update-social-media', AuthMiddleware(UserRole.owner), validationMiddleware(socialMediaSchema), SocialMediaController.updateSocialMedia);
+router.delete('/delete-social-media', AuthMiddleware(UserRole.owner),  SocialMediaController.deleteSocialMedia);
 
 
 export const SocialMediaRoutes = router;

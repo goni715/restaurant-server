@@ -4,33 +4,39 @@ const mongoose_1 = require("mongoose");
 const reviewSchema = new mongoose_1.Schema({
     userId: {
         type: mongoose_1.Schema.Types.ObjectId,
+        required: true,
         ref: "User",
-        required: true,
-        trim: true
     },
-    quizId: {
+    restaurantId: {
         type: mongoose_1.Schema.Types.ObjectId,
-        ref: "Quiz",
         required: true,
-        trim: true
+        ref: "Restaurant",
     },
-    intervalTimes: {
-        type: [Number],
-        default: [24, 48, 72, 144, 288, 576]
-    }, // 6 intervals in hours
-    lastReviewed: {
-        type: Date,
-        default: Date.now
+    star: {
+        type: Number,
+        required: true,
+        trim: true,
+        min: [0.5, "Rating must be at least 0.5"],
+        max: [5, "Rating must not exceed 5"],
+        validate: {
+            validator: (value) => value % 0.5 === 0,
+            message: "Rating must be in increments of 0.5",
+        },
     },
-    nextReview: {
-        type: Date,
-        default: function () { return new Date(Date.now() + 24 * 60 * 60 * 1000); }
-    }, // Next review 24h later
-    status: {
+    comment: {
         type: String,
-        enum: ["pending", "completed"],
-        default: "pending"
+        required: true,
+        trim: true,
+        minlength: [5, "Comment must be at least 5 characters long"],
+        maxlength: [500, "Comment cannot exceed 500 characters"],
     },
+    hidden: {
+        type: Boolean,
+        default: false
+    }
+}, {
+    timestamps: true,
+    versionKey: false,
 });
-const ReviewModel = (0, mongoose_1.model)('Review', reviewSchema);
+const ReviewModel = (0, mongoose_1.model)("Review", reviewSchema);
 exports.default = ReviewModel;

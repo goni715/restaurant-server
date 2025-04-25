@@ -8,6 +8,7 @@ export interface ITableBooking {
     guest: number;
     tableId: Types.ObjectId;
     scheduleId: Types.ObjectId;
+    ownerId: Types.ObjectId;
     diningId: Types.ObjectId;
     restaurantId: Types.ObjectId;
     availability: ITableAvailability;

@@ -25,6 +25,11 @@ const tableBookingSchema = new Schema<ITableBooking>(
       required: true,
       ref: "Dining"
     },
+    ownerId: {
+      type: Schema.Types.ObjectId,
+      required: true,
+      ref: "User",
+    },
     restaurantId: {
       type: Schema.Types.ObjectId,
       required: true,
@@ -43,8 +48,11 @@ const tableBookingSchema = new Schema<ITableBooking>(
     availability: {
       type: String,
       required: true,
-      enum: ["Immediate Seating", "Open Reservations", "Waitlist"],
-      default: "Immediate Seating"
+      default: "Waitlist",
+      enum: {
+        values: ["Immediate Seating", "Booked", "Waitlist", "Completed"],
+        message: '{VALUE} is not supported'
+      }
     },
   },
   {

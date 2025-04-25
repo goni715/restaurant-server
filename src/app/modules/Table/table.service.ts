@@ -387,23 +387,21 @@ const updateTableService = async (loginUserId: string, tableId: string, payload:
     const tableExist = await TableModel.findOne({
       _id: { $ne: tableId },
       slug,
-      scheduleId: { $ne: table.scheduleId},
-      diningId: { $ne: table.diningId},
+      scheduleId: table.scheduleId,
+      diningId: table.diningId,
     });
-
-    console.log(tableExist);
     if (tableExist) {
-      throw new AppError(409, "Sorry! This Table is already existed");
+      throw new AppError(409, "Sorry! This Table is already existed !");
     }
   }
 
 
-  // const result = await TableModel.updateOne(
-  //   { _id: tableId },
-  //   payload,
-  //   { runValidators:true } //mongoose valid will be working, When you want to update
-  // );
-  return "result";
+  const result = await TableModel.updateOne(
+    { _id: tableId },
+    payload,
+    { runValidators:true } //mongoose valid will be working, When you want to update
+  );
+  return result;
 }
 
 export {

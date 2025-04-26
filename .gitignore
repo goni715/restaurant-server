@@ -1,5 +1,4 @@
 node_modules
 .env
 src/app/modules/Auth/auth.controller.ts
-dist
 uploads

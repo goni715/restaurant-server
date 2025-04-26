@@ -22,7 +22,7 @@ jobs:
           echo "Github Workspace:"
           echo $GITHUB_WORKSPACE
 
-  build-and-deploy:
+  build:
     name: Build App
     runs-on: ubuntu-latest
     needs: [server-check]
@@ -41,12 +41,6 @@ jobs:
       - name: Build Application
         run: yarn build
 
-      - name: Check if dist/ and server.js exist
-        run: |
-          echo "Checking if dist/ folder and server.js exist..."
-          ls -al dist || echo "dist/ directory not found"
-          ls -al dist/server.js || echo "server.js not found in dist/"
-
       - name: Cache node_modules
         uses: actions/cache@v3
         with:
@@ -57,13 +51,21 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-yarn-
 
+  deploy:
+    name: Deploy to AWS EC2
+    runs-on: ubuntu-latest
+    needs: [build]
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
       - name: Deploy dist/ to EC2
         uses: appleboy/scp-action@v0.1.4
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          source: "dist ecosystem.config.json"
+          source: "dist"
           target: "/var/www/restaurant-backend"
 
       - name: SSH run remote script

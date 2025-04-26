@@ -76,6 +76,15 @@ jobs:
       - name: Build Application
         run: yarn build
 
+      - name: Clean remote directory before deploy
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            rm -rf /var/www/restaurant-backend/dist
+
       - name: Deploy dist/ to EC2
         uses: appleboy/scp-action@v0.1.4
         with:

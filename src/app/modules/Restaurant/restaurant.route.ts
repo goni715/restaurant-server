@@ -27,6 +27,13 @@ router.get(
   AuthMiddleware("super_admin", "administrator"),
   RestaurantController.getRestaurants
 );
+
+router.get(
+  "/find-nearby-restaurants",
+  AuthMiddleware("user"),
+  RestaurantController.findNearbyRestaurants
+);
+
 router.get(
   "/get-single-restaurant/:restaurantId",
   AuthMiddleware("super_admin", "administrator", "user"),

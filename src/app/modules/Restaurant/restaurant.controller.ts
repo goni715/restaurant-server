@@ -1,8 +1,8 @@
 import catchAsync from "../../utils/catchAsync";
 import pickValidFields from "../../utils/pickValidFields";
 import sendResponse from "../../utils/sendResponse";
-import { RestaurantValidFields, UserRestaurantValidFields } from "./restaurant.constant";
-import { approveRestaurantService, changeRestaurantStatusService, createRestaurantService, deleteRestaurantService, getOwnerRestaurantService, getRestaurantsService, getSingleRestaurantService, getUserRestaurantsService, updateRestaurantImgService, updateRestaurantService } from "./restaurant.service";
+import { NearbyValidFields, RestaurantValidFields, UserRestaurantValidFields } from "./restaurant.constant";
+import { approveRestaurantService, changeRestaurantStatusService, createRestaurantService, deleteRestaurantService, findNearbyRestaurantsService, getOwnerRestaurantService, getRestaurantsService, getSingleRestaurantService, getUserRestaurantsService, updateRestaurantImgService, updateRestaurantService } from "./restaurant.service";
 
 
 
@@ -31,7 +31,16 @@ const getRestaurants = catchAsync(async (req, res) => {
   });
 });
 
-
+const findNearbyRestaurants = catchAsync(async (req, res) => {
+  const validatedQuery = pickValidFields(req.query, NearbyValidFields);
+  const result = await findNearbyRestaurantsService(validatedQuery);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Restaurants are retrieved successfully",
+    data: result
+  });
+});
 
 const getUserRestaurants = catchAsync(async (req, res) => {
   const validatedQuery = pickValidFields(req.query, UserRestaurantValidFields);
@@ -68,6 +77,8 @@ const getSingleRestaurant = catchAsync(async (req, res) => {
     data: result
   });
 });
+
+
 
 
 
@@ -141,6 +152,7 @@ const RestaurantController = {
     getOwnerRestaurant,
     changeRestaurantStatus,
     getSingleRestaurant,
+    findNearbyRestaurants,
     approveRestaurant,
     updateRestaurant,
     updateRestaurantImg,

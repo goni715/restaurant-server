@@ -53,6 +53,11 @@ export type TRestaurantQuery = {
   status?: TRestaurantStatus
 };
 
+export type INearbyQuery = {
+  longitude: number;
+  latitude: number;
+}
+
 
 export type TUserRestaurantQuery = {
   searchTerm?: string;

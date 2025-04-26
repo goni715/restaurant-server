@@ -33,7 +33,7 @@ export const RestaurantValidFields: string[] = [
 
 export const NearbyValidFields: string[] = [
   "longitude",
-  "latitude",
+  "latitude"
 ];
 
 

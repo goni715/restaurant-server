@@ -54,8 +54,8 @@ export type TRestaurantQuery = {
 };
 
 export type INearbyQuery = {
-  longitude: number;
-  latitude: number;
+  longitude?: number;
+  latitude?: number;
 }
 
 

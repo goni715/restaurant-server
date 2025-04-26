@@ -475,7 +475,7 @@ const getSingleRestaurantService = async (restaurantId: string) => {
 
 const findNearbyRestaurantsService = async (query: INearbyQuery)=> {
   const { longitude, latitude } = query; // get from query params
-  const radius = 50; //5 kilometers
+  const radius = 20; //5 kilometers
   const earthRadiusInKm = 6378.1;
 
     if (!longitude || !latitude) {

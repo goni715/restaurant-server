@@ -1,102 +1,71 @@
-name: CICD Pipeline - Build & Deploy to AWS EC2
+name: Deploy to EC2  
+on:  
+  push:  
+    branches:  
+      - main  
 
-on:
-  push:
-    branches:
-      - main
-  workflow_dispatch:
+env:
+  DEPLOY_PATH: /var/www/restaurant-backend
 
-jobs:
-  server-check:
-    name: Server Check
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check system info
-        run: |
-          echo "Node Version:"
-          node -v
-          echo "Git Version:"
-          git --version
-          echo "Current Directory:"
-          whoami && pwd && ls -a
-          echo "Github Workspace:"
-          echo $GITHUB_WORKSPACE
+jobs:  
+  deploy:  
+    runs-on: ubuntu-latest  
+    steps:  
+      - name: Checkout code  
+        uses: actions/checkout@v4  
+      - name: Set up Node.js  
+        uses: actions/setup-node@v2  
+        with:  
+          node-version: 20 
+      - name: Install dependencies  
+        run: npm install  
 
-  build:
-    name: Build App
-    runs-on: ubuntu-latest
-    needs: [server-check]
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
+      - name: Build TypeScript project
+        run: npm run build  
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
+      - name: Check SSH connection  
+        uses: appleboy/ssh-action@v1.0.3  
+        with:  
+          host: ${{ secrets.EC2_HOST }}  
+          username: ${{ secrets.EC2_USER }}  
+          key: ${{ secrets.EC2_SSH_KEY }}  
+          script: |  
+            echo "SSH connection successful"  
+            whoami  
+            
+      - name: Create target directory  
+        uses: appleboy/ssh-action@v1.0.3  
+        with:  
+          host: ${{ secrets.EC2_HOST }}  
+          username: ${{ secrets.EC2_USER }}  
+          key: ${{ secrets.EC2_SSH_KEY }}  
+          script: |  
+            sudo mkdir -p ${{ env.DEPLOY_PATH }}
+            sudo chown -R ${{ secrets.EC2_USER }}:${{ secrets.EC2_USER }} ${{ env.DEPLOY_PATH }}
 
-      - name: Install Dependencies
-        run: yarn install --frozen-lockfile
-
-      - name: Build Application
-        run: yarn build
-
-      - name: Cache node_modules
-        uses: actions/cache@v3
-        with:
-          path: |
-            node_modules
-            .yarn/cache
-          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-yarn-
-
-  deploy:
-    name: Deploy to AWS EC2
-    runs-on: ubuntu-latest
-    needs: [build]
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-  
-      - name: Install Dependencies
-        run: yarn install --frozen-lockfile
-  
-      - name: Build Application
-        run: yarn build
-
-      - name: Clean remote directory before deploy
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          script: |
-            rm -rf /var/www/restaurant-backend/dist
-
-      - name: Deploy dist/ to EC2
+            
+      - name: Deploy to EC2  
         uses: appleboy/scp-action@v0.1.4
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          source: "dist"
-          target: "/var/www/restaurant-backend"
-          overwrite: true
+        with:  
+          host: ${{ secrets.EC2_HOST }}  
+          username: ${{ secrets.EC2_USER }}  
+          key: ${{ secrets.EC2_SSH_KEY }}  
+          source: ".,!.git,!node_modules"  
+          target: ${{ env.DEPLOY_PATH }}
+          strip_components: 1  
+          overwrite: true  
 
-      - name: SSH run remote script
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          script: |
-            cd /var/www/restaurant-backend
-            yarn install --production
-            pm2 reload ecosystem.config.json --only restaurant-backend || pm2 start ecosystem.config.json
-            pm2 save
+
+      - name: Setup and run application  
+        uses: appleboy/ssh-action@v1.0.3  
+        with:  
+          host: ${{ secrets.EC2_HOST }}  
+          username: ${{ secrets.EC2_USER }}  
+          key: ${{ secrets.EC2_SSH_KEY }}  
+          script: |  
+            export NVM_DIR="/home/${{ secrets.EC2_USER }}/.nvm"  
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  
+            [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  
+            cd ${{ env.DEPLOY_PATH }} 
+  
+            pm2 reload dist/server.js --name restaurant-backend || pm2 start dist/server.js --name restaurant-backend

@@ -18,6 +18,12 @@ export interface ITablePayload {
     seats: number;
 }
 
+export interface IUpdateTablePayload {
+    name: string;
+    slug: string;
+    seats: number;
+}
+
 export type TTableQuery = {
     page?: string;
     limit?: string;

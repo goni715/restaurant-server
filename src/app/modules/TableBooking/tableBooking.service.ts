@@ -6,7 +6,7 @@ import TableBookingModel from "./tableBooking.model"
 
 
 const createTableBookingService = async (loginUserId:string, payload: ITableBooking) => {
-    const {name, tableId, guest } = payload;
+    const {name, token, tableId, guest, availability } = payload;
     const table = await TableModel.findOne({
         _id: tableId,
         ownerId: loginUserId
@@ -34,11 +34,14 @@ const createTableBookingService = async (loginUserId:string, payload: ITableBook
     //create the tableBooking
     const newBooking = await TableBookingModel.create([{
         name,
+        token,
         guest,
         tableId,
         scheduleId: table.scheduleId,
+        ownerId: table.ownerId,
         restaurantId: table.restaurantId,
         diningId: table.diningId,
+        availability
     }], { session });
 
 
@@ -62,6 +65,11 @@ const createTableBookingService = async (loginUserId:string, payload: ITableBook
    }
 }
 
+const getTableBookingsService = async () => {
+    
+}
+
 export {
-    createTableBookingService
+    createTableBookingService,
+    getTableBookingsService
 }

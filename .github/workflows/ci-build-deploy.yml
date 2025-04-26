@@ -41,6 +41,12 @@ jobs:
       - name: Build Application
         run: yarn build
 
+      - name: Check if dist/ and server.js exist
+        run: |
+          echo "Checking if dist/ folder and server.js exist..."
+          ls -al dist || echo "dist/ directory not found"
+          ls -al dist/server.js || echo "server.js not found in dist/"
+
       - name: Cache node_modules
         uses: actions/cache@v3
         with:

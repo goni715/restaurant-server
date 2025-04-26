@@ -24,8 +24,12 @@ const OtpSchema = new Schema<IOtp>(
       type: Date,
       default: () => new Date(+new Date() + 600000), // 10 minutes // OTP Code Will be expired within 10 minutes
     },
+    createdAt: { //TTL (Time-To-Live) index
+      type: Date,
+      default: Date.now,
+      expires: 600, // seconds → 600s = 10 minutes
+    },
   },
-  { timestamps: true, versionKey: false }
 );
 
 const OtpModel = model<IOtp>("Otp", OtpSchema);

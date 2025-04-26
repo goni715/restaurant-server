@@ -3,9 +3,10 @@ import AppError from "../../errors/AppError";
 import ObjectId from "../../utils/ObjectId";
 import RestaurantModel from "../Restaurant/restaurant.model";
 import ScheduleModel from "../Schedule/schedule.model";
-import { ITablePayload, TTableQuery } from "./table.interface";
+import { ITablePayload, IUpdateTablePayload, TTableQuery } from "./table.interface";
 import TableModel from "./table.model";
 import DiningModel from "../Dining/dining.model";
+import TableBookingModel from "../TableBooking/tableBooking.model";
 
 
 const createTableService = async (loginUserId: string, payload: ITablePayload) => {
@@ -35,19 +36,51 @@ const createTableService = async (loginUserId: string, payload: ITablePayload) =
         throw new AppError(404, "This dining does not belong to your restaurant, please add this dining to your restaurant")
     }
 
-
      //check table is already existed
-     const tables = await TableModel.countDocuments({
-        scheduleId,
-        ownerId:loginUserId,
-        restaurantId: restaurant._id,
-        diningId,
-    });
+     const tables = await TableModel.aggregate([
+      {
+        $match: {
+          scheduleId: new ObjectId(scheduleId),
+          ownerId: new ObjectId(loginUserId),
+          restaurantId: new ObjectId(restaurant._id),
+          diningId: new ObjectId(diningId),
+        }
+      },
+      {
+        $addFields: {
+          nameNumber: {
+            $toInt: {
+              $arrayElemAt: [
+                { $split: ["$name", "-"] },
+                1
+              ]
+            }
+          }
+        }
+      },
+      {
+        $sort: {
+          nameNumber: 1
+        }
+      },
+     ])
+ 
+
+
+    //existingTotalTable based on this scheduleId & diningId
+    let existingTotalTable:number = 0;
+    if(tables.length > 0){
+      const lastTable = tables[tables.length - 1];
+      const lastTableName = lastTable?.name;
+      const lastTableNumber = lastTableName.split("-")[1]
+      existingTotalTable = Number(lastTableNumber);
+    }
+
 
     const tableData: any[] = [];
 
     for (let i = 1; i <= Number(totalTable); i++) {
-      const tableName = `T${i + tables}`;
+      const tableName = `T-${Number(i + existingTotalTable)}`;
       const slug = slugify(tableName).toLowerCase();
       tableData.push({
         name: tableName,
@@ -273,16 +306,108 @@ const getTablesByScheduleAndDiningService = async (loginUserId: string, schedule
         scheduleId: new ObjectId(scheduleId),
         diningId: new ObjectId(diningId),
       },
+    },
+    {
+      $addFields: {
+        nameNumber: {
+          $toInt: {
+            $arrayElemAt: [
+              { $split: ["$name", "-"] },
+              1
+            ]
+          }
+        }
+      }
+    },
+    {
+      $sort: {
+        nameNumber: 1
+      }
+    },
+    {
+      $project: {
+        restaurantId:0,
+        ownerId:0,
+        createdAt:0,
+        updatedAt:0,
+        slug:0
+      }
     }
   ]);
 
 
-  return result;
+  return {
+    diningName:dining?.name,
+    startDateTime: schedule?.startDateTime,
+    endDateTime: schedule?.endDateTime,
+    tables:result
+  };
 
+}
+
+const deleteTableService = async (loginUserId: string, tableId: string) => {
+  const table = await TableModel.findOne({
+    _id:tableId,
+    ownerId: loginUserId
+  })
+
+  if(!table){
+    throw new AppError(404, "Table Not Found");
+  }
+   //check if tableId is associated with tableBooking
+   const associateWithTableBooking = await TableBookingModel.findOne({
+     tableId
+   });
+   if(associateWithTableBooking){
+       throw new AppError(409, 'Failled to delete, This Table is associated with Booking');
+   }
+
+   const result = await TableModel.deleteOne({ _id: tableId});
+   return result;
+}
+
+
+
+const updateTableService = async (loginUserId: string, tableId: string, payload: Partial<IUpdateTablePayload>) => {
+  const table = await TableModel.findOne({
+    _id:tableId,
+    ownerId: loginUserId
+  })
+
+  if(!table){
+    throw new AppError(404, "Table Not Found");
+  }
+
+ 
+  //update the table name
+  //check this table name is existing with other schedule & dining
+  if(payload?.name){
+    const slug = slugify(payload?.name).toLowerCase();
+    payload.slug = slug;
+    const tableExist = await TableModel.findOne({
+      _id: { $ne: tableId },
+      slug,
+      scheduleId: table.scheduleId,
+      diningId: table.diningId,
+    });
+    if (tableExist) {
+      throw new AppError(409, "Sorry! This Table is already existed !");
+    }
+  }
+
+
+  const result = await TableModel.updateOne(
+    { _id: tableId },
+    payload,
+    { runValidators:true } //mongoose valid will be working, When you want to update
+  );
+  return result;
 }
 
 export {
     createTableService,
     getTablesService,
-    getTablesByScheduleAndDiningService
+    getTablesByScheduleAndDiningService,
+    updateTableService,
+    deleteTableService
 }

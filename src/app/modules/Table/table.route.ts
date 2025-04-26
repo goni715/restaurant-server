@@ -3,7 +3,7 @@ import AuthMiddleware from "../../middlewares/AuthMiddleware";
 import { UserRole } from "../User/user.constant";
 import validationMiddleware from "../../middlewares/validationMiddleware";
 import TableController from "./table.controller";
-import { createTableValidationSchema } from "./table.validation";
+import { createTableValidationSchema, updateTableValidationSchema } from "./table.validation";
 
 const router = express.Router();
 
@@ -24,6 +24,19 @@ router.get(
   "/get-tables-by-schedule-and-dining/:scheduleId/:diningId",
   AuthMiddleware(UserRole.owner),
   TableController.getTablesByScheduleAndDining
+);
+
+router.delete(
+  "/delete-table/:tableId",
+  AuthMiddleware(UserRole.owner),
+  TableController.deleteTable
+);
+
+router.patch(
+  "/update-table/:tableId",
+  AuthMiddleware(UserRole.owner),
+  validationMiddleware(updateTableValidationSchema),
+  TableController.updateTable
 );
 
 export const TableRoutes = router;

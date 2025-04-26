@@ -2,7 +2,7 @@ import catchAsync from "../../utils/catchAsync";
 import pickValidFields from "../../utils/pickValidFields";
 import sendResponse from "../../utils/sendResponse";
 import { UserValidFields } from "./user.constant";
-import { createUserService, editMyProfileService, getMeForSuperAdminService, getMeService, getSingleUserService, getUsersService, updateProfileImgService } from "./user.service";
+import { createOwnerService, createUserService, editMyProfileService, getMeForSuperAdminService, getMeService, getSingleUserService, getUsersService, updateProfileImgService } from "./user.service";
 
 
 const createUser = catchAsync(async (req, res) => {
@@ -14,6 +14,18 @@ const createUser = catchAsync(async (req, res) => {
     data: result
   })
 })
+
+
+
+const createOwner = catchAsync(async (req, res) => {
+  const result = await createOwnerService(req, req.body);
+  sendResponse(res, {
+    statusCode: 201,
+    success: true,
+    message: "Owner is created successfully",
+    data: result,
+  });
+});
 
 
 const getUsers = catchAsync(async (req, res) => {
@@ -95,6 +107,7 @@ const updateProfileImg = catchAsync(async (req, res) => {
 
 const UserController = {
     createUser,
+    createOwner,
     getUsers,
     getSingleUser,
     getMe,

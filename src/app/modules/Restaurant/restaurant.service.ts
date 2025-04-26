@@ -1,6 +1,6 @@
 import mongoose, { Types } from "mongoose";
 import AppError from "../../errors/AppError";
-import { IChangeApprovalStatus, IChangeRestaurantStatus, IRestaurant, TApprovedStatus, TRestaurantQuery, TRestaurantStatus, TUserRestaurantQuery } from "./restaurant.interface";
+import { IChangeApprovalStatus, IChangeRestaurantStatus, IRestaurant, IRestaurantPayload, TApprovedStatus, TRestaurantQuery, TRestaurantStatus, TUserRestaurantQuery } from "./restaurant.interface";
 import RestaurantModel from "./restaurant.model";
 import { makeFilterQuery, makeSearchQuery } from "../../helper/QueryBuilder";
 import { RestaurantSearchFields, UserRestaurantSearchFields } from "./restaurant.constant";
@@ -17,15 +17,17 @@ import { INotification } from "../Notification/notification.interface";
 import NotificationModel from "../Notification/notification.model";
 import ObjectId from "../../utils/ObjectId";
 import uploadImage from "../../utils/uploadImage";
+import slugify from "slugify";
 
 
 
 const createRestaurantService = async (
   req:Request,
   ownerId: string,
-  payload: IRestaurant
+  payload: IRestaurantPayload
 ) => {
-  const { name } = payload;
+  const { name, longitude, latitude, ...restData } = payload;
+  const slug = slugify(name).toLowerCase();
 
   //check restaurant owner is already exist
   const owner = await RestaurantModel.findOne({ ownerId });
@@ -34,21 +36,35 @@ const createRestaurantService = async (
   }
 
   //check restaurant
-  const restaurant = await RestaurantModel.findOne({ name });
+  const restaurant = await RestaurantModel.findOne({ slug });
   if (restaurant) {
     throw new AppError(409, "This restaurant name is already taken or existed");
   }
 
-  if(!req.file){
-    throw new AppError(400, "image is required");
-  }
+  // if(!req.file){
+  //   throw new AppError(400, "image is required");
+  // }
+
+
+  const newRestaurantData :IRestaurant = {
+    name,
+    slug,
+    ownerId: new ObjectId(ownerId),
+    ...restData,
+    location: {
+      type: 'Point',
+      coordinates:[longitude, latitude]
+    }
+  };
+
+  //upload the image
   if (req.file) {
-    payload.restaurantImg = await uploadImage(req);
+    newRestaurantData.restaurantImg = await uploadImage(req);
   }
 
 
   //create the restaurant
-  const result = await RestaurantModel.create({ ...payload, ownerId });
+  const result = await RestaurantModel.create({ ...newRestaurantData });
   return result;
 };
 

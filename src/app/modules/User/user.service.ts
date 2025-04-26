@@ -29,6 +29,24 @@ const createUserService = async (req:Request, payload: IUser) => {
   return result;
 }
 
+const createOwnerService = async (req: Request, payload: IUser) => {
+  const user = await UserModel.findOne({ email: payload.email });
+  if (user) {
+    throw new AppError(409, "Email is already existed");
+  }
+
+  if (req.file) {
+    payload.profileImg = await uploadImage(req);
+  }
+
+  const result = await UserModel.create({
+    ...payload,
+    role: "owner",
+  });
+
+  result.password = "";
+  return result;
+};
 
 const getUsersService = async (query: TUserQuery) => {
   const ObjectId = Types.ObjectId;
@@ -188,4 +206,13 @@ const updateProfileImgService = async (req:Request, loginUserId: string) => {
 };
 
 
-export { createUserService, getUsersService, getSingleUserService, getMeForSuperAdminService, getMeService, editMyProfileService, updateProfileImgService };
+export {
+  createUserService,
+  createOwnerService,
+  getUsersService,
+  getSingleUserService,
+  getMeForSuperAdminService,
+  getMeService,
+  editMyProfileService,
+  updateProfileImgService,
+};

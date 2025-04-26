@@ -13,10 +13,10 @@ router.post(
   "/create-restaurant",
   AuthMiddleware(UserRole.owner),
   upload.single('file'),
-  (req: Request, res: Response, next: NextFunction) => {
-    req.body = JSON.parse(req.body.data);
-    next();
-  },
+  // (req: Request, res: Response, next: NextFunction) => {
+  //   req.body = JSON.parse(req.body.data);
+  //   next();
+  // },
   validationMiddleware(createRestaurantValidationSchema),
   RestaurantController.createRestaurant
 );

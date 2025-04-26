@@ -4,10 +4,10 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon src/server.ts",
+    "start": "node dist/server.js",
     "dev": "ts-node-dev --respawn --transpile-only ./src/server.ts",
     "create:module": "node create-module.js",
-    "build": "tsc --w"
+    "build": "tsc"
   },
   "keywords": [],
   "author": "",

@@ -1,0 +1,81 @@
+name: CICD Pipeline - Build & Deploy to AWS EC2
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  server-check:
+    name: Server Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check system info
+        run: |
+          echo "Node Version:"
+          node -v
+          echo "Git Version:"
+          git --version
+          echo "Current Directory:"
+          whoami && pwd && ls -a
+          echo "Github Workspace:"
+          echo $GITHUB_WORKSPACE
+
+  build:
+    name: Build App
+    runs-on: ubuntu-latest
+    needs: [server-check]
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Build Application
+        run: yarn build
+
+      - name: Cache node_modules
+        uses: actions/cache@v3
+        with:
+          path: |
+            node_modules
+            .yarn/cache
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+
+  deploy:
+    name: Deploy to AWS EC2
+    runs-on: ubuntu-latest
+    needs: [build]
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Deploy dist/ to EC2
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: "dist ecosystem.config.json"
+          target: "/var/www/restaurant-backend"
+
+      - name: SSH run remote script
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd /var/www/restaurant-backend
+            yarn install --production
+            pm2 reload ecosystem.config.json --only restaurant-backend || pm2 start ecosystem.config.json
+            pm2 save

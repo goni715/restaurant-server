@@ -78,6 +78,7 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           source: "dist"
           target: "/var/www/restaurant-backend"
+          overwrite: true
 
       - name: SSH run remote script
         uses: appleboy/ssh-action@v1.0.3

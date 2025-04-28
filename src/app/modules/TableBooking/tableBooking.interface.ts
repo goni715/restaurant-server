@@ -1,6 +1,6 @@
 import { Types } from "mongoose";
 
-export type ITableAvailability = "Immediate Seating" | "Waitlist";
+export type ITableAvailability = "Waitlist" | "Seating" | "Booked" | "Completed";
 
 export interface ITableBooking {
     name: string;

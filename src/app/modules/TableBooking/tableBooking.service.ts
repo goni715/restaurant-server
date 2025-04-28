@@ -219,7 +219,44 @@ return {
 
 }
 
+
+const changeAvailabilityService = async (loginUserId: string, tableBookingId:string, payload: { availability: "Seating" | "Waitlist" }) => {
+
+  const tableBooking = await TableBookingModel.findOne({
+    _id: tableBookingId,
+    ownerId: loginUserId
+  });
+  if(!tableBooking){
+    throw new AppError(404, "Table Booking Not Found");
+  }
+
+   const result = await TableBookingModel.updateOne(
+    { _id: new ObjectId(tableBookingId), ownerId: loginUserId },
+    payload
+   );
+
+   return result;
+}
+
+const deleteTableBookingService = async (loginUserId: string, tableBookingId: string) => {
+  const tableBooking = await TableBookingModel.findOne({
+    _id: tableBookingId,
+    ownerId: loginUserId
+  });
+  if(!tableBooking){
+    throw new AppError(404, "Table Booking Not Found");
+  }
+
+ const result = await TableBookingModel.deleteOne({
+  _id: tableBookingId,
+  ownerId: loginUserId
+ })
+ return result;
+}
+
 export {
     createTableBookingService,
-    getTableBookingsService
+    getTableBookingsService,
+    changeAvailabilityService,
+    deleteTableBookingService 
 }

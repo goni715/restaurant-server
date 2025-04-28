@@ -13,3 +13,12 @@ export interface ITableBooking {
     restaurantId: Types.ObjectId;
     availability: ITableAvailability;
 }
+
+export type TTableBookingQuery = {
+    searchTerm?:string,
+    page?: string;
+    limit?: string;
+    sortBy?: string;
+    sortOrder?: 'asc' | 'desc';
+    date?: string;
+};

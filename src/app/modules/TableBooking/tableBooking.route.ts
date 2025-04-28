@@ -10,8 +10,14 @@ const router = express.Router();
 router.post(
   "/create-table-booking",
   AuthMiddleware(UserRole.owner),
- // validationMiddleware(createTableBookingSchema),
+ validationMiddleware(createTableBookingSchema),
   TableBookingController.createTableBooking
+);
+
+router.get(
+  "/get-table-bookings",
+  AuthMiddleware(UserRole.owner),
+  TableBookingController.getTableBookings
 );
 
 

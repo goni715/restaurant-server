@@ -124,6 +124,81 @@ const getUsersService = async (query: TUserQuery) => {
   };
 }
 
+const getOwnersService = async (query: TUserQuery) => {
+  // 1. Extract query parameters
+  const {
+    searchTerm, 
+    page = 1, 
+    limit = 10, 
+    sortOrder = "desc",
+    sortBy = "createdAt", 
+    ...filters  // Any additional filters
+  } = query;
+
+  // 2. Set up pagination
+  const skip = (Number(page) - 1) * Number(limit);
+
+  //3. setup sorting
+  const sortDirection = sortOrder === "asc" ? 1 : -1;
+
+  //4. setup searching
+  let searchQuery = {};
+  if (searchTerm) {
+    searchQuery = makeSearchQuery(searchTerm, UserSearchFields);
+  }
+
+  //5 setup filters
+  let filterQuery = {};
+  if (filters) {
+    filterQuery = makeFilterQuery(filters);
+  }
+
+
+  const result = await UserModel.aggregate([
+    {
+      $match: {
+        role: "owner",
+        ...searchQuery, // Apply search query
+        ...filterQuery, // Apply filters
+      },
+    },
+    {
+      $project: {
+        _id: 1,
+        fullName: 1,
+        email: 1,
+        phone: 1,
+        gender:1,
+        role: 1,
+        status: 1,
+        profileImg: 1,
+        createdAt: 1,
+        updatedAt: 1,
+      },
+    },
+    { $sort: { [sortBy]: sortDirection } }, 
+    { $skip: skip }, 
+    { $limit: Number(limit) }, 
+  ]);
+
+  // total count of matching users
+  const totalCount = await UserModel.countDocuments({
+    role: "owner",
+    ...searchQuery, 
+    ...filterQuery, 
+  });
+
+  return {
+    meta: {
+      page: Number(page), //currentPage
+      limit: Number(limit),
+      totalPages: Math.ceil(totalCount / Number(limit)),
+      total: totalCount,
+    },
+    data: result,
+  };
+}
+
 
 const getSingleUserService = async (userId: string) => {
   const user = await UserModel.findById(userId).select('-role -status -address');
@@ -158,7 +233,7 @@ const getMeForSuperAdminService = async (userId: string) => {
     phone: result[0]?.phone,
     role: result[0]?.role,
     profileImg: result[0]?.profileImg,
-    access: result[0]?.administrator?.length > 0 ? result[0]?.administrator[0]?.access : ["user", "dashboard", "restaurant", "settings"]
+    access: result[0]?.administrator?.length > 0 ? result[0]?.administrator[0]?.access : ["user", "owner", "restaurant", "settings"]
   }
   return returnData;
 }
@@ -210,6 +285,7 @@ export {
   createUserService,
   createOwnerService,
   getUsersService,
+  getOwnersService,
   getSingleUserService,
   getMeForSuperAdminService,
   getMeService,

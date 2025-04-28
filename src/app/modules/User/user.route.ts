@@ -21,11 +21,6 @@ router.post(
 
 router.post(
   "/create-owner",
-  upload.single("file"),
-  (req: Request, res: Response, next: NextFunction) => {
-    req.body = JSON.parse(req.body.data);
-    next();
-  },
   validationMiddleware(createOwnerValidationSchema),
   UserController.createOwner
 );
@@ -34,6 +29,11 @@ router.get(
   "/get-users",
   AuthMiddleware(UserRole.super_admin, UserRole.administrator),
   UserController.getUsers
+);
+router.get(
+  "/get-owners",
+  AuthMiddleware(UserRole.super_admin, UserRole.administrator),
+  UserController.getOwners
 );
 router.get(
   "/get-single-user/:id",

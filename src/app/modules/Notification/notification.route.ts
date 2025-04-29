@@ -9,26 +9,26 @@ const router = express.Router();
 
 router.post(
   "/create-notification",
-  AuthMiddleware(UserRole.admin, UserRole.super_admin, UserRole.user),
+  AuthMiddleware(UserRole.owner, UserRole.super_admin, UserRole.user),
   validationMiddleware(createNotificationValidationSchema),
   NotificationController.createNotification
 );
 
 router.patch(
   "/mark-read/:notificationId",
-  AuthMiddleware(UserRole.admin, UserRole.user),
+  AuthMiddleware(UserRole.owner, UserRole.user),
   NotificationController.markAsRead
 );
 
 router.get(
   "/get-user-notifications",
-  AuthMiddleware(UserRole.admin, UserRole.user),
+  AuthMiddleware(UserRole.owner, UserRole.user),
   NotificationController.getUserNotifications
 );
 
 router.delete(
   "/delete-notification/:notificationId",
-  AuthMiddleware(UserRole.admin, UserRole.user, UserRole.super_admin),
+  AuthMiddleware(UserRole.owner, UserRole.user, UserRole.super_admin),
   NotificationController.deleteNotification
 );
 

@@ -5,6 +5,7 @@ import { TSchedulePayload, TScheduleQuery, TUserScheduleQuery } from "./schedule
 import ScheduleModel from "./schedule.model";
 import BookingModel from "../Booking/booking.model";
 import isDifferenceDuration from "../../utils/isDifferenceDuration";
+import TableModel from "../Table/table.model";
 
 
 const createScheduleService = async (loginUserId: string, payload: TSchedulePayload) => {
@@ -114,7 +115,6 @@ const getSchedulesService =  async (loginUserId: string, query:TScheduleQuery) =
         let filterQuery = {};
         //check if only filter by date
         if (date && !startDate && !endDate) {
-          console.log("Yes");
           const start = `${date}T00:00:00.000+00:00`;
             const end = `${date}T23:59:59.999+00:00`;
            filterQuery = {
@@ -148,7 +148,7 @@ const getSchedulesService =  async (loginUserId: string, query:TScheduleQuery) =
                 ...filterQuery
             }
         },
-        { $sort: { [sortBy]: sortDirection, endDateTime:1 } },
+        { $sort: { startDateTime:-1, endDateTime:-1 } },
         { $skip: skip },
         { $limit: Number(limit) }
     ])
@@ -224,6 +224,54 @@ const getScheduleDropDownService = async (
 
   return result;
 };
+
+
+// const getScheduleDropDownService = async (
+//   loginUserId: string,
+//   query: { date?: string }
+// ) => {
+//   const ObjectId = Types.ObjectId;
+//   // 1. Extract query parameters
+//   const { date } = query;
+
+//   //4 setup filters
+//   let filterQuery = {};
+//   //check if only filter by date
+//   if (date) {
+//     const start = `${date}T00:00:00.000+00:00`;
+//     const end = `${date}T23:59:59.999+00:00`;
+//     filterQuery = {
+//       startDateTime: { $gte: new Date(start), $lte: new Date(end) },
+//     };
+//   }
+
+//   //check restaurant not found
+//   const restaurant = await RestaurantModel.findOne({
+//     ownerId: loginUserId,
+//   });
+//   if (!restaurant) {
+//     throw new AppError(404, "Restaurant not found");
+//   }
+
+//   const result = await ScheduleModel.aggregate([
+//     {
+//       $match: {
+//         restaurantId: new ObjectId(restaurant._id),
+//         ...filterQuery,
+//       },
+//     },
+//     {
+//       $project: {
+//         _id:1,
+//         startDateTime:1,
+//         endDateTime:1
+//       }
+//     },
+//     { $sort: { startDateTime: 1, endDateTime: 1 } },
+//   ]);
+
+//   return result;
+// };
 
 
 const getUserSchedulesService =  async (restaurantId: string, query:TUserScheduleQuery) => {
@@ -328,6 +376,13 @@ const deleteScheduleService = async (loginUserId: string, scheduleId: string) =>
       throw new AppError(409, 'Failled to delete, This Schedule is associated with booking');
   }
 
+  //check if scheduleId is associated with table
+  const associateWithTable = await TableModel.findOne({ scheduleId });
+  if(associateWithTable){
+      throw new AppError(409, 'Failled to delete, This Schedule is associated with Table');
+  }
+
+
  const result = await ScheduleModel.deleteOne({
    _id: scheduleId,
    ownerId: loginUserId
@@ -335,70 +390,70 @@ const deleteScheduleService = async (loginUserId: string, scheduleId: string) =>
  return result;
 }
 
-const createScheduleOldService = async (loginUserId: string, payload: TSchedulePayload) => {
-  const {duration, startDate, endDate, startTime, endTime, availableSeats, bookingFee, availability, paymentRequired } = payload;
-  //check restaurant not found
-  const restaurant = await RestaurantModel.findOne({
-      ownerId: loginUserId
-    });
-    if (!restaurant) {
-      throw new AppError(404, "Restaurant not found");
-    }
+// const createScheduleOldService = async (loginUserId: string, payload: TSchedulePayload) => {
+//   const {duration, startDate, endDate, startTime, endTime, availableSeats, bookingFee, availability, paymentRequired } = payload;
+//   //check restaurant not found
+//   const restaurant = await RestaurantModel.findOne({
+//       ownerId: loginUserId
+//     });
+//     if (!restaurant) {
+//       throw new AppError(404, "Restaurant not found");
+//     }
 
 
-  // schedule creation part
+//   // schedule creation part
 
-  const schedules = [];
-  //duration = const timeSlotMinutes = 30; // Schedule interval = unit = minutes
+//   const schedules = [];
+//   //duration = const timeSlotMinutes = 30; // Schedule interval = unit = minutes
 
-  // Convert start and end date to UTC
-  const startDateObj = new Date(`${startDate}T00:00:00.000Z`);
-  const endDateObj = new Date(`${endDate}T00:00:00.000Z`);
+//   // Convert start and end date to UTC
+//   const startDateObj = new Date(`${startDate}T00:00:00.000Z`);
+//   const endDateObj = new Date(`${endDate}T00:00:00.000Z`);
 
-  for (let currentDate = new Date(startDateObj); currentDate <= endDateObj; currentDate.setUTCDate(currentDate.getUTCDate() + 1)) {
-      let currentDay = new Date(currentDate);
+//   for (let currentDate = new Date(startDateObj); currentDate <= endDateObj; currentDate.setUTCDate(currentDate.getUTCDate() + 1)) {
+//       let currentDay = new Date(currentDate);
 
-      // Parse start and end time as UTC
-      const [startHour, startMinute] = startTime.split(":").map(Number);
-      let startDateTime = new Date(Date.UTC(currentDay.getUTCFullYear(), currentDay.getUTCMonth(), currentDay.getUTCDate(), startHour, startMinute, 0));
+//       // Parse start and end time as UTC
+//       const [startHour, startMinute] = startTime.split(":").map(Number);
+//       let startDateTime = new Date(Date.UTC(currentDay.getUTCFullYear(), currentDay.getUTCMonth(), currentDay.getUTCDate(), startHour, startMinute, 0));
 
-      const [endHour, endMinute] = endTime.split(":").map(Number);
-      let endDateTimeLimit = new Date(Date.UTC(currentDay.getUTCFullYear(), currentDay.getUTCMonth(), currentDay.getUTCDate(), endHour, endMinute, 0));
+//       const [endHour, endMinute] = endTime.split(":").map(Number);
+//       let endDateTimeLimit = new Date(Date.UTC(currentDay.getUTCFullYear(), currentDay.getUTCMonth(), currentDay.getUTCDate(), endHour, endMinute, 0));
 
-     // console.log(isDifferenceDuration(startDateTime, endDateTimeLimit, duration)); true or false
-     //check if startDateTime is less than endDateTimeLimit
-     //check if difference between startDateTime & endDateTimeLimit = duration time
-     //or check if difference between startDateTime & endDateTimeLimit is greater than duration time
-      while (startDateTime < endDateTimeLimit && isDifferenceDuration(startDateTime, endDateTimeLimit, duration)) {
-          let endDateTime = new Date(startDateTime.getTime() + duration * 60 * 1000); // Add duration minutes
+//      // console.log(isDifferenceDuration(startDateTime, endDateTimeLimit, duration)); true or false
+//      //check if startDateTime is less than endDateTimeLimit
+//      //check if difference between startDateTime & endDateTimeLimit = duration time
+//      //or check if difference between startDateTime & endDateTimeLimit is greater than duration time
+//       while (startDateTime < endDateTimeLimit && isDifferenceDuration(startDateTime, endDateTimeLimit, duration)) {
+//           let endDateTime = new Date(startDateTime.getTime() + duration * 60 * 1000); // Add duration minutes
           
-          const scheduleData = {
-            ownerId: loginUserId,
-            restaurantId: restaurant._id,
-            startDateTime: startDateTime,
-            endDateTime: endDateTime,
-          };
+//           const scheduleData = {
+//             ownerId: loginUserId,
+//             restaurantId: restaurant._id,
+//             startDateTime: startDateTime,
+//             endDateTime: endDateTime,
+//           };
 
-          //check if schedule exist
-          const existingSchedule = await ScheduleModel.findOne(scheduleData);
+//           //check if schedule exist
+//           const existingSchedule = await ScheduleModel.findOne(scheduleData);
 
-          if(!existingSchedule){
-              schedules.push({
-                ...scheduleData,
-                availableSeats,
-                bookingFee,
-                availability,
-                paymentRequired
-              })
-          }
+//           if(!existingSchedule){
+//               schedules.push({
+//                 ...scheduleData,
+//                 availableSeats,
+//                 bookingFee,
+//                 availability,
+//                 paymentRequired
+//               })
+//           }
 
-          startDateTime = endDateTime; // Move to the next slot
-      }
-  }
+//           startDateTime = endDateTime; // Move to the next slot
+//       }
+//   }
 
-  const result = await ScheduleModel.insertMany(schedules);
-  return result;
-}
+//   const result = await ScheduleModel.insertMany(schedules);
+//   return result;
+// }
 export {
     createScheduleService,
     getSchedulesService,

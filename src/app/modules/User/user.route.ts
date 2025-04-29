@@ -3,7 +3,7 @@ import AuthMiddleware from '../../middlewares/AuthMiddleware';
 import { UserRole } from './user.constant';
 import UserController from './user.controller';
 import validationMiddleware from '../../middlewares/validationMiddleware';
-import { createUserValidationSchema, updateProfileValidationSchema } from './user.validation';
+import { createOwnerValidationSchema, createUserValidationSchema, updateProfileValidationSchema } from './user.validation';
 import upload from '../../helper/upload';
 
 const router = express.Router();
@@ -17,6 +17,17 @@ router.post(
   },
   validationMiddleware(createUserValidationSchema),
   UserController.createUser
+);
+
+router.post(
+  "/create-owner",
+  upload.single("file"),
+  (req: Request, res: Response, next: NextFunction) => {
+    req.body = JSON.parse(req.body.data);
+    next();
+  },
+  validationMiddleware(createOwnerValidationSchema),
+  UserController.createOwner
 );
 
 router.get(

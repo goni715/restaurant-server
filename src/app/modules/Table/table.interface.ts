@@ -11,6 +11,7 @@ export interface ITable {
     seats: number;
 }
 
+<<<<<<< HEAD
 export interface ITablePayload{
   scheduleId: Types.ObjectId;
   diningId: Types.ObjectId;
@@ -18,11 +19,23 @@ export interface ITablePayload{
   seats: number;
 } 
 
+=======
+export interface ITablePayload {
+    totalTable: number;
+    scheduleId: Types.ObjectId;
+    diningId: Types.ObjectId;
+    seats: number;
+}
+
+export interface IUpdateTablePayload {
+    name: string;
+    slug: string;
+    seats: number;
+}
+>>>>>>> 852cf8fceb280888b3558bbd0b661b1f93d94b70
 
 export type TTableQuery = {
-    searchTerm?: string;
     page?: string;
     limit?: string;
-    sortBy?: string;
-    sortOrder?: "asc" | "desc";
+    date?: string;
 };

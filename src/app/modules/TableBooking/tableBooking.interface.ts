@@ -1,13 +1,15 @@
 import { Types } from "mongoose";
-import { IAvailability } from "../Schedule/schedule.interface";
 
+export type ITableAvailability = "Immediate Seating" | "Waitlist";
 
 export interface ITableBooking {
     name: string;
+    token: string;
     guest: number;
     tableId: Types.ObjectId;
     scheduleId: Types.ObjectId;
+    ownerId: Types.ObjectId;
     diningId: Types.ObjectId;
     restaurantId: Types.ObjectId;
-    availability: IAvailability;
+    availability: ITableAvailability;
 }

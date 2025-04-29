@@ -5,7 +5,17 @@ export const objectIdSchema = z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid Obj
 export const createRestaurantValidationSchema = z.object({
   name: z.string().min(1, "Name is required"),
   dining: z.array(objectIdSchema).min(1, "There must be at least one value"),
-  location: z.string().min(1, "Location is required"),
+  // location: z.object({
+  //   type: z.literal('Point'),
+  //   coordinates: z
+  //     .array(z.number())
+  //     .length(2, 'Coordinates must contain exactly two numbers [longitude, latitude]'),
+  // }),
+  longitude: z.number().min(-180).max(180, { message: "Longitude must be between -180 and 180" }),
+  latitude: z.number().min(-90).max(90, { message: "Latitude must be between -90 and 90" }),
+  address: z.string({ required_error: "Address is required"}).min(1, "address is required !"),
+  //longitude: z.preprocess((val) => Number(val), z.number().min(-180).max(180)),
+ // latitude: z.preprocess((val) => Number(val), z.number().min(-90).max(90)),
   keywords: z.array(z.string()).optional(),
   features: z.array(z.string()).optional(),
   discount: z.string().optional(),

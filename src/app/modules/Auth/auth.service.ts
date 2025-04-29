@@ -373,76 +373,76 @@ const refreshTokenService = async (token: string) => {
 };
 
 
-const oAuthLoginService = async (payload: OAuth) => {
-    const { provider, idToken } = payload;
+// const oAuthLoginService = async (payload: OAuth) => {
+//     const { provider, idToken } = payload;
 
-    //client for google signin
-    const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+//     //client for google signin
+//     const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
-    let email, fullName;
+//     let email, fullName;
     
-    try{
+//     try{
 
-    if(provider === "google"){
-        const ticket = await client.verifyIdToken({
-            idToken,
-            audience: process.env.GOOGLE_CLIENT_ID,
-          });
+//     if(provider === "google"){
+//         const ticket = await client.verifyIdToken({
+//             idToken,
+//             audience: process.env.GOOGLE_CLIENT_ID,
+//           });
     
-          const payload = ticket.getPayload();
-          email = payload?.email;
-          fullName = payload?.name;
-    }
-    else if(provider === "apple"){
-        const payload = await appleSignin.verifyIdToken(idToken, {
-            audience: process.env.APPLE_CLIENT_ID,
-            ignoreExpiration: true,
-          });
+//           const payload = ticket.getPayload();
+//           email = payload?.email;
+//           fullName = payload?.name;
+//     }
+//     else if(provider === "apple"){
+//         const payload = await appleSignin.verifyIdToken(idToken, {
+//             audience: process.env.APPLE_CLIENT_ID,
+//             ignoreExpiration: true,
+//           });
     
-          email = payload.email;
-          fullName = payload.name || "Apple User"; // Property 'name' does not exist on type 'AppleIdTokenType'.
-    }
-    else{
-        throw new AppError(400, "Unsupported provider")
-    }
+//           email = payload.email;
+//           fullName = payload.name || "Apple User"; // Property 'name' does not exist on type 'AppleIdTokenType'.
+//     }
+//     else{
+//         throw new AppError(400, "Unsupported provider")
+//     }
 
 
-    let user = await UserModel.findOne({ email });
-    if(!user){
-      user = await UserModel.create({
-        fullName,
-        email,
-        phone: '12345678',
-        password: 'social-login-placeholder',
-        role: 'user'
-      })
-    }
+//     let user = await UserModel.findOne({ email });
+//     if(!user){
+//       user = await UserModel.create({
+//         fullName,
+//         email,
+//         phone: '12345678',
+//         password: 'social-login-placeholder',
+//         role: 'user'
+//       })
+//     }
 
     
-  //create accessToken
-  const accessToken = createToken(
-    { email: user.email, id: String(user._id), role: user.role },
-    config.jwt_access_secret as Secret,
-    config.jwt_access_expires_in as TExpiresIn
-  );
+//   //create accessToken
+//   const accessToken = createToken(
+//     { email: user.email, id: String(user._id), role: user.role },
+//     config.jwt_access_secret as Secret,
+//     config.jwt_access_expires_in as TExpiresIn
+//   );
 
-   //create refreshToken
-   const refreshToken = createToken(
-    { email: user.email, id: String(user._id), role: user.role },
-    config.jwt_refresh_secret as Secret,
-    config.jwt_refresh_expires_in as TExpiresIn
-  );
+//    //create refreshToken
+//    const refreshToken = createToken(
+//     { email: user.email, id: String(user._id), role: user.role },
+//     config.jwt_refresh_secret as Secret,
+//     config.jwt_refresh_expires_in as TExpiresIn
+//   );
 
-  return {
-    accessToken,
-    role: user.role,
-    refreshToken,
-  };
+//   return {
+//     accessToken,
+//     role: user.role,
+//     refreshToken,
+//   };
 
-  }catch(err:any){
-    throw new Error(err)
-  }
-}
+//   }catch(err:any){
+//     throw new Error(err)
+//   }
+// }
 
 export {
     loginUserService,
@@ -455,5 +455,4 @@ export {
     changeStatusService,
     deleteMyAccountService,
     refreshTokenService,
-    oAuthLoginService
 }

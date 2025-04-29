@@ -15,16 +15,17 @@ const restaurantSchema = new Schema<IRestaurant>({
         unique: true,
         trim: true
     },
+    slug: {
+        type: String,
+        required: true,
+        unique: true,
+        trim: true
+    },
     dining: [{
         type: Schema.Types.ObjectId,
         ref: "Dining",
         required: true,
     }],
-    location: {
-        type: String,
-        required:true,
-        trim: true
-    },
     keywords: {
         type: [String],
         default: []
@@ -45,6 +46,22 @@ const restaurantSchema = new Schema<IRestaurant>({
     restaurantImg: { 
         type: String,
         default: ''
+    },
+    location: {
+        type: {
+          type: String,
+          enum: ['Point'], // 'type' must be "Point"
+          required: true,
+        },
+        coordinates: {
+          type: [Number], // [longitude, latitude]
+          required: true,
+        },
+    },
+    address: {
+        type: String,
+        required: [true, "Address is required"],
+        trim: true
     },
     cancellationPercentage: {//percentage
         type: Number,

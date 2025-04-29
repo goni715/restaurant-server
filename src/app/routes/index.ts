@@ -16,6 +16,7 @@ import { SlotRoutes } from '../modules/Slot/slot.route';
 import { AdministratorRoutes } from '../modules/Administrator/administrator.route';
 import { TableRoutes } from '../modules/Table/table.route';
 import { TableBookingRoutes } from '../modules/TableBooking/tableBooking.route';
+import OwnerRoutes from '../modules/Owner/Owner.route';
 
 const router = express.Router();
 
@@ -28,7 +29,11 @@ const moduleRoutes = [
     {
         path: '/user',
         route: UserRoutes
-    },  
+    },
+    {
+        path: '/owner',
+        route: OwnerRoutes
+    },    
     {
         path: '/cuisine',
         route: CuisineRoutes

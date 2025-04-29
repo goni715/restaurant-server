@@ -35,7 +35,7 @@ router.patch(
 );
 router.get(
   "/get-administrators",
-  AuthMiddleware("super_admin", "administrator"),
+  AuthMiddleware("super_admin"),
   AdministratorController.getAdministrators
 );
 

@@ -32,6 +32,11 @@ const loginUserService = async (payload: ILoginUser) => {
     throw new AppError(404, `Couldn't find this email address`);
   }
 
+  //check user is blocked
+  if(user.status=== "blocked"){
+    throw new AppError(403, "Your account is blocked !")
+  }
+
   //check password
   const isPasswordMatch = await checkPassword(payload.password, user.password);
   if (!isPasswordMatch) {
@@ -69,6 +74,11 @@ const loginOwnerService = async (payload: ILoginUser) => {
       throw new AppError(404, `Couldn't find this email address`);
   }
 
+  //check user is blocked
+  if(user.status=== "blocked"){
+    throw new AppError(403, "Your account is blocked !")
+  }
+
   //check you are not admin
   if(user.role !=="owner"){
     throw new AppError(400, `Sorry! You are not Owner`);
@@ -99,6 +109,10 @@ const loginSuperAdminService = async (payload: ILoginUser) => {
       throw new AppError(404, `Couldn't find this email address`);
   }
 
+  //check user is blocked
+  if(user.status=== "blocked"){
+    throw new AppError(403, "Your account is blocked !")
+  }
 
   //check you are not super_admin or administrator
   if((user.role !== "administrator") && (user.role !== "super_admin")){
@@ -129,23 +143,25 @@ const loginSuperAdminService = async (payload: ILoginUser) => {
 //forgot password
 // step-01
 const forgotPassSendOtpService = async (email: string) => {
-    const user = await UserModel.findOne({ email });
-    if (!user) {
-        throw new AppError(404, `Couldn't find this email address`);
-    }
+  const user = await UserModel.findOne({ email });
+  if (!user) {
+    throw new AppError(404, `Couldn't find this email address`);
+  }
 
-    const otp = Math.floor(1000 + Math.random() * 9000);
+  //check user is blocked
+  if (user.status === "blocked") {
+    throw new AppError(403, "Your account is blocked !");
+  }
 
-    //insert the otp
-    await OtpModel.create({ email, otp });
+  const otp = Math.floor(1000 + Math.random() * 9000);
 
+  //insert the otp
+  await OtpModel.create({ email, otp });
 
-    //send otp to the email address
-    await sendEmailUtility(email, String(otp))
-
-    return null;
-
-}
+  //send otp to the email address
+  await sendEmailUtility(email, String(otp));
+  return null;
+};
 
 
 //step-02

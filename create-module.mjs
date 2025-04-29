@@ -153,13 +153,13 @@ router.get(
 );
 
 router.patch(
-  '/update-${moduleName}/:${moduleName.toLowerCase()}Id',
+  '/update-${moduleName.toLowerCase()}/:${moduleName.toLowerCase()}Id',
   validationMiddleware(update${capitalize(moduleName)}ValidationSchema),
   ${capitalize(moduleName)}Controller.update${capitalize(moduleName)},
 );
 
 router.delete(
-  '/delete-${moduleName}/:${moduleName.toLowerCase()}Id',
+  '/delete-${moduleName.toLowerCase()}/:${moduleName.toLowerCase()}Id',
   ${capitalize(moduleName)}Controller.delete${capitalize(moduleName)},
 );
 

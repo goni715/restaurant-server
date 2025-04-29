@@ -3,7 +3,7 @@ import AuthMiddleware from '../../middlewares/AuthMiddleware';
 import { UserRole } from './user.constant';
 import UserController from './user.controller';
 import validationMiddleware from '../../middlewares/validationMiddleware';
-import { createOwnerValidationSchema, createUserValidationSchema, updateProfileValidationSchema } from './user.validation';
+import { createUserValidationSchema, updateProfileValidationSchema } from './user.validation';
 import upload from '../../helper/upload';
 
 const router = express.Router();
@@ -18,22 +18,10 @@ router.post(
   validationMiddleware(createUserValidationSchema),
   UserController.createUser
 );
-
-router.post(
-  "/create-owner",
-  validationMiddleware(createOwnerValidationSchema),
-  UserController.createOwner
-);
-
 router.get(
   "/get-users",
   AuthMiddleware(UserRole.super_admin, UserRole.administrator),
   UserController.getUsers
-);
-router.get(
-  "/get-owners",
-  AuthMiddleware(UserRole.super_admin, UserRole.administrator),
-  UserController.getOwners
 );
 router.get(
   "/get-single-user/:id",

@@ -14,5 +14,6 @@ export default {
     smtp_username: process.env.SMTP_USERNAME,
     smtp_password: process.env.SMTP_PASSWORD,
     smtp_from: process.env.SMTP_FROM,
-    default_password: process.env.DEFAULT_PASSWORD
+    administrator_default_password: process.env.ADMINISTRATOR_DEFAULT_PASSWORD,
+    owner_default_password: process.env.OWNER_DEFAULT_PASSWORD
 }

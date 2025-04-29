@@ -50,7 +50,7 @@ const tableBookingSchema = new Schema<ITableBooking>(
       required: true,
       default: "Waitlist",
       enum: {
-        values: ["Immediate Seating", "Booked", "Waitlist", "Completed"],
+        values: [ "Waitlist", "Seating", "Booked","Completed"],
         message: '{VALUE} is not supported'
       }
     },

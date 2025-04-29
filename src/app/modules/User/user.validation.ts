@@ -42,7 +42,7 @@ export const createOwnerValidationSchema = z.object({
   }),
   address: z.string({
     required_error: "address is required",
-  }),
+  }).optional(),
   password: z
     .string({
       required_error: "password is required",

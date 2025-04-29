@@ -2,7 +2,7 @@ import catchAsync from "../../utils/catchAsync";
 import pickValidFields from "../../utils/pickValidFields";
 import sendResponse from "../../utils/sendResponse";
 import { UserValidFields } from "./user.constant";
-import { createOwnerService, createUserService, editMyProfileService, getMeForSuperAdminService, getMeService, getSingleUserService, getUsersService, updateProfileImgService } from "./user.service";
+import { createOwnerService, createUserService, editMyProfileService, getMeForSuperAdminService, getMeService, getOwnersService, getSingleUserService, getUsersService, updateProfileImgService } from "./user.service";
 
 
 const createUser = catchAsync(async (req, res) => {
@@ -30,12 +30,24 @@ const createOwner = catchAsync(async (req, res) => {
 
 const getUsers = catchAsync(async (req, res) => {
   const validatedQuery = pickValidFields(req.query, UserValidFields);
-  console.log(validatedQuery);
   const result = await getUsersService(validatedQuery);
   sendResponse(res, {
     statusCode: 200,
     success: true,
     message: "Users are retrieved successfully",
+    meta: result.meta,
+    data: result.data
+  });
+});
+
+
+const getOwners = catchAsync(async (req, res) => {
+  const validatedQuery = pickValidFields(req.query, UserValidFields);
+  const result = await getOwnersService(validatedQuery);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Owners are retrieved successfully",
     meta: result.meta,
     data: result.data
   });
@@ -109,6 +121,7 @@ const UserController = {
     createUser,
     createOwner,
     getUsers,
+    getOwners,
     getSingleUser,
     getMe,
     getMeForSuperAdmin,

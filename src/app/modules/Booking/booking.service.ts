@@ -211,7 +211,6 @@ const createBookingWithPaymentService = async (
 
 
 const getBookingsService = async (loginUserId:string, query: TBookingQuery) => {
-  console.log(loginUserId);
   const ObjectId = Types.ObjectId;
      // 1. Extract query parameters
      const {

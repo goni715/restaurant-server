@@ -441,6 +441,19 @@ const getSingleRestaurantService = async (restaurantId: string) => {
       $unwind: "$owner"
     },
     {
+      $lookup: {
+        from: "reviews",
+        localField: "_id",
+        foreignField: "restaurantId",
+        as: "reviews"
+      }
+    },
+    {
+      $addFields: {
+        totalReview: { $size: "$reviews" },
+      }
+    },
+    {
       $project: {
         _id: 1,
         ownerId: 1,
@@ -448,8 +461,11 @@ const getSingleRestaurantService = async (restaurantId: string) => {
         cuisine: 1,
         dining: 1,
         website: 1,
-        location: 1,
+        location:1,
+        address:1,
         keywords: 1,
+        ratings:1,
+        totalReview:1,
         price: 1,
         features: 1,
         cancellationCharge:1,

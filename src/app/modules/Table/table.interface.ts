@@ -11,15 +11,8 @@ export interface ITable {
     seats: number;
 }
 
-<<<<<<< HEAD
-export interface ITablePayload{
-  scheduleId: Types.ObjectId;
-  diningId: Types.ObjectId;
-  totalTable:number;
-  seats: number;
-} 
 
-=======
+
 export interface ITablePayload {
     totalTable: number;
     scheduleId: Types.ObjectId;
@@ -32,7 +25,6 @@ export interface IUpdateTablePayload {
     slug: string;
     seats: number;
 }
->>>>>>> 852cf8fceb280888b3558bbd0b661b1f93d94b70
 
 export type TTableQuery = {
     page?: string;

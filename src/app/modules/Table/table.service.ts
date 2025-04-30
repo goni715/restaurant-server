@@ -3,7 +3,7 @@ import AppError from "../../errors/AppError";
 import ObjectId from "../../utils/ObjectId";
 import RestaurantModel from "../Restaurant/restaurant.model";
 import ScheduleModel from "../Schedule/schedule.model";
-import { ITable, TTableQuery } from "./table.interface";
+import { ITable, IUpdateTablePayload, TTableQuery } from "./table.interface";
 import TableModel from "./table.model";
 import DiningModel from "../Dining/dining.model";
 import TableBookingModel from "../TableBooking/tableBooking.model";

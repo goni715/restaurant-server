@@ -75,8 +75,8 @@ const create${capitalize(moduleName)} = catchAsync(async (req, res) => {
 });
 
 const getSingle${capitalize(moduleName)} = catchAsync(async (req, res) => {
-  const { id } = req.params;
-  const result = await getSingle${capitalize(moduleName)}Service(id);
+  const { ${moduleName.toLowerCase()}Id } = req.params;
+  const result = await getSingle${capitalize(moduleName)}Service(${moduleName.toLowerCase()}Id);
 
   sendResponse(res, {
     statusCode: 200,
@@ -99,8 +99,8 @@ const getAll${capitalize(moduleName)}s = catchAsync(async (req, res) => {
 });
 
 const update${capitalize(moduleName)} = catchAsync(async (req, res) => {
-  const { id } = req.params;
-  const result = await update${capitalize(moduleName)}Service(id, req.body);
+  const { i${moduleName.toLowerCase()}Id } = req.params;
+  const result = await update${capitalize(moduleName)}Service(${moduleName.toLowerCase()}Id, req.body);
 
   sendResponse(res, {
     statusCode: 200,
@@ -279,7 +279,7 @@ const getSingle${capitalize(moduleName)}Service = async (id: string) => {
 
 const update${capitalize(moduleName)}Service = async (${moduleName.toLowerCase()}Id: string, payload: any) => {
  
-  const ${moduleName.toLowerCase()} = await ${capitalize(moduleName)}Model.findById(faqId);
+  const ${moduleName.toLowerCase()} = await ${capitalize(moduleName)}Model.findById(${moduleName.toLowerCase()}Id);
   if(!${moduleName.toLowerCase()}){
     throw new AppError(404, "${capitalize(moduleName)} Not Found");
   }

@@ -18,6 +18,7 @@ import { TableRoutes } from '../modules/Table/table.route';
 import { TableBookingRoutes } from '../modules/TableBooking/tableBooking.route';
 import OwnerRoutes from '../modules/Owner/Owner.route';
 import FaqRoutes from '../modules/Faq/Faq.route';
+import PolicyRoutes from '../modules/Policy/Policy.route';
 
 const router = express.Router();
 
@@ -98,7 +99,11 @@ const moduleRoutes = [
     {
         path: '/faq',
         route: FaqRoutes
-    }   
+    },
+    {
+        path: '/policy',
+        route: PolicyRoutes
+    }    
 ]
 
 moduleRoutes.forEach((item, i)=> router.use(item.path, item.route));

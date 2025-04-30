@@ -13,10 +13,10 @@ router.post(
   "/create-restaurant",
   AuthMiddleware(UserRole.owner),
   upload.single('file'),
-  (req: Request, res: Response, next: NextFunction) => {
-    req.body = JSON.parse(req.body.data);
-    next();
-  },
+  // (req: Request, res: Response, next: NextFunction) => {
+  //   req.body = JSON.parse(req.body.data);
+  //   next();
+  // },
   validationMiddleware(createRestaurantValidationSchema),
   RestaurantController.createRestaurant
 );
@@ -27,6 +27,13 @@ router.get(
   AuthMiddleware("super_admin", "administrator"),
   RestaurantController.getRestaurants
 );
+
+router.get(
+  "/find-nearby-restaurants",
+  AuthMiddleware("user"),
+  RestaurantController.findNearbyRestaurants
+);
+
 router.get(
   "/get-single-restaurant/:restaurantId",
   AuthMiddleware("super_admin", "administrator", "user"),

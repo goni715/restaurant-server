@@ -7,6 +7,7 @@ import { makeFilterQuery, makeSearchQuery } from "../../helper/QueryBuilder";
 import { UserSearchFields } from "./user.constant";
 import ObjectId from "../../utils/ObjectId";
 import uploadImage from "../../utils/uploadImage";
+import config from "../../config";
 
 
 
@@ -140,7 +141,7 @@ const getMeForSuperAdminService = async (userId: string) => {
     phone: result[0]?.phone,
     role: result[0]?.role,
     profileImg: result[0]?.profileImg,
-    access: result[0]?.administrator?.length > 0 ? result[0]?.administrator[0]?.access : ["user", "dashboard", "restaurant", "settings"]
+    access: result[0]?.administrator?.length > 0 ? result[0]?.administrator[0]?.access : ["user", "owner", "restaurant", "settings"]
   }
   return returnData;
 }
@@ -188,4 +189,12 @@ const updateProfileImgService = async (req:Request, loginUserId: string) => {
 };
 
 
-export { createUserService, getUsersService, getSingleUserService, getMeForSuperAdminService, getMeService, editMyProfileService, updateProfileImgService };
+export {
+  createUserService,
+  getUsersService,
+  getSingleUserService,
+  getMeForSuperAdminService,
+  getMeService,
+  editMyProfileService,
+  updateProfileImgService,
+};

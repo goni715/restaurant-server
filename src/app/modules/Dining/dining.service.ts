@@ -89,7 +89,7 @@ data: result,
 }
 
 const getDiningDropDownService = async () => {
-    const result = await DiningModel.find().select('-createdAt -updatedAt').sort('-createdAt');
+    const result = await DiningModel.find().select('-createdAt -updatedAt -slug').sort('-createdAt');
     return result;
 }
 

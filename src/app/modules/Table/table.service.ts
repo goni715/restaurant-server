@@ -3,14 +3,15 @@ import AppError from "../../errors/AppError";
 import ObjectId from "../../utils/ObjectId";
 import RestaurantModel from "../Restaurant/restaurant.model";
 import ScheduleModel from "../Schedule/schedule.model";
-import { ITablePayload, IUpdateTablePayload, TTableQuery } from "./table.interface";
+import { ITable, IUpdateTablePayload, TTableQuery } from "./table.interface";
 import TableModel from "./table.model";
 import DiningModel from "../Dining/dining.model";
 import TableBookingModel from "../TableBooking/tableBooking.model";
 
 
-const createTableService = async (loginUserId: string, payload: ITablePayload) => {
-    const { totalTable, seats, diningId, scheduleId } = payload;
+const createTableService = async (loginUserId: string, payload: ITable) => {
+    const { name, seats, diningId, scheduleId } = payload;
+    const slug = slugify(name).toLowerCase();
 
     const restaurant = await RestaurantModel.findOne({
         ownerId: loginUserId,
@@ -36,69 +37,34 @@ const createTableService = async (loginUserId: string, payload: ITablePayload) =
         throw new AppError(404, "This dining does not belong to your restaurant, please add this dining to your restaurant")
     }
 
-     //check table is already existed
-     const tables = await TableModel.aggregate([
-      {
-        $match: {
-          scheduleId: new ObjectId(scheduleId),
-          ownerId: new ObjectId(loginUserId),
-          restaurantId: new ObjectId(restaurant._id),
-          diningId: new ObjectId(diningId),
-        }
-      },
-      {
-        $addFields: {
-          nameNumber: {
-            $toInt: {
-              $arrayElemAt: [
-                { $split: ["$name", "-"] },
-                1
-              ]
-            }
-          }
-        }
-      },
-      {
-        $sort: {
-          nameNumber: 1
-        }
-      },
-     ])
- 
 
-
-    //existingTotalTable based on this scheduleId & diningId
-    let existingTotalTable:number = 0;
-    if(tables.length > 0){
-      const lastTable = tables[tables.length - 1];
-      const lastTableName = lastTable?.name;
-      const lastTableNumber = lastTableName.split("-")[1]
-      existingTotalTable = Number(lastTableNumber);
-    }
-
-
-    const tableData: any[] = [];
-
-    for (let i = 1; i <= Number(totalTable); i++) {
-      const tableName = `T-${Number(i + existingTotalTable)}`;
-      const slug = slugify(tableName).toLowerCase();
-      tableData.push({
-        name: tableName,
+    //check table is already existed
+    const table = await TableModel.findOne({
         slug,
-        diningId,
-        ownerId: loginUserId,
-        restaurantId: restaurant._id,
         scheduleId,
-        seats,
-      });
+        ownerId:loginUserId,
+        restaurantId: restaurant._id,
+        diningId,
+    });
+
+    if(table){
+        throw new AppError(409, "Table is already existed");
     }
 
-
-    //create the multiple Or Single Table 
-    const result = await TableModel.insertMany(tableData);
+    //create the table 
+    const result = await TableModel.create({
+        name,
+        slug,
+        scheduleId,
+        ownerId:loginUserId,
+        restaurantId: restaurant._id,
+        diningId,
+        seats
+    })
+    
     return result;
-   
 }
+
 
 const getTablesService = async (loginUserId: string,  query: TTableQuery) => {
   // 1. Extract query parameters

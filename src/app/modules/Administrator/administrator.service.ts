@@ -18,7 +18,7 @@ const createAdministratorService = async (req:Request, payload:IAdministratorPay
     }
 
     if(!administratorData.password){
-        administratorData.password=config.default_password as string;
+        administratorData.password=config.administrator_default_password as string;
     }
 
     
@@ -131,6 +131,7 @@ const getAdministratorsService = async (query: TAdministratorQuery) => {
         email: "$user.email",
         phone: "$user.phone",
         profileImg: "$user.profileImg",
+        status: "$user.status",
         createdAt: "$createdAt",
         updatedAt: "$updatedAt",
       }

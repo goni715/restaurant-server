@@ -5,10 +5,15 @@ export type TPaymentStatus = "paid" | "unpaid";
 export type TBookingStatus = "pending" | "completed" | "cancelled";
 
 export interface IBooking {
-    scheduleId: Types.ObjectId;
     restaurantId: Types.ObjectId;
     userId: Types.ObjectId;
     diningId: Types.ObjectId;
+    checkIn: string;
+    checkOut: string;
+    date: Date;
+    token: string;
+    startDateTime: Date;
+    endDateTime: Date;
     amount: number;
     guest: number;
     paymentStatus: TPaymentStatus;
@@ -18,8 +23,11 @@ export interface IBooking {
 
 
 export interface IBookingPayload {
-    scheduleId: Types.ObjectId;
+    date: string;
+    checkIn: string;
+    checkOut: string;
     diningId: Types.ObjectId;
+    restaurantId: Types.ObjectId;
     amount: number;
     guest: number;
 }

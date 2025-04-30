@@ -6,16 +6,38 @@ export type TApprovedStatus = "pending" | "accepted" | "cancelled";
 export interface IRestaurant {
     ownerId: Types.ObjectId;
     name: string;
+    slug: string;
     dining: Types.ObjectId[];
-    location: string;
     keywords?: string[],
     features?: string[];
     ratings?: number;
     restaurantImg?: string;
+    location: {
+      type: 'Point';
+      coordinates: [number, number]; // [longitude, latitude]
+    };
+    address: string;
     discount?: string;
     cancellationPercentage?: number;
     status: TRestaurantStatus;
     approved: TApprovedStatus
+}
+
+
+
+export interface IRestaurantPayload {
+  name: string;
+  dining: Types.ObjectId[];
+  keywords?: string[],
+  features?: string[];
+  ratings?: number;
+  longitude: number;
+  latitude: number;
+  address: string;
+  discount?: string;
+  cancellationPercentage?: number;
+  status: TRestaurantStatus;
+  approved: TApprovedStatus
 }
 
 
@@ -30,6 +52,11 @@ export type TRestaurantQuery = {
   ratings?:number;
   status?: TRestaurantStatus
 };
+
+export type INearbyQuery = {
+  longitude?: number;
+  latitude?: number;
+}
 
 
 export type TUserRestaurantQuery = {

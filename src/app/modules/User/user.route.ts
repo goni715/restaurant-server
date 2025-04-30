@@ -18,7 +18,6 @@ router.post(
   validationMiddleware(createUserValidationSchema),
   UserController.createUser
 );
-
 router.get(
   "/get-users",
   AuthMiddleware(UserRole.super_admin, UserRole.administrator),

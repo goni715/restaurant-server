@@ -66,6 +66,14 @@ router.patch(
   AuthController.changeStatus
 );
 
+router.patch(
+  "/change-owner-status/:id",
+  AuthMiddleware(UserRole.super_admin, UserRole.administrator),
+  isAccess('owner'),
+  validationMiddleware(changeStatusValidationSchema),
+  AuthController.changeStatus
+);
+
 router.delete(
   "/delete-my-account",
   AuthMiddleware(UserRole.owner, UserRole.user),

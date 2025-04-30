@@ -24,9 +24,16 @@ export const createTableBookingSchema = z.object({
     .number()
     .positive("Guest must be a positive number")
     .min(1, "guest must be at least 1"),
-  // availability: z
-  //   .enum(["Immediate Seating", "Booked", "Completed", "Waitlist"], {
-  //     errorMap: () => ({ message: "{VALUE} is not supported" }),
-  //   })
-  //   .optional(),
+  availability: z
+    .enum(["Seating", "Booked", "Completed", "Waitlist"], {
+      errorMap: () => ({ message: "{VALUE} is not supported" }),
+    })
+    .optional(),
+});
+
+export const changeAvailibilitySchema = z.object({
+  availability: z
+    .enum(["Seating","Waitlist"], {
+      errorMap: () => ({ message: "{VALUE} is not supported" }),
+    }),
 });

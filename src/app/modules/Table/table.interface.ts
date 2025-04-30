@@ -11,6 +11,8 @@ export interface ITable {
     seats: number;
 }
 
+
+
 export interface ITablePayload {
     totalTable: number;
     scheduleId: Types.ObjectId;

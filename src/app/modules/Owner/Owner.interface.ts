@@ -1,16 +1,15 @@
 
 
-
-export interface IDining {
+export interface IOwner {
   name: string;
-  slug: string;
-}
+  description?: string;
+};
 
-
-export type TDiningQuery = {
+export type TOwnerQuery = {
   searchTerm?: string;
   page?: string;
   limit?: string;
   sortBy?: string;
   sortOrder?: "asc" | "desc";
+  status?: string,
 };

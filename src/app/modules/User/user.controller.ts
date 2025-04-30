@@ -16,9 +16,10 @@ const createUser = catchAsync(async (req, res) => {
 })
 
 
+
+
 const getUsers = catchAsync(async (req, res) => {
   const validatedQuery = pickValidFields(req.query, UserValidFields);
-  console.log(validatedQuery);
   const result = await getUsersService(validatedQuery);
   sendResponse(res, {
     statusCode: 200,
@@ -28,6 +29,7 @@ const getUsers = catchAsync(async (req, res) => {
     data: result.data
   });
 });
+
 
 
 

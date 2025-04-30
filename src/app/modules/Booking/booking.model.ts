@@ -10,11 +10,6 @@ const bookingSchema = new Schema<IBooking>(
       required: true,
       ref: "User",
     },
-    scheduleId: {
-      type: Schema.Types.ObjectId,
-      required: true,
-      ref: "Schedule",
-    },
     restaurantId: {
       type: Schema.Types.ObjectId,
       required: true,
@@ -24,6 +19,31 @@ const bookingSchema = new Schema<IBooking>(
       type: Schema.Types.ObjectId,
       required: true,
       ref: "Dining",
+    },
+    date: {
+      type: Date,
+      required: true
+    },
+    checkIn: {
+      type: String,
+      required: true
+    },
+    checkOut: {
+      type: String,
+      required: true
+    },
+    startDateTime: {
+      type: Date,
+      required: true,
+    },
+    endDateTime: {
+      type: Date,
+      required: true,
+    },
+    token: {
+      type: String,
+      minlength: [6, "Token must be 6 characters long"],
+      maxlength: [6, "Token must be 6 characters long"]
     },
     amount: {
         type: Number,

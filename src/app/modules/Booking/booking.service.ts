@@ -15,56 +15,64 @@ const createBookingWithoutPaymentService = async (
   loginUserId: string,
   payload: IBookingPayload
 ) => {
-  const { scheduleId, diningId, guest } = payload;
-  
+  const { restaurantId, diningId, guest,date, checkIn, checkOut } = payload;
+
   const dining = await DiningModel.findById(diningId);
-  if(!dining){
-      throw new AppError(404, 'This dining not found');
-  }
-  //check schedule not found
-  const schedule = await ScheduleModel.findById(scheduleId);
-  if (!schedule) {
-    throw new AppError(404, "Schedule not found");
+  if (!dining) {
+    throw new AppError(404, "This dining not found");
   }
 
-  const availableSeats = schedule.availableSeats;
-  if(availableSeats < guest){
-    throw new AppError(400, "There are no available seats during this schedule")
+  const restaurant = await RestaurantModel.findById(restaurantId);
+  if (!restaurant) {
+    throw new AppError(404, "Restaurant Not Found");
   }
 
+  // const date = `${date}T00:00:00.000+00:00`;
+  //generate token
+  const token = Math.floor(1000 + Math.random() * 900000);
 
-  const session = await mongoose.startSession();
-  try{
-    session.startTransaction();
+  const currentDay = new Date("2025-01-01T00:00:00.000Z");
 
-    //database-process-01
-    //create the booking
-    const newBooking = await BookingModel.create([{
-        userId: loginUserId,
-        scheduleId,
-        restaurantId: schedule.restaurantId,
-        diningId,
-        guest,
-    }], { session });
-
-
-    //database-process-02
-    //update the schedule
-    await ScheduleModel.updateOne(
-        { _id: scheduleId, availableSeats: { $gt: 0 }},
-        { $inc: { availableSeats: - guest } }, // Decrease availableSeats
-        { session }
+  // Parse start and end time as UTC
+  const [startHour, startMinute] = checkIn.split(":").map(Number);
+  const startDateTime = new Date(
+    Date.UTC(
+      currentDay.getUTCFullYear(),
+      currentDay.getUTCMonth(),
+      currentDay.getUTCDate(),
+      startHour,
+      startMinute,
+      0
     )
+  ); //month is 0-based
 
-    
-    await session.commitTransaction();
-    await session.endSession();
-    return newBooking[0];
-  }catch(err:any){
-    await session.abortTransaction();
-    await session.endSession();
-    throw new Error(err)
-  }
+  const [endHour, endMinute] = checkOut.split(":").map(Number);
+  const endDateTime = new Date(
+    Date.UTC(
+      currentDay.getUTCFullYear(),
+      currentDay.getUTCMonth(),
+      currentDay.getUTCDate(),
+      endHour,
+      endMinute,
+      0
+    )
+  ); //month is 0-based
+
+  //create the booking
+  const result = await BookingModel.create({
+    userId: loginUserId,
+    restaurantId: restaurantId,
+    diningId,
+    token,
+    guest,
+    date: new Date(date),
+    checkIn,
+    checkOut,
+    startDateTime,
+    endDateTime
+  });
+
+  return result;
 };
 
 
@@ -73,79 +81,133 @@ const createBookingWithPaymentService = async (
   loginUserId: string,
   payload: IBookingPayload
 ) => {
-  const { scheduleId, diningId, amount, guest } = payload;
-   const ObjectId = Types.ObjectId;
+  const { restaurantId, diningId, guest,date, checkIn, checkOut } = payload;
 
-   const dining = await DiningModel.findById(diningId);
-   if(!dining){
-       throw new AppError(404, 'This dining not found');
-   }
-   
-  //check schedule not found
-  const schedule = await ScheduleModel.findById(scheduleId);
-  if (!schedule) {
-    throw new AppError(404, "Schedule not found");
+  const dining = await DiningModel.findById(diningId);
+  if (!dining) {
+    throw new AppError(404, "This dining not found");
   }
 
-  const availableSeats = schedule.availableSeats;
-  if(availableSeats < guest){
-    throw new AppError(400, "There are no available seats during this schedule")
-  }
-
-  const restaurant = await RestaurantModel.findById(schedule.restaurantId);
-  if(!restaurant){
+  const restaurant = await RestaurantModel.findById(restaurantId);
+  if (!restaurant) {
     throw new AppError(404, "Restaurant Not Found");
   }
 
-  //calculation of canCellationCharge
-  const cancellationCharge = getPercentageValue(amount, restaurant.cancellationPercentage as number)
+  // const date = `${date}T00:00:00.000+00:00`;
+  //generate token
+  const token = Math.floor(1000 + Math.random() * 900000);
 
+  const currentDay = new Date("2025-01-01T00:00:00.000Z");
 
-  const session = await mongoose.startSession();
-  try{
-    session.startTransaction();
-
-    //database-process-01
-    //create the booking
-    const newBooking = await BookingModel.create([{
-        userId: loginUserId,
-        scheduleId,
-        restaurantId: schedule.restaurantId,
-        diningId,
-        amount,
-        cancellationCharge,
-        guest,
-    }], { session });
-
-
-    //database-process-02
-    //update the schedule
-    await ScheduleModel.updateOne(
-        { _id: scheduleId, availableSeats: { $gt: 0 }},
-        { $inc: { availableSeats: - guest } }, // Decrease availableSeats
-        { session }
+  // Parse start and end time as UTC
+  const [startHour, startMinute] = checkIn.split(":").map(Number);
+  const startDateTime = new Date(
+    Date.UTC(
+      currentDay.getUTCFullYear(),
+      currentDay.getUTCMonth(),
+      currentDay.getUTCDate(),
+      startHour,
+      startMinute,
+      0
     )
+  ); //month is 0-based
+
+  const [endHour, endMinute] = checkOut.split(":").map(Number);
+  const endDateTime = new Date(
+    Date.UTC(
+      currentDay.getUTCFullYear(),
+      currentDay.getUTCMonth(),
+      currentDay.getUTCDate(),
+      endHour,
+      endMinute,
+      0
+    )
+  ); //month is 0-based
+
+  //create the booking
+  const result = await BookingModel.create({
+    userId: loginUserId,
+    restaurantId: restaurantId,
+    diningId,
+    token,
+    guest,
+    date: new Date(date),
+    checkIn,
+    checkOut,
+    startDateTime,
+    endDateTime
+  });
+
+  return result;
+};
+
+
+// const createBookingWithService = async (
+//   loginUserId: string,
+//   payload: IBookingPayload
+// ) => {
+//   const { diningId, amount, guest } = payload;
+//    const ObjectId = Types.ObjectId;
+
+//    const dining = await DiningModel.findById(diningId);
+//    if(!dining){
+//        throw new AppError(404, 'This dining not found');
+//    }
+   
+ 
+
+ 
+//   }
+
+//   //calculation of canCellationCharge
+//   const cancellationCharge = getPercentageValue(amount, restaurant.cancellationPercentage as number)
+
+
+//   const session = await mongoose.startSession();
+//   try{
+//     session.startTransaction();
+
+//     //database-process-01
+//     //create the booking
+//     const newBooking = await BookingModel.create([{
+//         userId: loginUserId,
+//         scheduleId,
+//         restaurantId: schedule.restaurantId,
+//         diningId,
+//         amount,
+//         cancellationCharge,
+//         guest,
+//     }], { session });
+
+
+//     //database-process-02
+//     //update the schedule
+//     await ScheduleModel.updateOne(
+//         { _id: scheduleId, availableSeats: { $gt: 0 }},
+//         { $inc: { availableSeats: - guest } }, // Decrease availableSeats
+//         { session }
+//     )
 
     
-    //database-process-03
-    //create the payment
-    const transactionId = new ObjectId().toString();
-    await PaymentModel.create({
-        bookingId: newBooking[0]?._id,
-        amount,
-        transactionId
-    })
+//     //database-process-03
+//     //create the payment
+//     const transactionId = new ObjectId().toString();
+//     await PaymentModel.create({
+//         bookingId: newBooking[0]?._id,
+//         amount,
+//         transactionId
+//     })
 
 
-    await session.commitTransaction();
-    await session.endSession();
-    return newBooking[0];
-  }catch(err:any){
-    await session.abortTransaction();
-    await session.endSession();
-    throw new Error(err)
-  }
-};
+//     await session.commitTransaction();
+//     await session.endSession();
+//     return newBooking[0];
+//   }catch(err:any){
+//     await session.abortTransaction();
+//     await session.endSession();
+//     throw new Error(err)
+//   }
+// };
 
 
 const getBookingsService = async (loginUserId:string, query: TBookingQuery) => {
@@ -161,7 +223,6 @@ const getBookingsService = async (loginUserId:string, query: TBookingQuery) => {
       ...filters // Any additional filters
     } = query;
 
-    console.log(query);
   
     // 2. Set up pagination
     const skip = (Number(page) - 1) * Number(limit);
@@ -203,6 +264,7 @@ const getBookingsService = async (loginUserId:string, query: TBookingQuery) => {
     throw new AppError(404, "Restaurant not found");
   }
 
+
   const result = await BookingModel.aggregate([
     {
       $match: { restaurantId: new ObjectId(restaurant._id)}
@@ -217,17 +279,6 @@ const getBookingsService = async (loginUserId:string, query: TBookingQuery) => {
     },
     {
       $unwind: "$user"
-    },
-    {
-      $lookup: {
-        from: "schedules",
-        localField: "scheduleId",
-        foreignField: "_id",
-        as: "schedule"
-      }
-    },
-    {
-      $unwind: "$schedule"
     },
     {
       $lookup: {
@@ -254,8 +305,12 @@ const getBookingsService = async (loginUserId:string, query: TBookingQuery) => {
         customerEmail: "$user.email",
         customerPhone: "$user.phone",
         scheduleId: "$scheduleId",
-        startDateTime: "$schedule.startDateTime",
-        endDateTime: "$schedule.endDateTime",
+        date: "$date",
+        checkIn: "$checkIn",
+        checkOuT: "$checkOut",
+        token: "$token",
+        startDateTime: "$startDateTime",
+        endDateTime: "$endDateTime",
         amount:"$amount",
         guest:"$guest",
         cancellationCharge: "$cancellationCharge",
@@ -266,7 +321,7 @@ const getBookingsService = async (loginUserId:string, query: TBookingQuery) => {
       }
     },
     {
-      $sort: {"startDateTime": 1, endDateTime:1}, //after projection
+      $sort: {date: -1}, //after projection
     },
     { $skip: skip },
     { $limit: Number(limit) }
@@ -288,17 +343,6 @@ const totalBookingResult = await BookingModel.aggregate([
     },
     {
       $unwind: "$user"
-    },
-    {
-      $lookup: {
-        from: "schedules",
-        localField: "scheduleId",
-        foreignField: "_id",
-        as: "schedule"
-      }
-    },
-    {
-      $unwind: "$schedule"
     },
     {
       $lookup: {

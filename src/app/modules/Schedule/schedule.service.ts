@@ -178,7 +178,6 @@ return {
 };
 }
 
-
 const getScheduleDropDownService = async (
   loginUserId: string,
   query: { date?: string }
@@ -225,6 +224,54 @@ const getScheduleDropDownService = async (
 
   return result;
 };
+
+
+// const getScheduleDropDownService = async (
+//   loginUserId: string,
+//   query: { date?: string }
+// ) => {
+//   const ObjectId = Types.ObjectId;
+//   // 1. Extract query parameters
+//   const { date } = query;
+
+//   //4 setup filters
+//   let filterQuery = {};
+//   //check if only filter by date
+//   if (date) {
+//     const start = `${date}T00:00:00.000+00:00`;
+//     const end = `${date}T23:59:59.999+00:00`;
+//     filterQuery = {
+//       startDateTime: { $gte: new Date(start), $lte: new Date(end) },
+//     };
+//   }
+
+//   //check restaurant not found
+//   const restaurant = await RestaurantModel.findOne({
+//     ownerId: loginUserId,
+//   });
+//   if (!restaurant) {
+//     throw new AppError(404, "Restaurant not found");
+//   }
+
+//   const result = await ScheduleModel.aggregate([
+//     {
+//       $match: {
+//         restaurantId: new ObjectId(restaurant._id),
+//         ...filterQuery,
+//       },
+//     },
+//     {
+//       $project: {
+//         _id:1,
+//         startDateTime:1,
+//         endDateTime:1
+//       }
+//     },
+//     { $sort: { startDateTime: 1, endDateTime: 1 } },
+//   ]);
+
+//   return result;
+// };
 
 
 const getUserSchedulesService =  async (restaurantId: string, query:TUserScheduleQuery) => {

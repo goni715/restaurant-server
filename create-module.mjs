@@ -187,11 +187,6 @@ const create${capitalize(moduleName)}Service = async (
   payload: I${capitalize(moduleName)},
 ) => {
   const result = await ${capitalize(moduleName)}Model.create(payload);
-  
-  if (!result) {
-    throw new AppError(400, 'Failed to create ${capitalize(moduleName)}');
-  }
-
   return result;
 };
 
@@ -282,30 +277,18 @@ const getSingle${capitalize(moduleName)}Service = async (id: string) => {
   return result;
 };
 
-const update${capitalize(moduleName)}Service = async (id: string, payload: any) => {
-  const isDeletedService = await mongoose.connection
-    .collection('${moduleName.toLowerCase()}s')
-    .findOne(
-      { _id: new mongoose.Types.ObjectId(id) },
-      { projection: { isDeleted: 1, name: 1 } },
-    );
-
-  if (!isDeletedService?.name) {
-    throw new Error('${capitalize(moduleName)} not found');
+const update${capitalize(moduleName)}Service = async (${moduleName.toLowerCase()}Id: string, payload: any) => {
+ 
+  const ${moduleName.toLowerCase()} = await ${capitalize(moduleName)}Model.findById(faqId);
+  if(!${moduleName.toLowerCase()}){
+    throw new AppError(404, "${capitalize(moduleName)} Not Found");
   }
-
-  if (isDeletedService.isDeleted) {
-    throw new Error('Cannot update a deleted ${moduleName}');
-  }
-
-  const updatedData = await ${capitalize(moduleName)}Model.updateOne(
-    { _id: id },
+  const result = await ${capitalize(moduleName)}Model.updateOne(
+    { _id: ${moduleName.toLowerCase()}Id },
     payload,
   );
 
-
-
-  return updatedData;
+  return result;
 };
 
 const delete${capitalize(moduleName)}Service = async (id: string) => {

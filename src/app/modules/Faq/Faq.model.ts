@@ -5,6 +5,13 @@ const faqSchema = new Schema<IFaq>({
   question: {
     type: String,
     required: true,
+    unique: true,
+    trim: true,
+  },
+  slug: {
+    type: String,
+    required: true,
+    unique: true,
     trim: true,
   },
   answer: {

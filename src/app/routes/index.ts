@@ -17,6 +17,7 @@ import { AdministratorRoutes } from '../modules/Administrator/administrator.rout
 import { TableRoutes } from '../modules/Table/table.route';
 import { TableBookingRoutes } from '../modules/TableBooking/tableBooking.route';
 import OwnerRoutes from '../modules/Owner/Owner.route';
+import FaqRoutes from '../modules/Faq/Faq.route';
 
 const router = express.Router();
 
@@ -93,7 +94,11 @@ const moduleRoutes = [
     {
         path: '/table-booking',
         route: TableBookingRoutes
-    }      
+    },
+    {
+        path: '/faq',
+        route: FaqRoutes
+    }   
 ]
 
 moduleRoutes.forEach((item, i)=> router.use(item.path, item.route));

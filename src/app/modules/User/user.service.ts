@@ -7,7 +7,6 @@ import { makeFilterQuery, makeSearchQuery } from "../../helper/QueryBuilder";
 import { UserSearchFields } from "./user.constant";
 import ObjectId from "../../utils/ObjectId";
 import uploadImage from "../../utils/uploadImage";
-import config from "../../config";
 
 
 

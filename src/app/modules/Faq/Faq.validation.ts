@@ -15,7 +15,7 @@ export const updateFaqValidationSchema = z.object({
     required_error: "question is required!"
   }).optional(),
   answer: z.string({
-    required_error: "description is required !"
+    required_error: "answer is required !"
   }).optional(),
   category: z.string().optional(),
   isActive: z.boolean().optional()

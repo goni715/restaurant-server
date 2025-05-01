@@ -1,9 +1,12 @@
+import { Types } from "mongoose";
 
 
 
 export interface IDining {
   name: string;
   slug: string;
+  ownerId: Types.ObjectId;
+  restaurantId : Types.ObjectId;
 }
 
 

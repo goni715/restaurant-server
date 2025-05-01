@@ -2,11 +2,6 @@ import { Types } from "mongoose";
 import { z } from "zod";
 
 export const createTableBookingSchema = z.object({
-  name: z
-    .string({
-      required_error: "name is required",
-    })
-    .trim(),
   tableId: z
     .string({
       required_error: "tableId is required!",

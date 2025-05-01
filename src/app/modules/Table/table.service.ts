@@ -25,17 +25,19 @@ const createTableService = async (loginUserId: string, payload: ITablePayload) =
         _id: scheduleId
     });
 
-
     if(!schedule){
         throw new AppError(404, "Schedule not found");
     }
 
-
-    const dining = restaurant.dining;
-    if(!dining.includes(new ObjectId(diningId))){
-        throw new AppError(404, "This dining does not belong to your restaurant, please add this dining to your restaurant")
-    }
-
+    //check dining
+    const dining = await DiningModel.findOne({
+      ownerId: loginUserId,
+      _id: diningId,
+      restaurantId: restaurant._id
+    })
+     if(!dining){
+      throw new AppError(404, 'This dining not found');
+     }
 
     //find existing lastTableNumber
     const tables = await TableModel.aggregate([
@@ -216,8 +218,8 @@ const getTablesService = async (loginUserId: string,  query: TTableQuery) => {
     },
     {
       $sort: {
-        startDateTime:1,
-        endDateTime:1
+        startDateTime:-1,
+        endDateTime:-1
       }
     },
     {
@@ -318,24 +320,17 @@ const getTablesByScheduleAndDiningService = async (loginUserId: string, schedule
     ownerId: loginUserId,
     _id: scheduleId,
   });
-
   if (!schedule) {
     throw new AppError(404, "Schedule not found");
   }
-
-  const dining = await DiningModel.findById(diningId);
-  if (!dining) {
-    throw new AppError(404, "dining not found");
-  }
-
   //check dining
-  const myDining = await RestaurantModel.findOne({
-    dining: { $in: [diningId]}
-  });
-
-  if (!myDining) {
-    throw new AppError(404, "This dining is not belong to my restaurant");
-  }
+  const dining = await DiningModel.findOne({
+    ownerId: loginUserId,
+    _id: diningId,
+  })
+   if(!dining){
+    throw new AppError(404, 'This dining not found');
+   }
 
   const result = await TableModel.aggregate([
     {

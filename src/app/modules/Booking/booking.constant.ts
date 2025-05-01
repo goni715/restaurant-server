@@ -4,6 +4,11 @@ export const BookingSearchFields = [
   "user.phone"
 ];
 
+export const MyBookingSearchFields = [
+  "restaurant.name",
+  "token",
+  "dining.name"
+];
 
 export const BookingValidFields = [
   "searchTerm",

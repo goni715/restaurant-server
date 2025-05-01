@@ -5,10 +5,10 @@ import { ITableBooking } from "./tableBooking.interface";
 
 const tableBookingSchema = new Schema<ITableBooking>(
   {
-    name: {
-      type: String,
+    userId: {
+      type: Schema.Types.ObjectId,
       required: true,
-      trim: true
+      ref: "User"
     },
     tableId: {
         type: Schema.Types.ObjectId,

@@ -4,7 +4,6 @@ import RestaurantModel from "../Restaurant/restaurant.model";
 import { TSchedulePayload, TScheduleQuery, TUserScheduleQuery } from "./schedule.interface"
 import ScheduleModel from "./schedule.model";
 import BookingModel from "../Booking/booking.model";
-import isDifferenceDuration from "../../utils/isDifferenceDuration";
 import TableModel from "../Table/table.model";
 
 

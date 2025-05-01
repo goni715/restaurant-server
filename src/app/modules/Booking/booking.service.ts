@@ -1,4 +1,4 @@
-import mongoose, { Types } from "mongoose";
+import { Types } from "mongoose";
 import AppError from "../../errors/AppError";
 import ScheduleModel from "../Schedule/schedule.model";
 import { IBookingPayload, TBookingQuery } from "./booking.interface"
@@ -8,7 +8,7 @@ import DiningModel from "../Dining/dining.model";
 import RestaurantModel from "../Restaurant/restaurant.model";
 import getPercentageValue from "../../utils/getPercentageValue";
 import { makeFilterQuery, makeSearchQuery } from "../../helper/QueryBuilder";
-import { BookingSearchFields } from "./booking.constant";
+import { BookingSearchFields, MyBookingSearchFields } from "./booking.constant";
 
 
 const createBookingWithoutPaymentService = async (
@@ -16,17 +16,28 @@ const createBookingWithoutPaymentService = async (
   payload: IBookingPayload
 ) => {
   const { restaurantId, diningId, guest,date, checkIn, checkOut } = payload;
-
-  const dining = await DiningModel.findById(diningId);
-  if (!dining) {
-    throw new AppError(404, "This dining not found");
-  }
-
   const restaurant = await RestaurantModel.findById(restaurantId);
   if (!restaurant) {
     throw new AppError(404, "Restaurant Not Found");
   }
 
+  if(restaurant?.status !== "active"){
+    throw new AppError(403, "Restaurant is not active")
+  }
+
+  if(restaurant?.approved !== "accepted"){
+    throw new AppError(403, "Restaurant is not Approved")
+  }
+
+  const dining = await DiningModel.findOne({
+    _id: diningId,
+    restaurantId
+  });
+  if (!dining) {
+    throw new AppError(404, "This dining not found");
+  }
+
+ 
   // const date = `${date}T00:00:00.000+00:00`;
   //generate token
   const token = Math.floor(1000 + Math.random() * 900000);
@@ -246,7 +257,7 @@ const getBookingsService = async (loginUserId:string, query: TBookingQuery) => {
           const end = `${date}T23:59:59.999+00:00`;
          filterQuery = {
           ...filterQuery,
-           "schedule.startDateTime": { $gte: new Date(start), $lte: new Date(end) }
+           "date": { $gte: new Date(start), $lte: new Date(end) }
          };
       }
 
@@ -304,6 +315,7 @@ const getBookingsService = async (loginUserId:string, query: TBookingQuery) => {
         customerName: "$user.fullName",
         customerEmail: "$user.email",
         customerPhone: "$user.phone",
+        diningName: "$dining.name",
         scheduleId: "$scheduleId",
         date: "$date",
         checkIn: "$checkIn",
@@ -381,4 +393,153 @@ const totalBookingResult = await BookingModel.aggregate([
 
 }
 
-export { createBookingWithoutPaymentService, createBookingWithPaymentService, getBookingsService };
+
+const getMyBookingsService = async (loginUserId:string, query: TBookingQuery) => {
+  const ObjectId = Types.ObjectId;
+     // 1. Extract query parameters
+     const {
+      searchTerm,
+      page = 1, 
+      limit = 10, 
+      sortOrder = "asc",
+      sortBy = "startDateTime", 
+      date,
+      ...filters // Any additional filters
+    } = query;
+
+  
+    // 2. Set up pagination
+    const skip = (Number(page) - 1) * Number(limit);
+  
+    //4. setup searching
+      let searchQuery: any = {};
+      if (searchTerm) {
+        searchQuery = makeSearchQuery(searchTerm, MyBookingSearchFields);
+      }
+    
+      //console.dir(searchQuery, {depth:null})
+ 
+      //5 setup filters
+      let filterQuery = {};
+    //add additional filters
+    if (filters) {
+      filterQuery = {
+        ...filterQuery,
+        ...makeFilterQuery(filters)
+      }
+    }
+
+  const result = await BookingModel.aggregate([
+    {
+      $match: { userId: new ObjectId(loginUserId)}
+    },
+    {
+      $lookup: {
+        from: "restaurants",
+        localField: "restaurantId",
+        foreignField: "_id",
+        as: "restaurant"
+      }
+    },
+    {
+      $unwind: "$restaurant"
+    },
+    {
+      $lookup: {
+        from: "dinings",
+        localField: "diningId",
+        foreignField: "_id",
+        as: "dining"
+      }
+    },
+    {
+      $unwind: "$dining"
+    },
+    {
+      $match: {
+         ...filterQuery,
+         ...searchQuery
+      }
+    },
+    {
+      $project: {
+        _id:"$_id",
+        restaurantName: "$restaurant.name",
+        diningName: "$dining.name",
+        date: "$date",
+        checkIn: "$checkIn",
+        checkOuT: "$checkOut",
+        token: "$token",
+        startDateTime: "$startDateTime",
+        endDateTime: "$endDateTime",
+        amount:"$amount",
+        guest:"$guest",
+        cancellationCharge: "$cancellationCharge",
+        status: "$status",
+        paymentStatus: "$paymentStatus"
+      }
+    },
+    {
+      $sort: {date: -1}, //after projection
+    },
+    { $skip: skip },
+    { $limit: Number(limit) }
+  ])
+
+  
+   // total count 
+const totalBookingResult = await BookingModel.aggregate([
+    {
+      $match: { userId: new ObjectId(loginUserId)}
+    },
+    {
+      $lookup: {
+        from: "restaurants",
+        localField: "restaurantId",
+        foreignField: "_id",
+        as: "restaurant"
+      }
+    },
+    {
+      $unwind: "$restaurant"
+    },
+    {
+      $lookup: {
+        from: "dinings",
+        localField: "diningId",
+        foreignField: "_id",
+        as: "dining"
+      }
+    },
+    {
+      $unwind: "$dining"
+    },
+    {
+      $match: {
+         ...filterQuery,
+         ...searchQuery
+      }
+    },
+     { $count: "totalCount" }
+  ])
+
+  const totalCount = totalBookingResult[0]?.totalCount || 0;
+  const totalPages = Math.ceil(totalCount / Number(limit));
+  
+ return {
+  meta: {
+    page: Number(page), //currentPage
+    limit: Number(limit),
+    totalPages,
+    total: totalCount,
+  },
+  data: result
+ }
+
+
+
+}
+
+
+
+export { createBookingWithoutPaymentService, createBookingWithPaymentService, getBookingsService, getMyBookingsService };

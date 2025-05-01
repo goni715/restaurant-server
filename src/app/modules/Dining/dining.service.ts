@@ -9,21 +9,38 @@ import { DiningSearchFields } from "./dining.constant";
 
 
 
+const createDiningService = async (loginUserId:string, name: string) => {
+    const restaurant = await RestaurantModel.findOne({
+        ownerId: loginUserId
+    });
+    if(!restaurant){
+        throw new AppError(404, "You have no restaurant !");
+    }
 
-const createDiningService = async (name: string) => {
     const slug = slugify(name).toLowerCase();
     
     //check Dining is already existed
-    const dining = await DiningModel.findOne({ slug });
+    const dining = await DiningModel.findOne({
+        slug,
+        ownerId: loginUserId,
+        restaurantId: restaurant._id
+    });
     if(dining){
         throw new AppError(409, 'This dining is already existed');
     }
 
-    const result = await DiningModel.create({ name, slug })
+    const result = await DiningModel.create({
+         name,
+         slug,
+         ownerId: loginUserId,
+         restaurantId: restaurant._id
+    })
     return result;
 }
 
-const getDiningListService = async (query: TDiningQuery) => {
+
+
+const getDiningListService = async (loginUserId: string, query: TDiningQuery) => {
     // 1. Extract query parameters
       const {
         searchTerm, 
@@ -51,12 +68,19 @@ const getDiningListService = async (query: TDiningQuery) => {
       if (filters) {
         filterQuery = makeFilterQuery(filters);
       }
-  const result = await DiningModel.aggregate([
+   const result = await DiningModel.aggregate([
       {
           $match: {
+              ownerId: new ObjectId(loginUserId),
               ...searchQuery,
               ...filterQuery
           }
+      },
+      {
+        $project: {
+            _id:1,
+            name:1
+        }
       },
       { $sort: { [sortBy]: sortDirection } },
       { $skip: skip },
@@ -67,6 +91,7 @@ const getDiningListService = async (query: TDiningQuery) => {
 const totalDiningResult = await DiningModel.aggregate([
   {
     $match: {
+      ownerId: new ObjectId(loginUserId),
       ...searchQuery,
       ...filterQuery
     }
@@ -88,8 +113,10 @@ data: result,
 };
 }
 
-const getDiningDropDownService = async () => {
-    const result = await DiningModel.find().select('-createdAt -updatedAt -slug').sort('-createdAt');
+const getDiningDropDownService = async (loginUserId:string) => {
+    const result = await DiningModel.find({
+        ownerId: loginUserId
+    }).select('-createdAt -updatedAt -slug -ownerId -restaurantId').sort('-createdAt');
     return result;
 }
 
@@ -123,8 +150,18 @@ const getMyDiningsService = async (loginUserId: string) => {
 }
 
 
-const updateDiningService = async (diningId: string, name: string) => {
-    const dining = await DiningModel.findById(diningId)
+const updateDiningService = async (loginUserId:string, diningId: string, name: string) => {
+    const restaurant = await RestaurantModel.findOne({
+        ownerId: loginUserId
+    });
+    if(!restaurant){
+        throw new AppError(404, "You have no restaurant !");
+    }
+
+    const dining = await DiningModel.findOne({
+        ownerId: loginUserId,
+        _id: diningId
+    })
     if(!dining){
         throw new AppError(404, 'This dining not found');
     }
@@ -136,7 +173,7 @@ const updateDiningService = async (diningId: string, name: string) => {
     }
 
     const result = await DiningModel.updateOne(
-        { _id: diningId},
+        { _id: diningId, ownerId:loginUserId},
         {
             name,
             slug

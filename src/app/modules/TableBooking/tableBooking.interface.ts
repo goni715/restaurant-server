@@ -3,9 +3,9 @@ import { Types } from "mongoose";
 export type ITableAvailability = "Waitlist" | "Seating" | "Booked" | "Completed";
 
 export interface ITableBooking {
-    name: string;
     token: string;
     guest: number;
+    userId: Types.ObjectId;
     tableId: Types.ObjectId;
     scheduleId: Types.ObjectId;
     ownerId: Types.ObjectId;

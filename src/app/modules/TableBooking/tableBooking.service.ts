@@ -11,67 +11,112 @@ import ObjectId from "../../utils/ObjectId";
 
 
 const createTableBookingService = async (loginUserId:string, payload: ITableBooking) => {
-    const {name, token, tableId, guest, availability } = payload;
-    const table = await TableModel.findOne({
-        _id: tableId,
-        ownerId: loginUserId
-    })
+  const { token, tableId, guest, availability } = payload;
+  const table = await TableModel.findOne({
+    _id: tableId,
+    ownerId: loginUserId,
+  });
 
-    if(!table){
-        throw new AppError(404, "Table Not found");
+  if (!table) {
+    throw new AppError(404, "Table Not found");
+  }
+
+  //check token is not valid
+  const booking = await BookingModel.findOne({ token, restaurantId: table.restaurantId });
+  if (!booking) {
+    throw new AppError(400, "Invaild Token");
+  }
+
+ 
+  //check availableSeats
+  const availableSeats = table.seats;
+  if (availableSeats < guest) {
+    throw new AppError(
+      400,
+      "There are no available seats in this table at this moment"
+    );
+  }
+
+
+  //check your guest
+  const bookingGuest = booking.guest;
+  
+  //check your tableBookingGuest
+  const tableBookingGuest = await TableBookingModel.aggregate([
+    {
+      $match: {
+        token,
+        userId: new ObjectId(booking.userId)
+      }
+    },
+    {
+      $group: {
+        _id: {
+          token,
+          userId: new ObjectId(booking.userId)
+        },
+        totalGuest: { $sum: "$guest"}
+      }
     }
+  ]);
 
-    //check token is not valid
-    const tokenExist = await BookingModel.findOne({ token });
-    if(!tokenExist){
-        throw new AppError(400, "Invaild Token");
-    }
-    //check availableSeats
-   const availableSeats = table.seats;
-   if(availableSeats < guest){
-     throw new AppError(400, "There are no available seats in this table at this moment")
-   }
+  const alreadyTableBookingGuest = tableBookingGuest?.length > 0 ? tableBookingGuest[0]?.totalGuest : 0;
+  if(alreadyTableBookingGuest === bookingGuest){
+    throw new AppError(403, "You have already booked the seat(s)");
+  }
 
 
-   //transaction & rollback part
-   const session = await mongoose.startSession();
-   
-   try{
+  // check if trying to book more than allowed
+if (alreadyTableBookingGuest + guest > bookingGuest) {
+  const remaining = bookingGuest - alreadyTableBookingGuest;
+  throw new AppError(
+    403,
+    `You can only book ${remaining} seat(s).`
+  );
+}
+
+
+  //transaction & rollback part
+  const session = await mongoose.startSession();
+
+  try {
     session.startTransaction();
 
     //database-process-01
     //create the tableBooking
-    const newBooking = await TableBookingModel.create([{
-        name,
-        token,
-        guest,
-        tableId,
-        scheduleId: table.scheduleId,
-        ownerId: table.ownerId,
-        restaurantId: table.restaurantId,
-        diningId: table.diningId,
-        availability
-    }], { session });
-
+    const newBooking = await TableBookingModel.create(
+      [
+        {
+          token,
+          guest,
+          userId: booking.userId,
+          tableId,
+          scheduleId: table.scheduleId,
+          ownerId: table.ownerId,
+          restaurantId: table.restaurantId,
+          diningId: table.diningId,
+          availability,
+        },
+      ],
+      { session }
+    );
 
     //database-process-02
     //update the table
     await TableModel.updateOne(
-        { _id: tableId, seats: { $gt: 0 }},
-        { $inc: { seats: - guest } }, // Decrease availableSeats
-        { session }
-    )
+      { _id: tableId, seats: { $gt: 0 } },
+      { $inc: { seats: -guest } }, // Decrease availableSeats
+      { session }
+    );
 
-    
     await session.commitTransaction();
     await session.endSession();
     return newBooking[0];
-   }
-   catch(err:any){
+  } catch (err: any) {
     await session.abortTransaction();
     await session.endSession();
-    throw new Error(err)
-   }
+    throw new Error(err);
+  }
 }
 
 const getTableBookingsService = async (loginUserId: string, query: TTableBookingQuery) => {
@@ -171,8 +216,21 @@ const getTableBookingsService = async (loginUserId: string, query: TTableBooking
     $unwind: "$schedule"
   },
   {
+    $lookup: {
+      from: "users",
+      localField: "userId",
+      foreignField: "_id",
+      as: "user"
+    }
+  },
+  {
+    $unwind: "$user"
+  },
+  {
     $project: {
-        name: "$name",
+        fullName: "$user.fullName",
+        email: "$user.email",
+        phone: "$user.phone",
         token: 1,
         guest:1,
         availability:1,

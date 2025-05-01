@@ -6,8 +6,9 @@ import { createDiningService, deleteDiningService, getDiningDropDownService, get
 
 
 const createDining = catchAsync(async (req, res) => {
-  const { name } = req.body;
-  const result = await createDiningService(name);
+  const loginUserId = req.headers.id;
+  const {name } = req.body;
+  const result = await createDiningService(loginUserId as string, name);
 
   sendResponse(res, {
     statusCode: 201,
@@ -20,8 +21,9 @@ const createDining = catchAsync(async (req, res) => {
 
 
 const getDiningList = catchAsync(async (req, res) => {
+  const loginUserId = req.headers.id;
   const validatedQuery = pickValidFields(req.query, DiningValidFields);
-  const result = await getDiningListService(validatedQuery);
+  const result = await getDiningListService(loginUserId as string, validatedQuery);
 
   sendResponse(res, {
     statusCode: 200,
@@ -33,7 +35,8 @@ const getDiningList = catchAsync(async (req, res) => {
 });
 
 const getDiningDropDown = catchAsync(async (req, res) => {
-  const result = await getDiningDropDownService();
+  const loginUserId = req.headers.id;
+  const result = await getDiningDropDownService(loginUserId as string);
 
   sendResponse(res, {
     statusCode: 200,
@@ -57,9 +60,10 @@ const getMyDinings = catchAsync(async (req, res) => {
 
 
 const updateDining = catchAsync(async (req, res) => {
+  const loginUserId = req.headers.id;
   const { diningId } = req.params;
   const { name } = req.body;
-  const result = await updateDiningService(diningId, name);
+  const result = await updateDiningService(loginUserId as string, diningId, name);
 
   sendResponse(res, {
     statusCode: 200,

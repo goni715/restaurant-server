@@ -27,4 +27,9 @@ router.get(
   BookingController.getBookings
 );
 
+router.get(
+  "/get-my-bookings",
+  AuthMiddleware(UserRole.user),
+  BookingController.getMyBookings
+);
 export const BookingRoutes = router;

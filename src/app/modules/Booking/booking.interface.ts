@@ -39,7 +39,7 @@ export type TBookingQuery = {
     limit?: string;
     sortBy?: string;
     sortOrder?: 'asc' | 'desc';
-    date?: string;
+    date?:string;
     paymentStatus?: TPaymentStatus;
     status?: TBookingStatus;
 };

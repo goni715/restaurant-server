@@ -14,7 +14,17 @@ const diningSchema = new Schema<IDining>({
         required: true,
         unique: true,
         trim: true
-    }
+    },
+    ownerId: {
+        type: Schema.Types.ObjectId,
+        required: true,
+        ref: "User",
+    },
+    restaurantId: {
+      type: Schema.Types.ObjectId,
+      required: true,
+      ref: "Restaurant",
+    },
 },{
     timestamps: true,
     versionKey: false

@@ -9,13 +9,13 @@ const router = express.Router();
 
 router.post(
   "/create-dining",
-  AuthMiddleware(UserRole.super_admin),
+  AuthMiddleware(UserRole.owner),
   validationMiddleware(diningValidationSchema),
   DiningController.createDining
 );
 router.get(
   "/get-dining-list",
-  AuthMiddleware(UserRole.super_admin, UserRole.administrator),
+  AuthMiddleware(UserRole.owner),
   DiningController.getDiningList
 );
 router.get(
@@ -30,7 +30,7 @@ router.get(
 );
 router.patch(
   "/update-dining/:diningId",
-  AuthMiddleware(UserRole.super_admin),
+  AuthMiddleware(UserRole.owner),
   validationMiddleware(diningValidationSchema),
   DiningController.updateDining
 );

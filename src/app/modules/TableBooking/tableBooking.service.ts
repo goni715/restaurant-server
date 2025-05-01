@@ -305,11 +305,40 @@ const deleteTableBookingService = async (loginUserId: string, tableBookingId: st
     throw new AppError(404, "Table Booking Not Found");
   }
 
- const result = await TableBookingModel.deleteOne({
-  _id: tableBookingId,
-  ownerId: loginUserId
- })
- return result;
+
+//transaction & rollback part
+const session = await mongoose.startSession();
+
+try {
+  session.startTransaction();
+
+  //database-process-01
+  //update the table seats
+  await TableModel.updateOne(
+    { _id: tableBooking.tableId, seats: { $gt: 0 } },
+    { $inc: { seats: +tableBooking.guest } }, // Increase availableSeats
+    { session }
+  );
+
+  //database-process-02
+  //delete the tableBooking
+  const result = await TableBookingModel.deleteOne(
+    {
+      _id: tableBookingId,
+      ownerId: loginUserId,
+    },
+    { session }
+  );
+
+  await session.commitTransaction();
+  await session.endSession();
+  return result;
+} catch (err: any) {
+  await session.abortTransaction();
+  await session.endSession();
+  throw new Error(err);
+}
+
 }
 
 export {

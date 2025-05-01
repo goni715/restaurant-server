@@ -3,15 +3,14 @@ import AppError from "../../errors/AppError";
 import ObjectId from "../../utils/ObjectId";
 import RestaurantModel from "../Restaurant/restaurant.model";
 import ScheduleModel from "../Schedule/schedule.model";
-import { ITable, IUpdateTablePayload, TTableQuery } from "./table.interface";
+import { ITablePayload, IUpdateTablePayload, TTableQuery } from "./table.interface";
 import TableModel from "./table.model";
 import DiningModel from "../Dining/dining.model";
 import TableBookingModel from "../TableBooking/tableBooking.model";
 
 
-const createTableService = async (loginUserId: string, payload: ITable) => {
-    const { name, seats, diningId, scheduleId } = payload;
-    const slug = slugify(name).toLowerCase();
+const createTableService = async (loginUserId: string, payload: ITablePayload) => {
+    const { totalTable, seats, diningId, scheduleId } = payload;
 
     const restaurant = await RestaurantModel.findOne({
         ownerId: loginUserId,
@@ -20,7 +19,7 @@ const createTableService = async (loginUserId: string, payload: ITable) => {
         throw new AppError(404, "Restaurant not found");
     }
 
-    //check schedule
+    // //check schedule
     const schedule = await ScheduleModel.findOne({
         ownerId: loginUserId,
         _id: scheduleId
@@ -38,31 +37,85 @@ const createTableService = async (loginUserId: string, payload: ITable) => {
     }
 
 
-    //check table is already existed
-    const table = await TableModel.findOne({
-        slug,
-        scheduleId,
-        ownerId:loginUserId,
-        restaurantId: restaurant._id,
-        diningId,
-    });
+    //find existing lastTableNumber
+    const tables = await TableModel.aggregate([
+      {
+        $match: {
+          ownerId: new ObjectId(loginUserId),
+          scheduleId: new ObjectId(scheduleId),
+          diningId: new ObjectId(diningId),
+        },
+      },
+      // {
+      //   $addFields: {
+      //     nickName:"goni",
+      //     SplitArray: {
+      //       $split: ["$name", "-"] //name : "T-10" //output = ["T", "10"]
+      //     },
+      //     tableNumber: {
+      //       $arrayElemAt: [
+      //         { $split: ["$name", "-"]}, 1 //return string table Number = "10"
+      //       ]
+      //     },
+      //     TwoInteger: {
+      //       $toInt:  {
+      //         $arrayElemAt: [
+      //           { $split: ["$name", "-"]}, 1 //convertTo Integer = 10
+      //         ]
+      //       }
+      //     }
+      //   }
+      // }
+      {
+        $addFields: {
+          tableNumber: {
+            $toInt: {
+              $arrayElemAt: [
+                { $split: ["$name", "-"] },
+                1
+              ]
+            }
+          }
+        }
+      },
+      {
+        $sort: {
+          tableNumber: -1 // sort descending to get highest number first
+        }
+      },
+      {
+        $limit: 1 // only return the last (highest numbered) table
+      },
+      {
+        $project: {
+          tableNumber:1
+        }
+      }
+    ]);
 
-    if(table){
-        throw new AppError(409, "Table is already existed");
-    }
+    //lastTableNumber
+    const lastTableNumber = tables?.length > 0 ? tables[0]?.tableNumber : 0;
 
-    //create the table 
-    const result = await TableModel.create({
+    let tableData: any[] = [];
+    for (let i = 1; i <= totalTable; i++) {
+      const name = `T-${Number(lastTableNumber+i)}`;
+      const slug = name.toLowerCase(); 
+    
+      tableData.push({
         name,
         slug,
         scheduleId,
-        ownerId:loginUserId,
-        restaurantId: restaurant._id,
         diningId,
+        restaurantId: restaurant._id,
+        ownerId:loginUserId,
         seats
-    })
-    
+      });
+    }
+
+    //create the tables
+    const result = await TableModel.insertMany(tableData);
     return result;
+    
 }
 
 
@@ -90,9 +143,28 @@ const getTablesService = async (loginUserId: string,  query: TTableQuery) => {
         ownerId: new ObjectId(loginUserId),
       },
     },
+    // { 
+    //   $group: {               //for single field 
+    //     _id: "$scheduleId",
+    //     count: { $count: {}},
+    //     sum: { $sum: "$seats"},
+    //     count2: { $sum: 1}
+    //   },
+    // },
+    // {
+    //   $group: {               //for multiple fields
+    //     _id: {
+    //       scheduleId: "$scheduleId",
+    //       diningId: "$diningId",
+    //     },
+    //     count: { $count: {}},
+    //     sum: { $sum: "$seats"},
+    //     count2: { $sum: 1}
+    //   },
+    // },
     {
       $group: {
-        _id: {
+         _id: {
           scheduleId: "$scheduleId",
           diningId: "$diningId",
         },
@@ -275,7 +347,7 @@ const getTablesByScheduleAndDiningService = async (loginUserId: string, schedule
     },
     {
       $addFields: {
-        nameNumber: {
+        tableNumber: {
           $toInt: {
             $arrayElemAt: [
               { $split: ["$name", "-"] },
@@ -287,7 +359,7 @@ const getTablesByScheduleAndDiningService = async (loginUserId: string, schedule
     },
     {
       $sort: {
-        nameNumber: 1
+        tableNumber: 1
       }
     },
     {

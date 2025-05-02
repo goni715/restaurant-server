@@ -1,6 +1,5 @@
 import express from 'express';
 import PolicyController from './Policy.controller';
-import AuthController from './Policy.controller';
 import validationMiddleware from '../../middlewares/validationMiddleware';
 import { createPolicyValidationSchema, updatePolicyValidationSchema } from './Policy.validation';
 import AuthMiddleware from '../../middlewares/AuthMiddleware';
@@ -29,7 +28,7 @@ router.get(
 );
 
 router.patch(
-  '/update-policy/:policyId',
+  '/update-policy/:type',
   AuthMiddleware("super_admin", "administrator"),
   isAccess("settings"),
   validationMiddleware(updatePolicyValidationSchema),

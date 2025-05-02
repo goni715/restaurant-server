@@ -8,12 +8,13 @@ import { approveRestaurantService, changeRestaurantStatusService, createRestaura
 
 const createRestaurant = catchAsync(async (req, res) => {
   const loginUserId = req.headers.id;
-  const result = await createRestaurantService(req, loginUserId as string, req.body);
+  console.log(req.body);
+  //const result = await createRestaurantService(req, loginUserId as string, req.body);
   sendResponse(res, {
     statusCode: 201,
     success: true,
     message: "Restaurant is created successfully",
-    data: result
+    data: "result"
   });
 });
   

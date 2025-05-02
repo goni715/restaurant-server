@@ -1,5 +1,6 @@
 import express from 'express';
 import PolicyController from './Policy.controller';
+import AuthController from './Policy.controller';
 import validationMiddleware from '../../middlewares/validationMiddleware';
 import { createPolicyValidationSchema, updatePolicyValidationSchema } from './Policy.validation';
 import AuthMiddleware from '../../middlewares/AuthMiddleware';
@@ -32,7 +33,7 @@ router.patch(
   AuthMiddleware("super_admin", "administrator"),
   isAccess("settings"),
   validationMiddleware(updatePolicyValidationSchema),
-  PolicyController.updatePolicy,
+  PolicyController.updatePolicyByType,
 );
 
 router.delete(

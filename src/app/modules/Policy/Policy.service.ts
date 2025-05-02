@@ -39,23 +39,27 @@ const getPolicyByTypeService = async (type: TPolicyType) => {
 };
 
 
-const updatePolicyService = async (policyId: string, payload: Partial<IPolicy>) => {
-  const policy = await PolicyModel.findById(policyId);
+const updatePolicyByTypeService = async (type: TPolicyType, payload: Partial<IPolicy>) => {
+   //check type is not valid
+   if(!PolicyTypeArray.includes(type)){
+    throw new AppError(400, `Please provide valid Type-- "privacy-policy" or "terms-condition" or "about-us" `)
+  }
+
+  const policy = await PolicyModel.findOne({ type });
   if(!policy){
     throw new AppError(404, "Policy Not Found");
   }
 
   if(payload?.type){
     const policyExist = await PolicyModel.findOne({
-      _id: { $ne: policyId },
-      type: payload.type
+      type: { $ne: type },
     });
     if (policyExist) {
       throw new AppError(409, `Sorry! ${payload.type} is already existed`);
     }
   }
   const result = await PolicyModel.updateOne(
-    { _id: policyId },
+    { type },
     payload
   );
   return result;
@@ -82,6 +86,6 @@ export {
   createPolicyService,
   getPoliciesService,
   getPolicyByTypeService,
-  updatePolicyService,
+  updatePolicyByTypeService,
   deletePolicyByTypeService
 };

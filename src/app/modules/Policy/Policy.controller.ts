@@ -1,7 +1,7 @@
 import catchAsync from '../../utils/catchAsync';
 import sendResponse from '../../utils/sendResponse';
 import { TPolicyType } from './Policy.interface';
-import { createPolicyService, updatePolicyService, getPolicyByTypeService, deletePolicyByTypeService, getPoliciesService } from './Policy.service';
+import { createPolicyService, updatePolicyByTypeService, getPolicyByTypeService, deletePolicyByTypeService, getPoliciesService } from './Policy.service';
 
 const createPolicy = catchAsync(async (req, res) => {
   const result = await createPolicyService(req.body);
@@ -38,9 +38,9 @@ const getPolicyByType = catchAsync(async (req, res) => {
 });
 
 
-const updatePolicy = catchAsync(async (req, res) => {
-  const { policyId } = req.params;
-  const result = await updatePolicyService(policyId, req.body);
+const updatePolicyByType = catchAsync(async (req, res) => {
+  const { type } = req.params;
+  const result = await updatePolicyByTypeService(type as TPolicyType, req.body);
 
   sendResponse(res, {
     statusCode: 200,
@@ -66,7 +66,7 @@ const PolicyController = {
   createPolicy,
   getPolicies,
   getPolicyByType,
-  updatePolicy,
+  updatePolicyByType,
   deletePolicyByType
 };
 export default PolicyController;

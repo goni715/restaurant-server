@@ -15,10 +15,10 @@ const bookingSchema = new Schema<IBooking>(
       required: true,
       ref: "Restaurant",
     },
-    diningId: {
+    ownerId: {
       type: Schema.Types.ObjectId,
       required: true,
-      ref: "Dining",
+      ref: "User",
     },
     date: {
       type: Date,
@@ -61,7 +61,7 @@ const bookingSchema = new Schema<IBooking>(
     },
     status: {
         type: String,
-        enum: ["pending", "conpleted", "cancelled"],
+        enum: ["pending", "waitlist", "seating"],
         default: "pending"
     },
     paymentStatus: {

@@ -45,7 +45,7 @@ router.get(
   RestaurantController.getUserRestaurants
 );
 router.get(
-  "/get-owner-restaurants",
+  "/get-owner-restaurant",
   AuthMiddleware(UserRole.owner),
   RestaurantController.getOwnerRestaurant
 );

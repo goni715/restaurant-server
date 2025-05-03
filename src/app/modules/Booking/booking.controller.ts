@@ -2,7 +2,7 @@ import catchAsync from "../../utils/catchAsync";
 import pickValidFields from "../../utils/pickValidFields";
 import sendResponse from "../../utils/sendResponse";
 import { BookingValidFields } from "./booking.constant";
-import { createBookingWithoutPaymentService, createBookingWithPaymentService, getBookingsService, getMyBookingsService } from "./booking.service";
+import { createBookingWithoutPaymentService, createBookingWithPaymentService, getBookingsService, getMyBookingsService, getSingleBookingService, updateBookingStatusService } from "./booking.service";
 
 const createBookingWithoutPayment = catchAsync(async (req, res) => {
   const loginUserId = req.headers.id;
@@ -58,11 +58,40 @@ const getMyBookings = catchAsync(async (req, res) => {
 });
 
 
+
+const updateBookingStatus = catchAsync(async (req, res) => {
+  const loginUserId = req.headers.id;
+  const { bookingId } = req.params;
+  const { status } = req.body;
+  const result = await updateBookingStatusService(loginUserId as string, bookingId, status);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "status is updated successfully",
+    data: result,
+  });
+});
+
+
+const getSingleBooking = catchAsync(async (req, res) => {
+  const loginUserId = req.headers.id;
+  const { bookingId } = req.params;
+  const result = await getSingleBookingService(loginUserId as string, bookingId);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Booking is retrieved successfully",
+    data: result,
+  });
+});
+
 const BookingController = {
   createBookingWithoutPayment,
   createBookingWithPayment,
   getBookings,
-  getMyBookings
+  getMyBookings,
+  updateBookingStatus,
+  getSingleBooking
 };
 
 export default BookingController;

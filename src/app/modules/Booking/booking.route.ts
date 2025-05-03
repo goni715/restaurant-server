@@ -3,7 +3,7 @@ import AuthMiddleware from '../../middlewares/AuthMiddleware';
 import { UserRole } from '../User/user.constant';
 import validationMiddleware from '../../middlewares/validationMiddleware';
 import BookingController from './booking.controller';
-import { createBookingWithoutPaymentSchema, createBookingWithPaymentSchema } from './booking.validation';
+import { createBookingWithoutPaymentSchema, createBookingWithPaymentSchema, updateBookingStatusSchema } from './booking.validation';
 
 const router = express.Router();
 
@@ -32,4 +32,17 @@ router.get(
   AuthMiddleware(UserRole.user),
   BookingController.getMyBookings
 );
+router.patch(
+  "/update-booking-status/:bookingId",
+  AuthMiddleware(UserRole.owner),
+  validationMiddleware(updateBookingStatusSchema),
+  BookingController.updateBookingStatus
+);
+
+router.get(
+  "/get-single-booking/:bookingId",
+  AuthMiddleware(UserRole.owner),
+  BookingController.getSingleBooking
+);
+
 export const BookingRoutes = router;

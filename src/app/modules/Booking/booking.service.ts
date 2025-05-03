@@ -1,7 +1,7 @@
-import { Types } from "mongoose";
+import mongoose, { Types } from "mongoose";
 import AppError from "../../errors/AppError";
 import ScheduleModel from "../Schedule/schedule.model";
-import { IBookingPayload, TBookingQuery } from "./booking.interface"
+import { IBookingPayload, TBookingQuery, TBookingStatus } from "./booking.interface"
 import BookingModel from "./booking.model";
 import PaymentModel from "../Payment/payment.model";
 import DiningModel from "../Dining/dining.model";
@@ -29,15 +29,7 @@ const createBookingWithoutPaymentService = async (
     throw new AppError(403, "Restaurant is not Approved")
   }
 
-  const dining = await DiningModel.findOne({
-    _id: diningId,
-    restaurantId
-  });
-  if (!dining) {
-    throw new AppError(404, "This dining not found");
-  }
 
- 
   // const date = `${date}T00:00:00.000+00:00`;
   //generate token
   const token = Math.floor(1000 + Math.random() * 900000);
@@ -73,7 +65,7 @@ const createBookingWithoutPaymentService = async (
   const result = await BookingModel.create({
     userId: loginUserId,
     restaurantId: restaurantId,
-    diningId,
+    ownerId: restaurant?.ownerId,
     token,
     guest,
     date: new Date(date),
@@ -290,17 +282,6 @@ const getBookingsService = async (loginUserId:string, query: TBookingQuery) => {
     },
     {
       $unwind: "$user"
-    },
-    {
-      $lookup: {
-        from: "dinings",
-        localField: "diningId",
-        foreignField: "_id",
-        as: "dining"
-      }
-    },
-    {
-      $unwind: "$dining"
     },
     {
       $match: {
@@ -541,5 +522,48 @@ const totalBookingResult = await BookingModel.aggregate([
 }
 
 
+const updateBookingStatusService = async (
+  loginUserId: string,
+  bookingId: string,
+  status: TBookingStatus
+) => {
 
-export { createBookingWithoutPaymentService, createBookingWithPaymentService, getBookingsService, getMyBookingsService };
+  console.log({
+    loginUserId,
+    bookingId
+  });
+
+  const booking = await BookingModel.findOne({
+    _id: bookingId,
+    ownerId: loginUserId,
+  });
+
+  if (!booking) {
+    throw new AppError(404, "Booking Not Found");
+  }
+
+  const result = await BookingModel.updateOne(
+    {
+      _id: bookingId,
+      ownerId: loginUserId,
+    },
+    {status}
+  )
+
+  return result;
+};
+
+const getSingleBookingService = async (loginUserId: string, bookingId: string) => {
+  const booking = await BookingModel.findOne({
+    _id: bookingId,
+    ownerId: loginUserId
+  }) 
+
+  if(!booking){
+    throw new AppError(404, "Booking Not Found")
+  }
+
+  return booking;
+}
+
+export { createBookingWithoutPaymentService, createBookingWithPaymentService, getBookingsService, getMyBookingsService, updateBookingStatusService, getSingleBookingService };

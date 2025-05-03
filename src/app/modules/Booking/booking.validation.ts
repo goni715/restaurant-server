@@ -71,13 +71,6 @@ export const createBookingWithoutPaymentSchema = z
     date: dateSchema,
     checkIn: checkInTimeSchema,
     checkOut: checkOutTimeSchema,
-    diningId: z
-      .string({
-        required_error: "diningId is required!",
-      })
-      .refine((id) => Types.ObjectId.isValid(id), {
-        message: "diningId must be a valid ObjectId",
-      }),
     restaurantId: z
       .string({
         required_error: "restaurantId is required!",
@@ -119,13 +112,6 @@ export const createBookingWithPaymentSchema = z
     date: dateSchema,
     checkIn: checkInTimeSchema,
     checkOut: checkOutTimeSchema,
-    diningId: z
-      .string({
-        required_error: "diningId is required!",
-      })
-      .refine((id) => Types.ObjectId.isValid(id), {
-        message: "diningId must be a valid ObjectId",
-      }),
     restaurantId: z
       .string({
         required_error: "restaurantId is required!",
@@ -161,4 +147,11 @@ export const createBookingWithPaymentSchema = z
         code: z.ZodIssueCode.custom,
       });
     }
+  });
+
+
+  export const updateBookingStatusSchema = z.object({
+    status: z.enum(["pending", "waitlist", "seating"], {
+      errorMap: () => ({ message: "{VALUE} is not supported" }),
+    })
   });

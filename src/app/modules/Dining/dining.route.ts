@@ -23,11 +23,6 @@ router.get(
   AuthMiddleware(UserRole.owner),
   DiningController.getDiningDropDown
 );
-router.get(
-  "/get-my-dinings",
-  AuthMiddleware(UserRole.owner),
-  DiningController.getMyDinings
-);
 router.patch(
   "/update-dining/:diningId",
   AuthMiddleware(UserRole.owner),
@@ -36,7 +31,7 @@ router.patch(
 );
 router.delete(
   "/delete-dining/:diningId",
-  AuthMiddleware(UserRole.super_admin),
+  AuthMiddleware(UserRole.owner),
   DiningController.deleteDining
 );
 

@@ -6,13 +6,11 @@ const diningSchema = new Schema<IDining>({
     name: {
         type: String,
         required: true,
-        unique: true,
-        trim: true
+        trim:true
     },
     slug: {
         type: String,
         required: true,
-        unique: true,
         trim: true
     },
     ownerId: {

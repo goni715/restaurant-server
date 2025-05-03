@@ -2,7 +2,7 @@ import catchAsync from "../../utils/catchAsync";
 import pickValidFields from "../../utils/pickValidFields";
 import sendResponse from "../../utils/sendResponse";
 import { DiningValidFields } from "./dining.constant";
-import { createDiningService, deleteDiningService, getDiningDropDownService, getDiningListService, getMyDiningsService, updateDiningService } from "./dining.service";
+import { createDiningService, deleteDiningService, getDiningDropDownService, getDiningListService, updateDiningService } from "./dining.service";
 
 
 const createDining = catchAsync(async (req, res) => {
@@ -46,18 +46,6 @@ const getDiningDropDown = catchAsync(async (req, res) => {
   });
 });
 
-const getMyDinings = catchAsync(async (req, res) => {
-  const loginUserId = req.headers.id;
-  const result = await getMyDiningsService(loginUserId as string);
-
-  sendResponse(res, {
-    statusCode: 200,
-    success: true,
-    message: "Dinings are retrived successfully",
-    data: result
-  });
-});
-
 
 const updateDining = catchAsync(async (req, res) => {
   const loginUserId = req.headers.id;
@@ -91,7 +79,6 @@ const DiningController = {
   createDining,
   getDiningList,
   getDiningDropDown,
-  getMyDinings,
   updateDining,
   deleteDining
 }

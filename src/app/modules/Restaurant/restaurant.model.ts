@@ -58,6 +58,14 @@ const restaurantSchema = new Schema<IRestaurant>({
         required: [true, "Address is required"],
         trim: true
     },
+    paymentRequired: {
+        type: Boolean,
+        default:false
+    },
+    bookingFeePerGuest: {//percentage
+        type: Number,
+        default: 0 
+    },
     cancellationPercentage: {//percentage
         type: Number,
         default: 0 

@@ -17,6 +17,8 @@ export interface IRestaurant {
     };
     address: string;
     discount?: string;
+    paymentRequired:boolean;
+    bookingFeePerGuest?: number;
     cancellationPercentage?: number;
     status: TRestaurantStatus;
     approved: TApprovedStatus

@@ -6,6 +6,7 @@ import ObjectId from "../../utils/ObjectId";
 import { TDiningQuery } from "./dining.interface";
 import { makeFilterQuery, makeSearchQuery } from "../../helper/QueryBuilder";
 import { DiningSearchFields } from "./dining.constant";
+import TableModel from "../Table/table.model";
 
 
 
@@ -120,34 +121,6 @@ const getDiningDropDownService = async (loginUserId:string) => {
     return result;
 }
 
-const getMyDiningsService = async (loginUserId: string) => {
-    const result = await RestaurantModel.aggregate([
-        {
-            $match: {
-                ownerId: new ObjectId(loginUserId) 
-            }
-        },
-        {
-            $lookup: {
-                from: "dinings",
-                localField: "dining",
-                foreignField: "_id",
-                as: "dinings"
-            }
-        },
-        {
-            $unwind: "$dinings"
-        },
-        {
-            $project: {
-                _id: "$dinings._id",
-                name: "$dinings.name"
-            }
-        }
-    ])
-
-    return result;
-}
 
 
 const updateDiningService = async (loginUserId:string, diningId: string, name: string) => {
@@ -163,11 +136,15 @@ const updateDiningService = async (loginUserId:string, diningId: string, name: s
         _id: diningId
     })
     if(!dining){
-        throw new AppError(404, 'This dining not found');
+        throw new AppError(404, 'This diningId not found');
     }
 
     const slug = slugify(name).toLowerCase();
-    const diningExist = await DiningModel.findOne({ _id: { $ne: diningId }, slug })
+    const diningExist = await DiningModel.findOne({
+         _id: { $ne: diningId },
+         ownerId: loginUserId,
+        slug 
+    })
     if(diningExist){
         throw new AppError(409, 'Sorry! This dining name is already taken');
     }
@@ -186,14 +163,24 @@ const updateDiningService = async (loginUserId:string, diningId: string, name: s
 const deleteDiningService = async (diningId: string) => {
     const dining = await DiningModel.findById(diningId)
     if(!dining){
-        throw new AppError(404, 'This dining not found');
+        throw new AppError(404, 'This diningId not found');
     }
 
-    //check if diningId is associated with restaurant
-    const associateWithRestaurant = await RestaurantModel.findOne({ dining: { $in: [diningId] } });
-    if(associateWithRestaurant){
-        throw new AppError(409, 'Failled to delete, This dining is associated with restaurant');
+    //check if diningId is associated with table
+    const associateWithTable = await TableModel.findOne({
+         diningId
+    });
+    if(associateWithTable){
+        throw new AppError(409, 'Failled to delete, This dining is associated with Table');
     }
+
+     //check if diningId is associated with Booking Table
+     const associateWithTableBooking = await TableModel.findOne({
+        diningId
+   });
+   if(associateWithTableBooking){
+       throw new AppError(409, 'Failled to delete, This dining is associated with Booking Table');
+   }
 
     const result = await DiningModel.deleteOne({ _id: dining})
     return result;
@@ -205,7 +192,6 @@ export {
     createDiningService,
     getDiningListService,
     getDiningDropDownService,
-    getMyDiningsService,
     updateDiningService,
     deleteDiningService
 }

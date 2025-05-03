@@ -18,15 +18,14 @@ export const createRestaurantValidationSchema = z.object({
   keywords: z.array(z.string()).optional(),
   features: z.array(z.string()).optional(),
   discount: z.string().optional(),
-  // paymentRequired: z.preprocess(
-  //   (val) => {
-  //     if (val === "true" || val === true) return true;
-  //     if (val === "false" || val === false) return false;
-  //     return val; // fallback for invalid types
-  //   },
-  //   z.boolean()
-  // ),
-  paymentRequired: z.preprocess((val) => Boolean(val), z.boolean().default(false)),
+  paymentRequired: z.preprocess(
+    (val) => {
+      if (val === "true" || val === true) return true;
+      if (val === "false" || val === false) return false;
+      return val; // fallback for invalid types
+    },
+    z.boolean()
+  ),
   bookingFeePerguest: z.preprocess((val) => Number(val), z.number().nonnegative().default(0)).optional(),
   cancellationPercentage: z.preprocess((val) => Number(val), z.number().nonnegative().default(0)).optional()
 })

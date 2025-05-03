@@ -7,7 +7,6 @@ export interface IRestaurant {
     ownerId: Types.ObjectId;
     name: string;
     slug: string;
-    dining: Types.ObjectId[];
     keywords?: string[],
     features?: string[];
     ratings?: number;
@@ -27,7 +26,6 @@ export interface IRestaurant {
 
 export interface IRestaurantPayload {
   name: string;
-  dining: Types.ObjectId[];
   keywords?: string[],
   features?: string[];
   ratings?: number;

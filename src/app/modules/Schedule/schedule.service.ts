@@ -5,10 +5,11 @@ import { TSchedulePayload, TScheduleQuery, TUserScheduleQuery } from "./schedule
 import ScheduleModel from "./schedule.model";
 import BookingModel from "../Booking/booking.model";
 import TableModel from "../Table/table.model";
+import TableBookingModel from "../TableBooking/tableBooking.model";
 
 
 const createScheduleService = async (loginUserId: string, payload: TSchedulePayload) => {
-    const {startDate, endDate, slot, availableSeats, bookingFee, availability, paymentRequired } = payload;
+    const {startDate, endDate, slot } = payload;
     //check restaurant not found
     const restaurant = await RestaurantModel.findOne({
         ownerId: loginUserId
@@ -71,13 +72,9 @@ const createScheduleService = async (loginUserId: string, payload: TSchedulePayl
           const existingSchedule = await ScheduleModel.findOne(scheduleData);
 
           if(!existingSchedule){
-              schedules.push({
-                ...scheduleData,
-                availableSeats,
-                bookingFee,
-                availability,
-                paymentRequired
-              })
+              schedules.push(
+                scheduleData
+              )
           }
          }
         
@@ -369,18 +366,17 @@ const deleteScheduleService = async (loginUserId: string, scheduleId: string) =>
     throw new AppError(404, "Schedule not found");
   }
 
- //check if scheduleId is associated with booking
-  const associateWithBooking = await BookingModel.findOne({ scheduleId });
-  if(associateWithBooking){
-      throw new AppError(409, 'Failled to delete, This Schedule is associated with booking');
-  }
-
   //check if scheduleId is associated with table
   const associateWithTable = await TableModel.findOne({ scheduleId });
   if(associateWithTable){
       throw new AppError(409, 'Failled to delete, This Schedule is associated with Table');
   }
 
+   //check if scheduleId is associated with table
+   const associateWithBookingTable = await TableBookingModel.findOne({ scheduleId, ownerId: loginUserId });
+   if(associateWithBookingTable){
+       throw new AppError(409, 'Failled to delete, This Schedule is associated with Booking Table');
+   }
 
  const result = await ScheduleModel.deleteOne({
    _id: scheduleId,

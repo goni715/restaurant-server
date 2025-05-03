@@ -1,5 +1,4 @@
-import { z } from 'zod';
-
+import { z } from "zod";
 
 const startTimeSchema = z
   .string({
@@ -16,7 +15,6 @@ const startTimeSchema = z
     }
   );
 
-
 const endTimeSchema = z
   .string({
     required_error: "Please select End Time",
@@ -32,80 +30,106 @@ const endTimeSchema = z
     }
   );
 
-
-const startDateSchema = z.string({
-    required_error: "Please select Start Date"
-})
-.min(1, { message: "Please select Start Date"})
-.refine(
+const startDateSchema = z
+  .string({
+    required_error: "Please select Start Date",
+  })
+  .min(1, { message: "Please select Start Date" })
+  .refine(
     (value) => {
-        const dateRegex = /^20\d{2}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/; // "2024-11-25"
+      const dateRegex = /^20\d{2}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/; // "2024-11-25"
       return dateRegex.test(value); //return true or false
     },
     {
       message: `Invalid Date format , expected 'yyyy-MM-dd' format`,
+    }
+  )
+  .refine(
+    (date) => {
+      const today = new Date();
+      const inputDate = new Date(date);
+      const maxDate = new Date();
+      maxDate.setDate(today.getDate() + 9);
+
+      // Strip time from both dates for accurate day-only comparison
+      const input = inputDate.setHours(0, 0, 0, 0);
+      const min = today.setHours(0, 0, 0, 0);
+      const max = maxDate.setHours(23, 59, 59, 999);
+
+      return input >= min && input <= max;
     },
-);
+    {
+      message: "Date must be within 10 days including today",
+    }
+  );
 
-
-
-
-const endDateSchema = z.string({
-    required_error: "Please select End Date"
-})
-.min(1, { message: "Please select End Date"})
-.refine(
+const endDateSchema = z
+  .string({
+    required_error: "Please select End Date",
+  })
+  .min(1, { message: "Please select End Date" })
+  .refine(
     (value) => {
-        const dateRegex = /^20\d{2}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/; // "2024-11-24"
+      const dateRegex = /^20\d{2}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/; // "2024-11-24"
       return dateRegex.test(value); //return true or false
     },
     {
       message: `Invalid Date format , expected 'yyyy-MM-dd' format`,
+    }
+  )
+  .refine(
+    (date) => {
+      const today = new Date();
+      const inputDate = new Date(date);
+      const maxDate = new Date();
+      maxDate.setDate(today.getDate() + 9);
+
+      // Strip time from both dates for accurate day-only comparison
+      const input = inputDate.setHours(0, 0, 0, 0);
+      const min = today.setHours(0, 0, 0, 0);
+      const max = maxDate.setHours(23, 59, 59, 999);
+
+      return input >= min && input <= max;
     },
-);
-
-
-
-
+    {
+      message: "Date must be within 10 days including today",
+    }
+  );
 
 export const createScheduleSchema = z
   .object({
     startDate: startDateSchema,
     endDate: endDateSchema,
-    slot: z.array(z.object({
-      startTime: startTimeSchema,
-      endTime:endTimeSchema
-    })),
-    availableSeats: z.number().positive("available seats must be a positive number").optional(),
-    availability: z.enum(["Immediate Seating", "Open Reservations", "Waitlist"], {
-      errorMap: () => ({ message: "{VALUE} is not supported" }),
-    }).optional(),
-    bookingFee: z.number().nonnegative().default(0),
-    paymentRequired: z.enum(["Yes", "No"], {
-      errorMap: () => ({ message: "{VALUE} is not supported" }),
-    }).default('No'),
+    slot: z.array(
+      z.object({
+        startTime: startTimeSchema,
+        endTime: endTimeSchema,
+      })
+    ),
   })
   .superRefine((values, ctx) => {
     const { startDate, endDate, slot } = values;
-  
+
     // Create Date objects using the provided startDate and endDate
     const StartDate = new Date(startDate);
     const EndDate = new Date(endDate);
 
     if (StartDate > EndDate) {
-        // Set the error on the `endTime` field
-        ctx.addIssue({
-            path: ["startDate"],
-            message: "Start date & EndDate must be same or StartDate is less than End Date ",
-            code:  z.ZodIssueCode.custom,
-        });
-        
-        // Alternatively, you could set the error on `startTime`
-        ctx.addIssue({
-          path: ['endDate'],
-          message: "Start date & EndDate must be same or EndDate is greater than startDate ",
-          code: z.ZodIssueCode.custom,
-        });
+      // Set the error on the `endTime` field
+      ctx.addIssue({
+        path: ["startDate"],
+        message:
+          "Start date & EndDate must be same or StartDate is less than End Date ",
+        code: z.ZodIssueCode.custom,
+      });
+
+      // Alternatively, you could set the error on `startTime`
+      ctx.addIssue({
+        path: ["endDate"],
+        message:
+          "Start date & EndDate must be same or EndDate is greater than startDate ",
+        code: z.ZodIssueCode.custom,
+      });
     }
 
     for (let i = 0; i < slot.length; i++) {
@@ -130,12 +154,4 @@ export const createScheduleSchema = z
         });
       }
     }
-    
-
   });
-
-
-
-
-
-

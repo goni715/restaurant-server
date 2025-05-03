@@ -21,11 +21,6 @@ const restaurantSchema = new Schema<IRestaurant>({
         unique: true,
         trim: true
     },
-    dining: [{
-        type: Schema.Types.ObjectId,
-        ref: "Dining",
-        required: true,
-    }],
     keywords: {
         type: [String],
         default: []

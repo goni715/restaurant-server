@@ -28,11 +28,11 @@ router.get(
 );
 
 router.patch(
-  '/update-policy/:policyId',
+  '/update-policy/:type',
   AuthMiddleware("super_admin", "administrator"),
   isAccess("settings"),
   validationMiddleware(updatePolicyValidationSchema),
-  PolicyController.updatePolicy,
+  PolicyController.updatePolicyByType,
 );
 
 router.delete(

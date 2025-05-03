@@ -10,15 +10,25 @@ export const createRestaurantValidationSchema = z.object({
   //     .array(z.number())
   //     .length(2, 'Coordinates must contain exactly two numbers [longitude, latitude]'),
   // }),
-  longitude: z.number().min(-180).max(180, { message: "Longitude must be between -180 and 180" }),
-  latitude: z.number().min(-90).max(90, { message: "Latitude must be between -90 and 90" }),
+ 
   address: z.string({ required_error: "Address is required"}).min(1, "address is required !"),
-  //longitude: z.preprocess((val) => Number(val), z.number().min(-180).max(180)),
- // latitude: z.preprocess((val) => Number(val), z.number().min(-90).max(90)),
+  longitude: z.preprocess((val) => Number(val), z.number().min(-180, { message: "Longitude must be >= -180" }).max(180, { message: "Longitude must be <= 180" })),
+  //latitude: z.preprocess((val) => Number(val), z.number().min(-90).max(90)),
+  latitude: z.preprocess((val) => Number(val), z.number().min(-90, { message: "Longitude must be >= -90" }).max(90, { message: "Longitude must be <= 90" })),
   keywords: z.array(z.string()).optional(),
   features: z.array(z.string()).optional(),
   discount: z.string().optional(),
-  cancellationPercentage: z.number().nonnegative().default(0)
+  // paymentRequired: z.preprocess(
+  //   (val) => {
+  //     if (val === "true" || val === true) return true;
+  //     if (val === "false" || val === false) return false;
+  //     return val; // fallback for invalid types
+  //   },
+  //   z.boolean()
+  // ),
+  paymentRequired: z.preprocess((val) => Boolean(val), z.boolean().default(false)),
+  bookingFeePerguest: z.preprocess((val) => Number(val), z.number().nonnegative().default(0)).optional(),
+  cancellationPercentage: z.preprocess((val) => Number(val), z.number().nonnegative().default(0)).optional()
 })
 
 export const updateRestaurantValidationSchema = z.object({

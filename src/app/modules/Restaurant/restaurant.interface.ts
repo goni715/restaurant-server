@@ -36,6 +36,7 @@ export interface IRestaurantPayload {
   address: string;
   discount?: string;
   cancellationPercentage?: number;
+  paymentRequired: boolean;
   status: TRestaurantStatus;
   approved: TApprovedStatus
 }

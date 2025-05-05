@@ -24,7 +24,7 @@ export const createRestaurantValidationSchema = z.object({
       if (val === "false" || val === false) return false;
       return val; // fallback for invalid types
     },
-    z.boolean()
+    z.boolean().default(false)
   ),
   bookingFeePerguest: z.preprocess((val) => Number(val), z.number().nonnegative().default(0)).optional(),
   cancellationPercentage: z.preprocess((val) => Number(val), z.number().nonnegative().default(0)).optional()

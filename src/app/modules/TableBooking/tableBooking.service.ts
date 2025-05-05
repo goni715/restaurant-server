@@ -206,18 +206,29 @@ const getTableBookingsService = async (loginUserId: string, query: TTableBooking
     $unwind: "$user"
   },
   {
+    $lookup: {
+      from: "bookings",
+      localField: "bookingId",
+      foreignField: "_id",
+      as: "booking"
+    }
+  },
+  {
+    $unwind: "$booking"
+  },
+  {
     $project: {
+        bookingId:1,
         fullName: "$user.fullName",
         email: "$user.email",
         phone: "$user.phone",
-        token: 1,
-        guest:1,
-        availability:1,
         startDateTime: "$schedule.startDateTime",
         endDateTime: "$schedule.endDateTime",
         diningName: "$dining.name",
         createdAt: "$createdAt",
-        updatedAt: "$updatedAt" 
+        updatedAt: "$updatedAt",
+        token: "$booking.token",
+        guest: "$booking.guest"
     }
   },
    {

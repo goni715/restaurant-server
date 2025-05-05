@@ -1,7 +1,11 @@
 import mongoose, { Types } from "mongoose";
 import AppError from "../../errors/AppError";
 import ScheduleModel from "../Schedule/schedule.model";
-import { IBookingPayload, TBookingQuery, TBookingStatus } from "./booking.interface"
+import {
+  IBookingPayload,
+  TBookingQuery,
+  TBookingStatus,
+} from "./booking.interface";
 import BookingModel from "./booking.model";
 import PaymentModel from "../Payment/payment.model";
 import DiningModel from "../Dining/dining.model";
@@ -9,26 +13,25 @@ import RestaurantModel from "../Restaurant/restaurant.model";
 import getPercentageValue from "../../utils/getPercentageValue";
 import { makeFilterQuery, makeSearchQuery } from "../../helper/QueryBuilder";
 import { BookingSearchFields, MyBookingSearchFields } from "./booking.constant";
-
+import ObjectId from "../../utils/ObjectId";
 
 const createBookingWithoutPaymentService = async (
   loginUserId: string,
   payload: IBookingPayload
 ) => {
-  const { restaurantId, diningId, guest,date, checkIn, checkOut } = payload;
+  const { restaurantId, diningId, guest, date, checkIn, checkOut } = payload;
   const restaurant = await RestaurantModel.findById(restaurantId);
   if (!restaurant) {
     throw new AppError(404, "Restaurant Not Found");
   }
 
-  if(restaurant?.status !== "active"){
-    throw new AppError(403, "Restaurant is not active")
+  if (restaurant?.status !== "active") {
+    throw new AppError(403, "Restaurant is not active");
   }
 
-  if(restaurant?.approved !== "accepted"){
-    throw new AppError(403, "Restaurant is not Approved")
+  if (restaurant?.approved !== "accepted") {
+    throw new AppError(403, "Restaurant is not Approved");
   }
-
 
   // const date = `${date}T00:00:00.000+00:00`;
   //generate token
@@ -72,19 +75,17 @@ const createBookingWithoutPaymentService = async (
     checkIn,
     checkOut,
     startDateTime,
-    endDateTime
+    endDateTime,
   });
 
   return result;
 };
 
-
-
 const createBookingWithPaymentService = async (
   loginUserId: string,
   payload: IBookingPayload
 ) => {
-  const { restaurantId, diningId, guest,date, checkIn, checkOut } = payload;
+  const { restaurantId, diningId, guest, date, checkIn, checkOut } = payload;
 
   const dining = await DiningModel.findById(diningId);
   if (!dining) {
@@ -138,12 +139,11 @@ const createBookingWithPaymentService = async (
     checkIn,
     checkOut,
     startDateTime,
-    endDateTime
+    endDateTime,
   });
 
   return result;
 };
-
 
 // const createBookingWithService = async (
 //   loginUserId: string,
@@ -156,15 +156,11 @@ const createBookingWithPaymentService = async (
 //    if(!dining){
 //        throw new AppError(404, 'This dining not found');
 //    }
-   
- 
 
- 
 //   }
 
 //   //calculation of canCellationCharge
 //   const cancellationCharge = getPercentageValue(amount, restaurant.cancellationPercentage as number)
-
 
 //   const session = await mongoose.startSession();
 //   try{
@@ -182,7 +178,6 @@ const createBookingWithPaymentService = async (
 //         guest,
 //     }], { session });
 
-
 //     //database-process-02
 //     //update the schedule
 //     await ScheduleModel.updateOne(
@@ -191,7 +186,6 @@ const createBookingWithPaymentService = async (
 //         { session }
 //     )
 
-    
 //     //database-process-03
 //     //create the payment
 //     const transactionId = new ObjectId().toString();
@@ -200,7 +194,6 @@ const createBookingWithPaymentService = async (
 //         amount,
 //         transactionId
 //     })
-
 
 //     await session.commitTransaction();
 //     await session.endSession();
@@ -212,54 +205,55 @@ const createBookingWithPaymentService = async (
 //   }
 // };
 
-
-const getBookingsService = async (loginUserId:string, query: TBookingQuery) => {
+const getBookingsService = async (
+  loginUserId: string,
+  query: TBookingQuery
+) => {
   const ObjectId = Types.ObjectId;
-     // 1. Extract query parameters
-     const {
-      searchTerm,
-      page = 1, 
-      limit = 10, 
-      sortOrder = "asc",
-      sortBy = "startDateTime", 
-      date,
-      ...filters // Any additional filters
-    } = query;
+  // 1. Extract query parameters
+  const {
+    searchTerm,
+    page = 1,
+    limit = 10,
+    sortOrder = "asc",
+    sortBy = "startDateTime",
+    date,
+    ...filters // Any additional filters
+  } = query;
 
-  
-    // 2. Set up pagination
-    const skip = (Number(page) - 1) * Number(limit);
-  
-    //3. setup sorting
-    const sortDirection = sortOrder === "asc" ? 1 : -1;
+  // 2. Set up pagination
+  const skip = (Number(page) - 1) * Number(limit);
 
-    //4. setup searching
-      let searchQuery: any = {};
-      if (searchTerm) {
-        searchQuery = makeSearchQuery(searchTerm, BookingSearchFields);
-      }
-    
-      //console.dir(searchQuery, {depth:null})
- 
-      //5 setup filters
-      let filterQuery = {};
-      //check if only filter by date
-      if (date) {
-        const start = `${date}T00:00:00.000+00:00`;
-          const end = `${date}T23:59:59.999+00:00`;
-         filterQuery = {
-          ...filterQuery,
-           "date": { $gte: new Date(start), $lte: new Date(end) }
-         };
-      }
+  //3. setup sorting
+  const sortDirection = sortOrder === "asc" ? 1 : -1;
 
-    //add additional filters
-    if (filters) {
-      filterQuery = {
-        ...filterQuery,
-        ...makeFilterQuery(filters)
-      }
-    }
+  //4. setup searching
+  let searchQuery: any = {};
+  if (searchTerm) {
+    searchQuery = makeSearchQuery(searchTerm, BookingSearchFields);
+  }
+
+  //console.dir(searchQuery, {depth:null})
+
+  //5 setup filters
+  let filterQuery = {};
+  //check if only filter by date
+  if (date) {
+    const start = `${date}T00:00:00.000+00:00`;
+    const end = `${date}T23:59:59.999+00:00`;
+    filterQuery = {
+      ...filterQuery,
+      date: { $gte: new Date(start), $lte: new Date(end) },
+    };
+  }
+
+  //add additional filters
+  if (filters) {
+    filterQuery = {
+      ...filterQuery,
+      ...makeFilterQuery(filters),
+    };
+  }
 
   //check restaurant exist
   const restaurant = await RestaurantModel.findOne({ ownerId: loginUserId });
@@ -267,31 +261,30 @@ const getBookingsService = async (loginUserId:string, query: TBookingQuery) => {
     throw new AppError(404, "Restaurant not found");
   }
 
-
   const result = await BookingModel.aggregate([
     {
-      $match: { restaurantId: new ObjectId(restaurant._id)}
+      $match: { restaurantId: new ObjectId(restaurant._id) },
     },
     {
       $lookup: {
         from: "users",
         localField: "userId",
         foreignField: "_id",
-        as: "user"
-      }
+        as: "user",
+      },
     },
     {
-      $unwind: "$user"
+      $unwind: "$user",
     },
     {
       $match: {
-         ...filterQuery,
-         ...searchQuery
-      }
+        ...filterQuery,
+        ...searchQuery,
+      },
     },
     {
       $project: {
-        _id:"$_id",
+        _id: "$_id",
         userId: "$userId",
         customerName: "$user.fullName",
         customerEmail: "$user.email",
@@ -304,147 +297,144 @@ const getBookingsService = async (loginUserId:string, query: TBookingQuery) => {
         token: "$token",
         startDateTime: "$startDateTime",
         endDateTime: "$endDateTime",
-        amount:"$amount",
-        guest:"$guest",
+        amount: "$amount",
+        guest: "$guest",
         cancellationCharge: "$cancellationCharge",
         status: "$status",
         paymentStatus: "$paymentStatus",
         createdAt: "$createdAt",
-        updatedAt: "$updatedAt"
-      }
+        updatedAt: "$updatedAt",
+      },
     },
     {
-      $sort: {date: -1}, //after projection
+      $sort: { date: -1 }, //after projection
     },
     { $skip: skip },
-    { $limit: Number(limit) }
-  ])
+    { $limit: Number(limit) },
+  ]);
 
-  
-   // total count 
-const totalBookingResult = await BookingModel.aggregate([
+  // total count
+  const totalBookingResult = await BookingModel.aggregate([
     {
-      $match: { restaurantId: new ObjectId(restaurant._id)}
+      $match: { restaurantId: new ObjectId(restaurant._id) },
     },
     {
       $lookup: {
         from: "users",
         localField: "userId",
         foreignField: "_id",
-        as: "user"
-      }
+        as: "user",
+      },
     },
     {
-      $unwind: "$user"
+      $unwind: "$user",
     },
     {
       $lookup: {
         from: "dinings",
         localField: "diningId",
         foreignField: "_id",
-        as: "dining"
-      }
+        as: "dining",
+      },
     },
     {
-      $unwind: "$dining"
+      $unwind: "$dining",
     },
     {
       $match: {
-         ...filterQuery,
-         ...searchQuery
-      }
+        ...filterQuery,
+        ...searchQuery,
+      },
     },
-     { $count: "totalCount" }
-  ])
+    { $count: "totalCount" },
+  ]);
 
   const totalCount = totalBookingResult[0]?.totalCount || 0;
   const totalPages = Math.ceil(totalCount / Number(limit));
-  
- return {
-  meta: {
-    page: Number(page), //currentPage
-    limit: Number(limit),
-    totalPages,
-    total: totalCount,
-  },
-  data: result
- }
 
+  return {
+    meta: {
+      page: Number(page), //currentPage
+      limit: Number(limit),
+      totalPages,
+      total: totalCount,
+    },
+    data: result,
+  };
+};
 
-
-}
-
-
-const getMyBookingsService = async (loginUserId:string, query: TBookingQuery) => {
+const getMyBookingsService = async (
+  loginUserId: string,
+  query: TBookingQuery
+) => {
   const ObjectId = Types.ObjectId;
-     // 1. Extract query parameters
-     const {
-      searchTerm,
-      page = 1, 
-      limit = 10, 
-      sortOrder = "asc",
-      sortBy = "startDateTime", 
-      date,
-      ...filters // Any additional filters
-    } = query;
+  // 1. Extract query parameters
+  const {
+    searchTerm,
+    page = 1,
+    limit = 10,
+    sortOrder = "asc",
+    sortBy = "startDateTime",
+    date,
+    ...filters // Any additional filters
+  } = query;
 
-  
-    // 2. Set up pagination
-    const skip = (Number(page) - 1) * Number(limit);
-  
-    //4. setup searching
-      let searchQuery: any = {};
-      if (searchTerm) {
-        searchQuery = makeSearchQuery(searchTerm, MyBookingSearchFields);
-      }
-    
-      //console.dir(searchQuery, {depth:null})
- 
-      //5 setup filters
-      let filterQuery = {};
-    //add additional filters
-    if (filters) {
-      filterQuery = {
-        ...filterQuery,
-        ...makeFilterQuery(filters)
-      }
-    }
+  // 2. Set up pagination
+  const skip = (Number(page) - 1) * Number(limit);
+
+  //4. setup searching
+  let searchQuery: any = {};
+  if (searchTerm) {
+    searchQuery = makeSearchQuery(searchTerm, MyBookingSearchFields);
+  }
+
+  //console.dir(searchQuery, {depth:null})
+
+  //5 setup filters
+  let filterQuery = {};
+  //add additional filters
+  if (filters) {
+    filterQuery = {
+      ...filterQuery,
+      ...makeFilterQuery(filters),
+    };
+  }
 
   const result = await BookingModel.aggregate([
     {
-      $match: { userId: new ObjectId(loginUserId)}
+      $match: { userId: new ObjectId(loginUserId) },
     },
     {
       $lookup: {
         from: "restaurants",
         localField: "restaurantId",
         foreignField: "_id",
-        as: "restaurant"
-      }
+        as: "restaurant",
+      },
     },
     {
-      $unwind: "$restaurant"
+      $unwind: "$restaurant",
     },
     {
       $lookup: {
         from: "dinings",
         localField: "diningId",
         foreignField: "_id",
-        as: "dining"
-      }
+        as: "dining",
+      },
     },
     {
-      $unwind: "$dining"
+      $unwind: "$dining",
     },
     {
       $match: {
-         ...filterQuery,
-         ...searchQuery
-      }
+        ...filterQuery,
+        ...searchQuery,
+      },
     },
     {
       $project: {
-        _id:"$_id",
+        _id: "$_id",
         restaurantName: "$restaurant.name",
         diningName: "$dining.name",
         date: "$date",
@@ -453,84 +443,78 @@ const getMyBookingsService = async (loginUserId:string, query: TBookingQuery) =>
         token: "$token",
         startDateTime: "$startDateTime",
         endDateTime: "$endDateTime",
-        amount:"$amount",
-        guest:"$guest",
+        amount: "$amount",
+        guest: "$guest",
         cancellationCharge: "$cancellationCharge",
         status: "$status",
-        paymentStatus: "$paymentStatus"
-      }
+        paymentStatus: "$paymentStatus",
+      },
     },
     {
-      $sort: {date: -1}, //after projection
+      $sort: { date: -1 }, //after projection
     },
     { $skip: skip },
-    { $limit: Number(limit) }
-  ])
+    { $limit: Number(limit) },
+  ]);
 
-  
-   // total count 
-const totalBookingResult = await BookingModel.aggregate([
+  // total count
+  const totalBookingResult = await BookingModel.aggregate([
     {
-      $match: { userId: new ObjectId(loginUserId)}
+      $match: { userId: new ObjectId(loginUserId) },
     },
     {
       $lookup: {
         from: "restaurants",
         localField: "restaurantId",
         foreignField: "_id",
-        as: "restaurant"
-      }
+        as: "restaurant",
+      },
     },
     {
-      $unwind: "$restaurant"
+      $unwind: "$restaurant",
     },
     {
       $lookup: {
         from: "dinings",
         localField: "diningId",
         foreignField: "_id",
-        as: "dining"
-      }
+        as: "dining",
+      },
     },
     {
-      $unwind: "$dining"
+      $unwind: "$dining",
     },
     {
       $match: {
-         ...filterQuery,
-         ...searchQuery
-      }
+        ...filterQuery,
+        ...searchQuery,
+      },
     },
-     { $count: "totalCount" }
-  ])
+    { $count: "totalCount" },
+  ]);
 
   const totalCount = totalBookingResult[0]?.totalCount || 0;
   const totalPages = Math.ceil(totalCount / Number(limit));
-  
- return {
-  meta: {
-    page: Number(page), //currentPage
-    limit: Number(limit),
-    totalPages,
-    total: totalCount,
-  },
-  data: result
- }
 
-
-
-}
-
+  return {
+    meta: {
+      page: Number(page), //currentPage
+      limit: Number(limit),
+      totalPages,
+      total: totalCount,
+    },
+    data: result,
+  };
+};
 
 const updateBookingStatusService = async (
   loginUserId: string,
   bookingId: string,
   status: TBookingStatus
 ) => {
-
   console.log({
     loginUserId,
-    bookingId
+    bookingId,
   });
 
   const booking = await BookingModel.findOne({
@@ -547,23 +531,72 @@ const updateBookingStatusService = async (
       _id: bookingId,
       ownerId: loginUserId,
     },
-    {status}
-  )
+    { status }
+  );
 
   return result;
 };
 
-const getSingleBookingService = async (loginUserId: string, bookingId: string) => {
-  const booking = await BookingModel.findOne({
-    _id: bookingId,
-    ownerId: loginUserId
-  }) 
+const getSingleBookingService = async (
+  loginUserId: string,
+  bookingId: string
+) => {
+  const booking = await BookingModel.aggregate([
+    {
+      $match: {
+        _id: new ObjectId(bookingId),
+        ownerId: new ObjectId(loginUserId),
+      },
+    },
+    {
+      $lookup: {
+        from: "users",
+        localField: "userId",
+        foreignField: "_id",
+        as: "user",
+      },
+    },
+    {
+      $unwind: "$user",
+    },
+    {
+      $project: {
+        _id: 1,
+        userId: 1,
+        restaurantId: 1,
+        ownerId: 1,
+        date: 1,
+        checkIn: 1,
+        checkOut: 1,
+        startDateTime: 1,
+        endDateTime: 1,
+        token: 1,
+        amount: 1,
+        guest: 1,
+        cancellationCharge: 1,
+        status: 1,
+        //paymentStatus: 1,
+        //createdAt: 1,
+        //updatedAt: 1,
+        customerName: "$user.fullName",
+        customerEmail: "$user.email",
+        customerPhone: "$user.phone"
+      },
+    },
+  ]);
 
-  if(!booking){
-    throw new AppError(404, "Booking Not Found")
+  if (booking?.length === 0) {
+    throw new AppError(404, "Booking Not Found");
   }
 
-  return booking;
-}
+  return booking[0];
+};
 
-export { createBookingWithoutPaymentService, createBookingWithPaymentService, getBookingsService, getMyBookingsService, updateBookingStatusService, getSingleBookingService };
+export {
+  createBookingWithoutPaymentService,
+  createBookingWithPaymentService,
+  getBookingsService,
+  getMyBookingsService,
+  updateBookingStatusService,
+  getSingleBookingService,
+};

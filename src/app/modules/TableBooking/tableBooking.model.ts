@@ -10,6 +10,12 @@ const tableBookingSchema = new Schema<ITableBooking>(
       required: true,
       ref: "User"
     },
+    bookingId: {
+      type: Schema.Types.ObjectId,
+      required: true,
+      unique: true,
+      ref: "Booking"
+   },
     tableId: {
         type: Schema.Types.ObjectId,
         required: true,
@@ -35,25 +41,16 @@ const tableBookingSchema = new Schema<ITableBooking>(
       required: true,
       ref: "Restaurant",
     },
-    token: {
-      type: String,
-      minlength: [6, "Token must be 6 characters long"],
-      maxlength: [6, "Token must be 6 characters long"]
-    },
-    guest: {
-      type: Number,
-      required: true,
-      trim:true
-    },
-    availability: {
-      type: String,
-      required: true,
-      default: "Waitlist",
-      enum: {
-        values: [ "Waitlist", "Seating", "Booked","Completed"],
-        message: '{VALUE} is not supported'
-      }
-    },
+    
+    // availability: {
+    //   type: String,
+    //   required: true,
+    //   default: "Waitlist",
+    //   enum: {
+    //     values: [ "Waitlist", "Seating", "Booked","Completed"],
+    //     message: '{VALUE} is not supported'
+    //   }
+    // },
   },
   {
     timestamps: true,

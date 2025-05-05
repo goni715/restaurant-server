@@ -11,7 +11,7 @@ import ObjectId from "../../utils/ObjectId";
 
 
 const createTableBookingService = async (loginUserId:string, payload: ITableBooking) => {
-  const { token, tableId, guest, availability } = payload;
+  const { bookingId, tableId } = payload;
   const table = await TableModel.findOne({
     _id: tableId,
     ownerId: loginUserId,
@@ -21,16 +21,17 @@ const createTableBookingService = async (loginUserId:string, payload: ITableBook
     throw new AppError(404, "Table Not found");
   }
 
-  //check token is not valid
-  const booking = await BookingModel.findOne({ token, restaurantId: table.restaurantId });
+  //check booking
+  const booking = await BookingModel.findOne({ _id:bookingId, ownerId:loginUserId });
   if (!booking) {
-    throw new AppError(400, "Invaild Token");
+    throw new AppError(404, "Booking Not Found");
   }
 
+  const bookingGuest = booking.guest;
  
   //check availableSeats
   const availableSeats = table.seats;
-  if (availableSeats < guest) {
+  if (availableSeats < bookingGuest) {
     throw new AppError(
       400,
       "There are no available seats in this table at this moment"
@@ -38,42 +39,13 @@ const createTableBookingService = async (loginUserId:string, payload: ITableBook
   }
 
 
-  //check your guest
-  const bookingGuest = booking.guest;
-  
-  //check your tableBookingGuest
-  const tableBookingGuest = await TableBookingModel.aggregate([
-    {
-      $match: {
-        token,
-        userId: new ObjectId(booking.userId)
-      }
-    },
-    {
-      $group: {
-        _id: {
-          token,
-          userId: new ObjectId(booking.userId)
-        },
-        totalGuest: { $sum: "$guest"}
-      }
-    }
-  ]);
-
-  const alreadyTableBookingGuest = tableBookingGuest?.length > 0 ? tableBookingGuest[0]?.totalGuest : 0;
-  if(alreadyTableBookingGuest === bookingGuest){
-    throw new AppError(403, "You have already booked the seat(s)");
+  //check already booked table
+  const tableBooking = await TableBookingModel.findOne({
+    bookingId
+  })
+  if(tableBooking){
+    throw new AppError(409, "Already booked the table")
   }
-
-
-  // check if trying to book more than allowed
-if (alreadyTableBookingGuest + guest > bookingGuest) {
-  const remaining = bookingGuest - alreadyTableBookingGuest;
-  throw new AppError(
-    403,
-    `You can only book ${remaining} seat(s).`
-  );
-}
 
 
   //transaction & rollback part
@@ -87,26 +59,33 @@ if (alreadyTableBookingGuest + guest > bookingGuest) {
     const newBooking = await TableBookingModel.create(
       [
         {
-          token,
-          guest,
+          bookingId,
           userId: booking.userId,
           tableId,
           scheduleId: table.scheduleId,
           ownerId: table.ownerId,
           restaurantId: table.restaurantId,
           diningId: table.diningId,
-          availability,
         },
       ],
       { session }
     );
 
-    //database-process-02
+
+     //database-process-02
+    //update the table
+    await BookingModel.updateOne(
+      { _id: bookingId },
+      { status: "seating" }, 
+      { runValidators:true, session }
+    );
+
+    //database-process-03
     //update the table
     await TableModel.updateOne(
       { _id: tableId, seats: { $gt: 0 } },
-      { $inc: { seats: -guest } }, // Decrease availableSeats
-      { session }
+      { $inc: { seats: -bookingGuest } }, // Decrease availableSeats
+      { runValidators:true, session }
     );
 
     await session.commitTransaction();

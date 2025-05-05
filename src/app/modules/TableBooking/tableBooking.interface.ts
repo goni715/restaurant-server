@@ -3,15 +3,13 @@ import { Types } from "mongoose";
 export type ITableAvailability = "Waitlist" | "Seating" | "Booked" | "Completed";
 
 export interface ITableBooking {
-    token: string;
-    guest: number;
+    bookingId: Types.ObjectId;
     userId: Types.ObjectId;
     tableId: Types.ObjectId;
     scheduleId: Types.ObjectId;
     ownerId: Types.ObjectId;
     diningId: Types.ObjectId;
     restaurantId: Types.ObjectId;
-    availability: ITableAvailability;
 }
 
 export type TTableBookingQuery = {

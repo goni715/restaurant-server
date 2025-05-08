@@ -1,9 +1,22 @@
 import mongoose, { Types } from "mongoose";
 import AppError from "../../errors/AppError";
-import { IChangeApprovalStatus, IChangeRestaurantStatus, INearbyQuery, IRestaurant, IRestaurantPayload, TApprovedStatus, TRestaurantQuery, TRestaurantStatus, TUserRestaurantQuery } from "./restaurant.interface";
+import {
+  IChangeApprovalStatus,
+  IChangeRestaurantStatus,
+  INearbyQuery,
+  IRestaurant,
+  IRestaurantPayload,
+  TApprovedStatus,
+  TRestaurantQuery,
+  TRestaurantStatus,
+  TUserRestaurantQuery,
+} from "./restaurant.interface";
 import RestaurantModel from "./restaurant.model";
 import { makeFilterQuery, makeSearchQuery } from "../../helper/QueryBuilder";
-import { RestaurantSearchFields, UserRestaurantSearchFields } from "./restaurant.constant";
+import {
+  RestaurantSearchFields,
+  UserRestaurantSearchFields,
+} from "./restaurant.constant";
 import { Request } from "express";
 import SocialMediaModel from "../SocialMedia/socialMedia.model";
 import MenuModel from "../Menu/menu.model";
@@ -19,10 +32,8 @@ import ObjectId from "../../utils/ObjectId";
 import uploadImage from "../../utils/uploadImage";
 import slugify from "slugify";
 
-
-
 const createRestaurantService = async (
-  req:Request,
+  req: Request,
   ownerId: string,
   payload: IRestaurantPayload
 ) => {
@@ -45,16 +56,15 @@ const createRestaurantService = async (
   //   throw new AppError(400, "image is required");
   // }
 
-
-  const newRestaurantData :IRestaurant = {
+  const newRestaurantData: IRestaurant = {
     name,
     slug,
     ownerId: new ObjectId(ownerId),
     ...restData,
     location: {
-      type: 'Point',
-      coordinates:[longitude, latitude]
-    }
+      type: "Point",
+      coordinates: [longitude, latitude],
+    },
   };
 
   //upload the image
@@ -62,12 +72,10 @@ const createRestaurantService = async (
     newRestaurantData.restaurantImg = await uploadImage(req);
   }
 
-
   //create the restaurant
   const result = await RestaurantModel.create({ ...newRestaurantData });
   return result;
 };
-
 
 const getRestaurantsService = async (query: TRestaurantQuery) => {
   // 1. Extract query parameters
@@ -93,9 +101,9 @@ const getRestaurantsService = async (query: TRestaurantQuery) => {
     searchQuery = {
       $or: [
         ...searchQuery?.$or,
-        { keywords: { $in: [new RegExp(searchTerm, "i")] } }
-      ]
-    }
+        { keywords: { $in: [new RegExp(searchTerm, "i")] } },
+      ],
+    };
   }
 
   //console.dir(searchQuery, {depth:null})
@@ -124,7 +132,7 @@ const getRestaurantsService = async (query: TRestaurantQuery) => {
         localField: "_id",
         foreignField: "restaurantId",
         as: "menus",
-      }
+      },
     },
     {
       $lookup: {
@@ -132,7 +140,7 @@ const getRestaurantsService = async (query: TRestaurantQuery) => {
         localField: "menus.cuisineId",
         foreignField: "_id",
         as: "cuisine",
-      }
+      },
     },
     {
       $match: {
@@ -145,13 +153,13 @@ const getRestaurantsService = async (query: TRestaurantQuery) => {
         from: "reviews",
         localField: "_id",
         foreignField: "restaurantId",
-        as: "reviews"
-      }
+        as: "reviews",
+      },
     },
     {
       $addFields: {
         totalReview: { $size: "$reviews" },
-      }
+      },
     },
     {
       $project: {
@@ -159,23 +167,23 @@ const getRestaurantsService = async (query: TRestaurantQuery) => {
         ownerId: 1,
         name: 1,
         location: 1,
-        address:1,
+        address: 1,
         keywords: 1,
         features: 1,
-        cancellationCharge:1,
-        discount:1,
+        cancellationCharge: 1,
+        discount: 1,
         ratings: 1,
-        restaurantImg:1,
-        totalReview:1,
-        status:1,
-        approved:1,
+        restaurantImg: 1,
+        totalReview: 1,
+        status: 1,
+        approved: 1,
         createdAt: 1,
         updatedAt: 1,
         ownerName: "$owner.fullName",
         ownerEmail: "$owner.email",
         ownerPhone: "$owner.phone",
         ownerImg: "$owner.profileImg",
-        ownerAddress: "$owner.address"
+        ownerAddress: "$owner.address",
       },
     },
     { $sort: { [sortBy]: sortDirection } },
@@ -186,10 +194,15 @@ const getRestaurantsService = async (query: TRestaurantQuery) => {
   // total count of matching users
   const totalRestaurantResult = await RestaurantModel.aggregate([
     {
-      $lookup: { from: 'users', localField: 'ownerId', foreignField: '_id', as: 'owner' }
+      $lookup: {
+        from: "users",
+        localField: "ownerId",
+        foreignField: "_id",
+        as: "owner",
+      },
     },
     {
-      $unwind: "$owner"
+      $unwind: "$owner",
     },
     {
       $lookup: {
@@ -197,7 +210,7 @@ const getRestaurantsService = async (query: TRestaurantQuery) => {
         localField: "_id",
         foreignField: "restaurantId",
         as: "menus",
-      }
+      },
     },
     {
       $lookup: {
@@ -205,7 +218,7 @@ const getRestaurantsService = async (query: TRestaurantQuery) => {
         localField: "menus.cuisineId",
         foreignField: "_id",
         as: "cuisine",
-      }
+      },
     },
     {
       $match: {
@@ -215,7 +228,6 @@ const getRestaurantsService = async (query: TRestaurantQuery) => {
     },
     { $count: "totalCount" },
   ]);
-
 
   const totalCount = totalRestaurantResult[0]?.totalCount || 0;
   const totalPages = Math.ceil(totalCount / Number(limit));
@@ -230,8 +242,6 @@ const getRestaurantsService = async (query: TRestaurantQuery) => {
     data: result,
   };
 };
-
-
 
 const getUserRestaurantsService = async (query: TUserRestaurantQuery) => {
   // 1. Extract query parameters
@@ -258,9 +268,9 @@ const getUserRestaurantsService = async (query: TUserRestaurantQuery) => {
     searchQuery = {
       $or: [
         ...searchQuery?.$or,
-        { keywords: { $in: [new RegExp(searchTerm, "i")] } }
-      ]
-    }
+        { keywords: { $in: [new RegExp(searchTerm, "i")] } },
+      ],
+    };
   }
 
   //console.dir(searchQuery, {depth:null})
@@ -277,7 +287,7 @@ const getUserRestaurantsService = async (query: TUserRestaurantQuery) => {
       $match: {
         status: "active",
         approved: "accepted",
-      }
+      },
     },
     {
       $lookup: {
@@ -296,7 +306,7 @@ const getUserRestaurantsService = async (query: TUserRestaurantQuery) => {
         localField: "_id",
         foreignField: "restaurantId",
         as: "menus",
-      }
+      },
     },
     {
       $lookup: {
@@ -304,7 +314,7 @@ const getUserRestaurantsService = async (query: TUserRestaurantQuery) => {
         localField: "menus.cuisineId",
         foreignField: "_id",
         as: "cuisine",
-      }
+      },
     },
     {
       $match: {
@@ -317,13 +327,13 @@ const getUserRestaurantsService = async (query: TUserRestaurantQuery) => {
         from: "reviews",
         localField: "_id",
         foreignField: "restaurantId",
-        as: "reviews"
-      }
+        as: "reviews",
+      },
     },
     {
       $addFields: {
         totalReview: { $size: "$reviews" },
-      }
+      },
     },
     {
       $project: {
@@ -336,7 +346,7 @@ const getUserRestaurantsService = async (query: TUserRestaurantQuery) => {
         cancellationCharge: 1,
         discount: 1,
         ratings: 1,
-        totalReview:1,
+        totalReview: 1,
         createdAt: 1,
         updatedAt: 1,
         ownerName: "$owner.fullName",
@@ -357,7 +367,7 @@ const getUserRestaurantsService = async (query: TUserRestaurantQuery) => {
       $match: {
         status: "active",
         approved: "accepted",
-      }
+      },
     },
     {
       $lookup: {
@@ -376,7 +386,7 @@ const getUserRestaurantsService = async (query: TUserRestaurantQuery) => {
         localField: "_id",
         foreignField: "restaurantId",
         as: "menus",
-      }
+      },
     },
     {
       $lookup: {
@@ -384,7 +394,7 @@ const getUserRestaurantsService = async (query: TUserRestaurantQuery) => {
         localField: "menus.cuisineId",
         foreignField: "_id",
         as: "cuisine",
-      }
+      },
     },
     {
       $match: {
@@ -395,8 +405,8 @@ const getUserRestaurantsService = async (query: TUserRestaurantQuery) => {
     { $count: "totalCount" },
   ]);
 
-    const totalCount = totalRestaurantResult[0]?.totalCount || 0;
-    const totalPages = Math.ceil(totalCount / Number(limit));
+  const totalCount = totalRestaurantResult[0]?.totalCount || 0;
+  const totalPages = Math.ceil(totalCount / Number(limit));
 
   return {
     meta: {
@@ -409,49 +419,83 @@ const getUserRestaurantsService = async (query: TUserRestaurantQuery) => {
   };
 };
 
-
-const getOwnerRestaurantService = async (loginUserId:string) => {
+const getOwnerRestaurantService = async (loginUserId: string) => {
   const ObjectId = Types.ObjectId;
-  const restaurant = await RestaurantModel.findOne({
-         ownerId: new ObjectId(loginUserId) ,
+  const result = await RestaurantModel.aggregate([
+    {
+      $match: {
+        ownerId: new ObjectId(loginUserId),
+      },
+    },
+    {
+      $project: {
+        _id:1,
+        ownerId: 1,
+        name: 1,
+        slug: 1,
+        keywords: 1,
+        features: 1,
+        discount: 1,
+        ratings: 1,
+        restaurantImg: 1,
+        location: 1,
+        coordinates: "$location.coordinates",
+        address: 1,
+        paymentRequired: 1,
+        bookingFeePerGuest: 1,
+        cancellationPercentage: 1,
+        status: 1,
+        approved: 1,
+        createdAt: 1,
+        updatedAt: 1,
+      },
+    },
+    {
+      $addFields: {
+        longitude: { $max: "$coordinates" },
+        latitude: { $min: "$coordinates" }
       }
-  );
+    }
+  ]);
 
-  if(!restaurant){
-    throw new AppError(404, "Restaurant not found")
+  if (result.length === 0) {
+    throw new AppError(404, "Restaurant not found");
   }
 
-  return restaurant;
-
+  return result[0];
 };
-
 
 const getSingleRestaurantService = async (restaurantId: string) => {
   const ObjectId = Types.ObjectId;
   const restaurant = await RestaurantModel.aggregate([
     {
       $match: {
-        _id: new ObjectId(restaurantId)
-      }
+        _id: new ObjectId(restaurantId),
+      },
     },
     {
-      $lookup: { from: 'users', localField: 'ownerId', foreignField: '_id', as: 'owner' }
+      $lookup: {
+        from: "users",
+        localField: "ownerId",
+        foreignField: "_id",
+        as: "owner",
+      },
     },
     {
-      $unwind: "$owner"
+      $unwind: "$owner",
     },
     {
       $lookup: {
         from: "reviews",
         localField: "_id",
         foreignField: "restaurantId",
-        as: "reviews"
-      }
+        as: "reviews",
+      },
     },
     {
       $addFields: {
         totalReview: { $size: "$reviews" },
-      }
+      },
     },
     {
       $project: {
@@ -461,68 +505,69 @@ const getSingleRestaurantService = async (restaurantId: string) => {
         cuisine: 1,
         dining: 1,
         website: 1,
-        location:1,
-        address:1,
+        location: 1,
+        address: 1,
         keywords: 1,
-        ratings:1,
-        totalReview:1,
+        ratings: 1,
+        totalReview: 1,
         price: 1,
         features: 1,
-        cancellationCharge:1,
-        discount:1,
-        status:1,
+        cancellationCharge: 1,
+        discount: 1,
+        status: 1,
         createdAt: 1,
         updatedAt: 1,
         ownerName: "$owner.fullName",
         ownerEmail: "$owner.email",
         ownerPhone: "$owner.phone",
         ownerImg: "$owner.profileImg",
-        ownerAddress: "$owner.address"
+        ownerAddress: "$owner.address",
       },
     },
-  ])
-  if(restaurant.length === 0){
+  ]);
+  if (restaurant.length === 0) {
     throw new AppError(404, "Restaurant Not Found");
   }
 
   return restaurant[0];
-}
+};
 
-
-const findNearbyRestaurantsService = async (query: INearbyQuery)=> {
+const findNearbyRestaurantsService = async (query: INearbyQuery) => {
   const { longitude, latitude } = query; // get from query params
   const radius = 20; //5 kilometers
   const earthRadiusInKm = 6378.1;
 
-    if (!longitude || !latitude) {
-      throw new AppError(400, "Longitude and latitude are required")
-    }
+  if (!longitude || !latitude) {
+    throw new AppError(400, "Longitude and latitude are required");
+  }
 
-   const result = await RestaurantModel.find({
+  const result = await RestaurantModel.find({
     location: {
       $geoWithin: {
         $centerSphere: [
           [Number(longitude), Number(latitude)], // [longitude, latitude]
-          Number(radius) / earthRadiusInKm // Convert radius to radians
+          Number(radius) / earthRadiusInKm, // Convert radius to radians
         ],
       },
     },
-   })
+  });
   return result;
-}
-  
+};
 
-const changeRestaurantStatusService = async (restaurantId: string, payload: IChangeRestaurantStatus) => {
-  const { status} = payload;
+const changeRestaurantStatusService = async (
+  restaurantId: string,
+  payload: IChangeRestaurantStatus
+) => {
+  const { status } = payload;
 
   const restaurant = await RestaurantModel.findById(restaurantId);
-  if(!restaurant){
+  if (!restaurant) {
     throw new AppError(404, "Restaurant Not Found");
   }
 
   //transaction & rollback part
   const session = await mongoose.startSession();
-  try{
+  try {
     session.startTransaction();
 
     //database-process-01
@@ -531,28 +576,32 @@ const changeRestaurantStatusService = async (restaurantId: string, payload: ICha
       { _id: new ObjectId(restaurantId) },
       { status: status },
       { session }
-    )
-    
-     //database-process-02
+    );
+
+    //database-process-02
     //create a notification
     await NotificationModel.create({
       userId: restaurant?.ownerId,
       title: "Restaurant Status",
-      message: `Your Restaurant is ${status === "active" ? "activated" : "deactivated"} successfully`,
-      type: `${status=== "active" ? "success" : "error"}`
+      message: `Your Restaurant is ${
+        status === "active" ? "activated" : "deactivated"
+      } successfully`,
+      type: `${status === "active" ? "success" : "error"}`,
     });
     await session.commitTransaction();
     await session.endSession();
     return result;
-  }catch(err:any){
+  } catch (err: any) {
     await session.abortTransaction();
     await session.endSession();
-    throw new Error(err)
+    throw new Error(err);
   }
-}
+};
 
-
-const approveRestaurantService = async (restaurantId: string, approved: IChangeApprovalStatus) => {
+const approveRestaurantService = async (
+  restaurantId: string,
+  approved: IChangeApprovalStatus
+) => {
   const ObjectId = Types.ObjectId;
   const restaurant = await RestaurantModel.findById(restaurantId);
   if (!restaurant) {
@@ -571,7 +620,6 @@ const approveRestaurantService = async (restaurantId: string, approved: IChangeA
       { approved }
     );
 
-
     //database-process-02
     //create a notification
     await NotificationModel.create({
@@ -588,121 +636,146 @@ const approveRestaurantService = async (restaurantId: string, approved: IChangeA
     await session.endSession();
     throw new Error(err);
   }
-}
+};
 
-
-const updateRestaurantService = async (ownerId: string, payload: Partial<IRestaurant>) => {
+const updateRestaurantService = async (
+  ownerId: string,
+  payload: Partial<IRestaurant>
+) => {
   const ObjectId = Types.ObjectId;
   const restaurant = await RestaurantModel.findOne({
-    ownerId
+    ownerId,
   });
 
-  if(!restaurant){
+  if (!restaurant) {
     throw new AppError(404, "Restaurant Not Found");
   }
-
 
   const result = await RestaurantModel.updateOne(
     { ownerId: new ObjectId(ownerId) },
     payload
-  )
-  
+  );
 
   return result;
-}
+};
 
-
-const updateRestaurantImgService = async (req:Request, loginUserId: string) => {
+const updateRestaurantImgService = async (
+  req: Request,
+  loginUserId: string
+) => {
   const restaurant = await RestaurantModel.findOne({
     ownerId: loginUserId,
   });
 
-  if(!restaurant){
+  if (!restaurant) {
     throw new AppError(404, "Restaurant Not Found");
   }
 
-  if(!req.file){
+  if (!req.file) {
     throw new AppError(400, "image is required");
   }
 
   //uploaded-image
   const image = await uploadImage(req);
-  
+
   const result = await RestaurantModel.updateOne(
     { ownerId: loginUserId },
     { restaurantImg: image }
-  )
+  );
 
   return result;
-
 };
-
 
 const deleteRestaurantService = async (loginUserId: string) => {
   const ObjectId = Types.ObjectId;
   const restaurant = await RestaurantModel.findOne({
-    ownerId:loginUserId
+    ownerId: loginUserId,
   });
 
-  if(!restaurant){
+  if (!restaurant) {
     throw new AppError(404, "Restaurant Not Found");
   }
 
   //check if restaurantId is associated with booking
-  const associateWithBooking = await BookingModel.findOne({ restaurantId: restaurant._id });
-  if(associateWithBooking){
-      throw new AppError(409, 'Failled to delete, This restaurant is associated with booking');
+  const associateWithBooking = await BookingModel.findOne({
+    restaurantId: restaurant._id,
+  });
+  if (associateWithBooking) {
+    throw new AppError(
+      409,
+      "Failled to delete, This restaurant is associated with booking"
+    );
   }
 
   //transaction & rollback
- const session = await mongoose.startSession();
+  const session = await mongoose.startSession();
 
-  try{
+  try {
     session.startTransaction();
 
     //delete social media
-    await SocialMediaModel.deleteOne({ ownerId: new ObjectId(loginUserId) }, { session });
+    await SocialMediaModel.deleteOne(
+      { ownerId: new ObjectId(loginUserId) },
+      { session }
+    );
 
     //delete menus
-    await MenuModel.deleteMany({ ownerId: new ObjectId(loginUserId) }, { session })
+    await MenuModel.deleteMany(
+      { ownerId: new ObjectId(loginUserId) },
+      { session }
+    );
 
     //delete favourite list
-    await FavouriteModel.deleteMany({ restaurantId: new ObjectId(restaurant._id) }, { session } )
+    await FavouriteModel.deleteMany(
+      { restaurantId: new ObjectId(restaurant._id) },
+      { session }
+    );
 
     //delete the reviews
-    await ReviewModel.deleteMany({ restaurantId: new ObjectId(restaurant._id) }, { session })
-    
+    await ReviewModel.deleteMany(
+      { restaurantId: new ObjectId(restaurant._id) },
+      { session }
+    );
+
     //delete the menu reviews
-    await MenuReviewModel.deleteMany({ restaurantId: new ObjectId(restaurant._id) }, { session })
+    await MenuReviewModel.deleteMany(
+      { restaurantId: new ObjectId(restaurant._id) },
+      { session }
+    );
 
     //delete the schedule
-    await ScheduleModel.deleteMany({ restaurantId: new ObjectId(restaurant._id) }, { session })
+    await ScheduleModel.deleteMany(
+      { restaurantId: new ObjectId(restaurant._id) },
+      { session }
+    );
 
     //delete restaurant
-    const result = await RestaurantModel.deleteOne({ ownerId: new ObjectId(loginUserId) }, { session });
+    const result = await RestaurantModel.deleteOne(
+      { ownerId: new ObjectId(loginUserId) },
+      { session }
+    );
 
     //transaction success
     await session.commitTransaction();
     await session.endSession();
     return result;
-  }
-  catch(err:any){
+  } catch (err: any) {
     await session.abortTransaction();
     await session.endSession();
-    throw new Error(err)
+    throw new Error(err);
   }
-}
+};
 
 export {
-    createRestaurantService,
-    getRestaurantsService,
-    getUserRestaurantsService,
-    getOwnerRestaurantService,
-    changeRestaurantStatusService,
-    getSingleRestaurantService,
-    findNearbyRestaurantsService,
-    approveRestaurantService,
-    updateRestaurantService,
-    updateRestaurantImgService,
-    deleteRestaurantService
-}
+  createRestaurantService,
+  getRestaurantsService,
+  getUserRestaurantsService,
+  getOwnerRestaurantService,
+  changeRestaurantStatusService,
+  getSingleRestaurantService,
+  findNearbyRestaurantsService,
+  approveRestaurantService,
+  updateRestaurantService,
+  updateRestaurantImgService,
+  deleteRestaurantService,
+};

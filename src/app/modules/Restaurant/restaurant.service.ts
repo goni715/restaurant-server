@@ -281,17 +281,6 @@ const getUserRestaurantsService = async (query: TUserRestaurantQuery) => {
     },
     {
       $lookup: {
-        from: "users",
-        localField: "ownerId",
-        foreignField: "_id",
-        as: "owner",
-      },
-    },
-    {
-      $unwind: "$owner",
-    },
-    {
-      $lookup: {
         from: "menus", // Menu collection
         localField: "_id",
         foreignField: "restaurantId",

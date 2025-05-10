@@ -215,7 +215,7 @@ const getTablesService = async (loginUserId: string,  query: TTableQuery) => {
         endDateTime: "$schedule.endDateTime",
         diningName: "$dining.name"
       }
-    },
+     },
     {
       $sort: {
         startDateTime:-1,

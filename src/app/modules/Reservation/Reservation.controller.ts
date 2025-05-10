@@ -1,6 +1,6 @@
 import catchAsync from '../../utils/catchAsync';
 import sendResponse from '../../utils/sendResponse';
-import { createReservationService, getSingleReservationService, getAllReservationsService, updateReservationService, deleteReservationService } from './Reservation.service';
+import { createReservationService, getSingleReservationService, updateReservationService, deleteReservationService, getReservationsService } from './Reservation.service';
 
 const createReservation = catchAsync(async (req, res) => {
   const loginUserId = req.headers.id;
@@ -26,8 +26,9 @@ const getSingleReservation = catchAsync(async (req, res) => {
   });
 });
 
-const getAllReservations = catchAsync(async (req, res) => {
-  const result = await getAllReservationsService(req.query);
+const getReservations = catchAsync(async (req, res) => {
+  const loginUserId = req.headers.id;
+  const result = await getReservationsService(loginUserId as string,req.query);
 
   sendResponse(res, {
     statusCode: 200,
@@ -39,7 +40,7 @@ const getAllReservations = catchAsync(async (req, res) => {
 });
 
 const updateReservation = catchAsync(async (req, res) => {
-  const { ireservationId } = req.params;
+  const { reservationId } = req.params;
   const result = await updateReservationService(reservationId, req.body);
 
   sendResponse(res, {
@@ -65,7 +66,7 @@ const deleteReservation = catchAsync(async (req, res) => {
 const ReservationController = {
   createReservation,
   getSingleReservation,
-  getAllReservations,
+  getReservations,
   updateReservation,
   deleteReservation,
 };

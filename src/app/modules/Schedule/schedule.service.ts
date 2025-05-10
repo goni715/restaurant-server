@@ -372,6 +372,13 @@ const deleteScheduleService = async (loginUserId: string, scheduleId: string) =>
       throw new AppError(409, 'Failled to delete, This Schedule is associated with Table');
   }
 
+
+  //check if scheduleId is associated with booking
+  const associateWithBooking = await BookingModel.findOne({ scheduleId });
+  if(associateWithBooking){
+      throw new AppError(409, 'Failled to delete, This Schedule is associated with Booking');
+  }
+
    //check if scheduleId is associated with table
    const associateWithBookingTable = await TableBookingModel.findOne({ scheduleId, ownerId: loginUserId });
    if(associateWithBookingTable){

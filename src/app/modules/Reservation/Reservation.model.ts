@@ -13,6 +13,11 @@ const reservationSchema = new Schema<IReservation>(
       required: true,
       ref: "Schedule",
     },
+    restaurantId: {
+      type: Schema.Types.ObjectId,
+      required: true,
+      ref: "Restaurant"
+    },
     seats: {
       type: Number,
       required: true,

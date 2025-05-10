@@ -1,11 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import AppError from '../../errors/AppError';
 import { ReservationSearchableFields } from './Reservation.constant';
-import { IReservation, IReservationPayload, TReservationQuery } from './Reservation.interface';
+import { IReservationPayload, TReservationQuery } from './Reservation.interface';
 import ReservationModel from './Reservation.model';
 import { makeFilterQuery, makeSearchQuery } from '../../helper/QueryBuilder';
 import ScheduleModel from '../Schedule/schedule.model';
 import RestaurantModel from '../Restaurant/restaurant.model';
+import ObjectId from '../../utils/ObjectId';
 
 const createReservationService = async (
   loginUserId: string,
@@ -39,8 +40,9 @@ const createReservationService = async (
   for(let i =0; i < scheduleIdsArray.length; i++){
      const reservation = await ReservationModel.findOne({
         ownerId: loginUserId,
-        _id: scheduleIdsArray[i]
+        scheduleId: scheduleIdsArray[i]
      });
+
      if(!reservation){
       reservationData.push({
         scheduleId: scheduleIdsArray[i],
@@ -55,7 +57,7 @@ const createReservationService = async (
   return result;
 };
 
-const getAllReservationsService = async (query: TReservationQuery) => {
+const getReservationsService = async (loginUserId: string, query: TReservationQuery) => {
   const {
     searchTerm, 
     page = 1, 
@@ -85,41 +87,45 @@ const getAllReservationsService = async (query: TReservationQuery) => {
   const result = await ReservationModel.aggregate([
     {
       $match: {
-        ...searchQuery, // Apply search query
-        ...filterQuery, // Apply filters
-      },
+        ownerId: new ObjectId(loginUserId)
+      }
+    },
+     {
+      $lookup: {
+        from: "schedules",
+        localField: "scheduleId",
+        foreignField: "_id",
+        as: "schedule"
+      }
+    },
+    {
+      $unwind: "$schedule"
     },
     {
       $project: {
-        _id: 1,
-        fullName: 1,
-        email: 1,
-        phone: 1,
-        gender:1,
-        role: 1,
-        status: 1,
-        profileImg: 1,
-        createdAt: 1,
-        updatedAt: 1,
-      },
-    },
+        _id:1,
+        scheduleId: 1,
+        seats: 1,
+        startDateTime: "$schedule.startDateTime",
+        endDateTime: "$schedule.endDateTime",
+      }
+     },
     { $sort: { [sortBy]: sortDirection } }, 
     { $skip: skip }, 
     { $limit: Number(limit) }, 
   ]);
 
      // total count
-  const totalReviewResult = await ReservationModel.aggregate([
-    {
+  const totalReservationResult = await ReservationModel.aggregate([
+   {
       $match: {
-        ...searchQuery,
-        ...filterQuery
+        ownerId: new ObjectId(loginUserId)
       }
     },
     { $count: "totalCount" }
   ])
 
-  const totalCount = totalReviewResult[0]?.totalCount || 0;
+  const totalCount = totalReservationResult[0]?.totalCount || 0;
   const totalPages = Math.ceil(totalCount / Number(limit));
 
 return {
@@ -168,7 +174,7 @@ const deleteReservationService = async (id: string) => {
 
 export {
   createReservationService,
-  getAllReservationsService,
+  getReservationsService,
   getSingleReservationService,
   updateReservationService,
   deleteReservationService,

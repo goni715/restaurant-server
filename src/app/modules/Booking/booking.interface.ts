@@ -8,13 +8,9 @@ export interface IBooking {
     restaurantId: Types.ObjectId;
     ownerId: Types.ObjectId;
     userId: Types.ObjectId;
-    diningId: Types.ObjectId;
-    checkIn: string;
-    checkOut: string;
-    date: Date;
+    scheduleId: Types.ObjectId;
+    //diningId: Types.ObjectId;
     token: string;
-    startDateTime: Date;
-    endDateTime: Date;
     amount: number;
     guest: number;
     paymentStatus: TPaymentStatus;
@@ -24,10 +20,8 @@ export interface IBooking {
 
 
 export interface IBookingPayload {
-    date: string;
-    checkIn: string;
-    checkOut: string;
-    diningId: Types.ObjectId;
+    scheduleId: Types.ObjectId;
+    //diningId: Types.ObjectId;
     restaurantId: Types.ObjectId;
     amount: number;
     guest: number;

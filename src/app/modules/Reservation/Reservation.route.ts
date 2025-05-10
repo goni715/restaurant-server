@@ -31,8 +31,9 @@ router.delete(
 );
 
 router.get(
-  '/get-all-reservations',
-  ReservationController.getAllReservations,
+  '/get-reservations',
+   AuthMiddleware(UserRole.owner),
+  ReservationController.getReservations,
 );
 
 const ReservationRoutes = router;

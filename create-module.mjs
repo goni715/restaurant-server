@@ -99,7 +99,7 @@ const getAll${capitalize(moduleName)}s = catchAsync(async (req, res) => {
 });
 
 const update${capitalize(moduleName)} = catchAsync(async (req, res) => {
-  const { i${moduleName.toLowerCase()}Id } = req.params;
+  const { ${moduleName.toLowerCase()}Id } = req.params;
   const result = await update${capitalize(moduleName)}Service(${moduleName.toLowerCase()}Id, req.body);
 
   sendResponse(res, {

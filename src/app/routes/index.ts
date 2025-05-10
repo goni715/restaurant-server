@@ -19,6 +19,7 @@ import { TableBookingRoutes } from '../modules/TableBooking/tableBooking.route';
 import OwnerRoutes from '../modules/Owner/Owner.route';
 import FaqRoutes from '../modules/Faq/Faq.route';
 import PolicyRoutes from '../modules/Policy/Policy.route';
+import ReservationRoutes from '../modules/Reservation/Reservation.route';
 
 const router = express.Router();
 
@@ -75,6 +76,10 @@ const moduleRoutes = [
     {
         path: '/schedule',
         route: ScheduleRoutes
+    },
+     {
+        path: '/reservation',
+        route: ReservationRoutes
     },
     {
         path: '/booking',

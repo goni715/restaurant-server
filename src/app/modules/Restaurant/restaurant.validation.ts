@@ -25,7 +25,7 @@ export const createRestaurantValidationSchema = z.object({
     },
     z.boolean().default(false)
   ),
-  bookingFeePerguest: z.preprocess((val) => Number(val), z.number().nonnegative().default(0)).optional(),
+  bookingFeePerGuest: z.preprocess((val) => Number(val), z.number().nonnegative().default(0)).optional(),
   cancellationPercentage: z.preprocess((val) => Number(val), z.number().nonnegative().default(0)).optional()
 })
 
@@ -38,7 +38,7 @@ export const updateRestaurantValidationSchema = z.object({
   longitude: z.preprocess((val) => Number(val), z.number().min(-180, { message: "Longitude must be >= -180" }).max(180, { message: "Longitude must be <= 180" }).optional()).optional(),
   latitude: z.preprocess((val) => Number(val), z.number().min(-90, { message: "Longitude must be >= -90" }).max(90, { message: "Longitude must be <= 90" }).optional()).optional(),
   paymentRequired: z.boolean().optional(),
-  bookingFeePerguest: z.number().nonnegative().optional(),
+  bookingFeePerGuest: z.number().nonnegative().optional(),
   cancellationPercentage: z.number().nonnegative().optional()
 });
 

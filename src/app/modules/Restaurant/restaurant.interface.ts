@@ -40,6 +40,7 @@ export interface IRestaurantPayload {
   address: string;
   discount?: string;
   cancellationPercentage?: number;
+  bookingFeePerGuest?: number;
   paymentRequired: boolean;
   status: TRestaurantStatus;
   approved: TApprovedStatus;

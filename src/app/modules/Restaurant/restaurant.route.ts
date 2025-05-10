@@ -67,10 +67,10 @@ router.patch(
 );
 
 router.patch(
-  "/update-restaurant",
+  "/update-restaurant-img",
   AuthMiddleware(UserRole.owner),
-  validationMiddleware(updateRestaurantValidationSchema),
-  RestaurantController.updateRestaurant
+  upload.single("file"),
+  RestaurantController.updateRestaurantImg
 );
 
 router.delete(

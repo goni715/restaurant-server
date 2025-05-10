@@ -28,9 +28,13 @@ export interface IRestaurant {
 
 export interface IRestaurantPayload {
   name: string;
-  keywords?: string[],
+  keywords?: string[];
   features?: string[];
   ratings?: number;
+  location: {
+    type: "Point";
+    coordinates: [number, number]; // [longitude, latitude]
+  };
   longitude: number;
   latitude: number;
   address: string;
@@ -38,7 +42,7 @@ export interface IRestaurantPayload {
   cancellationPercentage?: number;
   paymentRequired: boolean;
   status: TRestaurantStatus;
-  approved: TApprovedStatus
+  approved: TApprovedStatus;
 }
 
 

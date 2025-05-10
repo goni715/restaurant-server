@@ -416,6 +416,19 @@ const getOwnerRestaurantService = async (loginUserId: string) => {
         ownerId: new ObjectId(loginUserId),
       },
     },
+     {
+      $lookup: {
+        from: "reviews",
+        localField: "_id",
+        foreignField: "restaurantId",
+        as: "reviews",
+      },
+    },
+    {
+      $addFields: {
+        totalReview: { $size: "$reviews" },
+      },
+    },
     {
       $project: {
         _id:1,
@@ -426,6 +439,7 @@ const getOwnerRestaurantService = async (loginUserId: string) => {
         features: 1,
         discount: 1,
         ratings: 1,
+        totalReview:1,
         restaurantImg: 1,
         location: 1,
         coordinates: "$location.coordinates",
@@ -629,8 +643,9 @@ const approveRestaurantService = async (
 
 const updateRestaurantService = async (
   ownerId: string,
-  payload: Partial<IRestaurant>
+  payload: Partial<IRestaurantPayload>
 ) => {
+  const { longitude, latitude } = payload;
   const ObjectId = Types.ObjectId;
   const restaurant = await RestaurantModel.findOne({
     ownerId,
@@ -640,9 +655,18 @@ const updateRestaurantService = async (
     throw new AppError(404, "Restaurant Not Found");
   }
 
+ //update the location
+ if(longitude && latitude){
+  payload.location={
+    type: "Point",
+    coordinates: [Number(longitude), Number(latitude)]
+  }
+ }
+
   const result = await RestaurantModel.updateOne(
     { ownerId: new ObjectId(ownerId) },
-    payload
+    payload,
+    { runValidators: true }
   );
 
   return result;

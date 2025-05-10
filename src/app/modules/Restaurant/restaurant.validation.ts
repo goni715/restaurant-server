@@ -10,7 +10,6 @@ export const createRestaurantValidationSchema = z.object({
   //     .array(z.number())
   //     .length(2, 'Coordinates must contain exactly two numbers [longitude, latitude]'),
   // }),
- 
   address: z.string({ required_error: "Address is required"}).min(1, "address is required !"),
   longitude: z.preprocess((val) => Number(val), z.number().min(-180, { message: "Longitude must be >= -180" }).max(180, { message: "Longitude must be <= 180" })),
   //latitude: z.preprocess((val) => Number(val), z.number().min(-90).max(90)),
@@ -32,12 +31,15 @@ export const createRestaurantValidationSchema = z.object({
 
 export const updateRestaurantValidationSchema = z.object({
   name: z.string().min(1, "Name is required").optional(),
-  website: z.string().url("Invalid URL format").optional(),
   address: z.string().min(1, "Location is required").optional(),
   keywords: z.array(z.string()).optional().optional(),
   features: z.array(z.string()).optional(),
   discount: z.string().optional(),
-  cancellationPercentage: z.number().nonnegative().default(0)
+  longitude: z.preprocess((val) => Number(val), z.number().min(-180, { message: "Longitude must be >= -180" }).max(180, { message: "Longitude must be <= 180" }).optional()).optional(),
+  latitude: z.preprocess((val) => Number(val), z.number().min(-90, { message: "Longitude must be >= -90" }).max(90, { message: "Longitude must be <= 90" }).optional()).optional(),
+  paymentRequired: z.boolean().optional(),
+  bookingFeePerguest: z.number().nonnegative().optional(),
+  cancellationPercentage: z.number().nonnegative().optional()
 });
 
 

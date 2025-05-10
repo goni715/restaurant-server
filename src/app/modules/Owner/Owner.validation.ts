@@ -19,7 +19,6 @@ export const createOwnerValidationSchema = z.object({
     .string({
       required_error: "password is required",
     })
-    .min(6, "Password minimum 6 characters long")
     .trim().optional(),
 });
 

@@ -1,8 +1,9 @@
+import { Schema } from "zod";
 import catchAsync from "../../utils/catchAsync";
 import pickValidFields from "../../utils/pickValidFields";
 import sendResponse from "../../utils/sendResponse";
 import { ScheduleDropDownValidFields, ScheduleValidFields, UserScheduleValidFields } from "./schedule.constant";
-import { createScheduleService, deleteScheduleService, getScheduleDropDownService, getSchedulesService, getSingleScheduleService, getUserSchedulesService } from "./schedule.service";
+import { createScheduleService, deleteScheduleService, getScheduleDropDownService, getSchedulesByDateService, getSchedulesService, getSingleScheduleService, getUserSchedulesService } from "./schedule.service";
 
 
 const createSchedule = catchAsync(async (req, res) => {
@@ -26,9 +27,22 @@ const getSchedules = catchAsync(async (req, res) => {
     sendResponse(res, {
       statusCode: 200,
       success: true,
-      message: "Schedules are retrived successfully",
+      message: "Schedules are retrieved successfully",
       meta: result.meta,
       data: result.data
+    });
+});
+
+const getSchedulesByDate = catchAsync(async (req, res) => {
+  const loginUserId = req.headers.id;
+  const validatedQuery = pickValidFields(req.query, ScheduleValidFields);
+  const result = await getSchedulesByDateService(loginUserId as string, validatedQuery);
+  
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: "Schedules are retrieved successfully",
+      data: result
     });
 });
 
@@ -40,22 +54,20 @@ const getScheduleDropDown = catchAsync(async (req, res) => {
     sendResponse(res, {
       statusCode: 200,
       success: true,
-      message: "Schedules are retrived successfully",
+      message: "Schedules are retrieved successfully",
       data: result
     });
 });
 
 const getUserSchedules = catchAsync(async (req, res) => {
-  const { restaurantId } = req.params;
-  const validatedQuery = pickValidFields(req.query, UserScheduleValidFields);
-  const result = await getUserSchedulesService(restaurantId as string, validatedQuery);
+  const { restaurantId, date } = req.params;
+  const result = await getUserSchedulesService(restaurantId, date);
   
     sendResponse(res, {
       statusCode: 200,
       success: true,
       message: "Schedules are retrived successfully",
-      meta: result.meta,
-      data: result.data
+      data: result
     });
 });
 
@@ -88,6 +100,7 @@ const deleteSchedule = catchAsync(async (req, res) => {
 const ScheduleController = {
     createSchedule,
     getSchedules,
+    getSchedulesByDate,
     getScheduleDropDown,
     getUserSchedules,
     getSingleSchedule,

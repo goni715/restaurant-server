@@ -1,3 +1,4 @@
+import { Types } from "mongoose";
 import { z } from "zod";
 
 const startTimeSchema = z
@@ -155,3 +156,26 @@ export const createScheduleSchema = z
       }
     }
   });
+
+export const getUserSchedulesSchema = z.object({
+  restaurantId: z
+    .string({
+      required_error: "restaurantId is required!",
+    })
+    .refine((id) => Types.ObjectId.isValid(id), {
+      message: "restaurantId must be a valid ObjectId",
+    }),
+  date: z
+    .string({
+    })
+    .min(1, { message: "Please select Start Date" })
+    .refine(
+      (value) => {
+        const dateRegex = /^20\d{2}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/; // "2024-11-25"
+        return dateRegex.test(value); //return true or false
+      },
+      {
+        message: `Invalid Date format , expected 'yyyy-MM-dd' format`,
+      }
+    ),
+});

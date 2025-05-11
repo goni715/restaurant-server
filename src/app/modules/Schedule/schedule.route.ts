@@ -3,7 +3,8 @@ import AuthMiddleware from '../../middlewares/AuthMiddleware';
 import { UserRole } from '../User/user.constant';
 import ScheduleController from './schedule.controller';
 import validationMiddleware from '../../middlewares/validationMiddleware';
-import { createScheduleSchema } from './schedule.validation';
+import { createScheduleSchema, getUserSchedulesSchema } from './schedule.validation';
+import { updateTableValidationSchema } from '../Table/table.validation';
 
 const router = express.Router();
 
@@ -19,7 +20,11 @@ router.get(
   AuthMiddleware(UserRole.owner),
   ScheduleController.getSchedules
 );
-
+router.get(
+  "/get-schedules-by-date",
+  AuthMiddleware(UserRole.owner),
+  ScheduleController.getSchedulesByDate
+);
 router.get(
   "/get-schedule-drop-down",
   AuthMiddleware(UserRole.owner),
@@ -27,7 +32,7 @@ router.get(
 );
 
 router.get(
-  "/get-user-schedules/:restaurantId",
+  "/get-user-schedules/:restaurantId/:date",
   AuthMiddleware(UserRole.user),
   ScheduleController.getUserSchedules
 );

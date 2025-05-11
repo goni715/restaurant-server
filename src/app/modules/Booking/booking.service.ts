@@ -333,8 +333,6 @@ const getBookingsService = async (
         diningName: "$dining.name",
         scheduleId: "$scheduleId",
         date: "$date",
-        checkIn: "$checkIn",
-        checkOuT: "$checkOut",
         token: "$token",
         startDateTime: "$schedule.startDateTime",
         endDateTime: "$schedule.endDateTime",
@@ -353,9 +351,9 @@ const getBookingsService = async (
         ...searchQuery,
       },
     },
-    // {
-    //   $sort: { date: -1 }, //after projection
-    // },
+    {
+      $sort: { startDateTime: -1 }, //after projection
+    },
     { $skip: skip },
     { $limit: Number(limit) },
   ]);

@@ -107,9 +107,6 @@ const getSchedulesService = async (
   // 2. Set up pagination
   const skip = (Number(page) - 1) * Number(limit);
 
-  //3. setup sorting
-  const sortDirection = sortOrder === "asc" ? 1 : -1;
-
   //4 setup filters
   let filterQuery = {};
   //check if only filter by date
@@ -375,7 +372,6 @@ const getUserSchedulesService = async (
     { $sort: { startDateTime: 1, endDateTime: 1 } },
   ]);
 
-  const time = convertUTCtimeString("2025-05-15T10:00:00.000Z");
 
   const modifiedResult = result?.length > 0 ? result?.map((schedule)=>({
     _id:schedule._id,

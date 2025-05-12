@@ -41,5 +41,11 @@ router.get(
    AuthMiddleware(UserRole.owner),
   ReservationController.getReservationsByDate,
 );
+
+router.get(
+  '/get-user-reservations-by-date/:restaurantId/:date',
+   AuthMiddleware(UserRole.user),
+  ReservationController.getUserReservationsByDate,
+);
 const ReservationRoutes = router;
 export default ReservationRoutes;

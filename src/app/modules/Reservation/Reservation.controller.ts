@@ -1,6 +1,6 @@
 import catchAsync from '../../utils/catchAsync';
 import sendResponse from '../../utils/sendResponse';
-import { createReservationService, getSingleReservationService, updateReservationService, deleteReservationService, getReservationsService, getReservationsByDateService } from './Reservation.service';
+import { createReservationService, getSingleReservationService, updateReservationService, deleteReservationService, getReservationsService, getReservationsByDateService, getUserReservationsByDateService } from './Reservation.service';
 
 const createReservation = catchAsync(async (req, res) => {
   const loginUserId = req.headers.id;
@@ -52,6 +52,18 @@ const getReservationsByDate = catchAsync(async (req, res) => {
   });
 });
 
+const getUserReservationsByDate = catchAsync(async (req, res) => {
+  const { restaurantId, date } = req.params;
+  const result = await getUserReservationsByDateService(restaurantId, date);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Reservations are retrieved successfully',
+    data: result
+  });
+});
+
 const updateReservation = catchAsync(async (req, res) => {
   const { reservationId } = req.params;
   const result = await updateReservationService(reservationId, req.body);
@@ -81,6 +93,7 @@ const ReservationController = {
   getSingleReservation,
   getReservations,
   getReservationsByDate,
+  getUserReservationsByDate,
   updateReservation,
   deleteReservation,
 };

@@ -4,6 +4,7 @@ import pickValidFields from "../../utils/pickValidFields";
 import sendResponse from "../../utils/sendResponse";
 import { ScheduleDropDownValidFields, ScheduleValidFields, UserScheduleValidFields } from "./schedule.constant";
 import { createScheduleService, deleteScheduleService, getScheduleDropDownService, getSchedulesByDateService, getSchedulesService, getSingleScheduleService, getUserSchedulesService } from "./schedule.service";
+import { getUserReservationsByDateService } from "../Reservation/Reservation.service";
 
 
 const createSchedule = catchAsync(async (req, res) => {
@@ -61,7 +62,7 @@ const getScheduleDropDown = catchAsync(async (req, res) => {
 
 const getUserSchedules = catchAsync(async (req, res) => {
   const { restaurantId, date } = req.params;
-  const result = await getUserSchedulesService(restaurantId, date);
+  const result = await getUserReservationsByDateService(restaurantId, date);
   
     sendResponse(res, {
       statusCode: 200,

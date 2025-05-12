@@ -20,39 +20,16 @@ const createBookingWithoutPaymentService = async (
   loginUserId: string,
   payload: IBookingPayload
 ) => {
-  const { restaurantId, scheduleId, guest } = payload;
-  const restaurant = await RestaurantModel.findById(restaurantId);
-  if (!restaurant) {
-    throw new AppError(404, "Restaurant Not Found");
-  }
-
-  if (restaurant?.status !== "active") {
-    throw new AppError(403, "Restaurant is not active");
-  }
-
-  if (restaurant?.approved !== "accepted") {
-    throw new AppError(403, "Restaurant is not Approved");
-  }
-
-  //check schedule
-  const schedule = await ScheduleModel.findById(scheduleId);
-  if (!schedule) {
-    throw new AppError(404, "Schedule Not Found");
-  }
-
-  //generate token
-  const token = Math.floor(1000 + Math.random() * 900000);
-
- //check availableSeats
-  const reservation = await ReservationModel.findOne({
-    scheduleId,
-    restaurantId: restaurantId,
-    ownerId: restaurant?.ownerId,
-  });
+  const { reservationId, guest } = payload;
+  const reservation = await ReservationModel.findById(reservationId);
 
   if (!reservation) {
     throw new AppError(404, "Reservation not found");
   }
+
+  return reservation;
+  
+ //check availableSeats
   const availableSeats = Number(reservation?.seats);
   if(availableSeats < guest) {
     throw new AppError(
@@ -60,6 +37,10 @@ const createBookingWithoutPaymentService = async (
       "There are no available seats at this moment or schedule"
     );
   }
+
+  //generate token
+  const token = Math.floor(1000 + Math.random() * 900000);
+
 
 
   //check you have already booked the 10 seats // you can maximum 10 seats for one day

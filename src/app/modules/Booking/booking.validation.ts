@@ -67,19 +67,12 @@ const checkOutTimeSchema = z
   );
 
 export const createBookingWithoutPaymentSchema = z.object({
-  scheduleId: z
+  reservationId: z
     .string({
-      required_error: "scheduleId is required!",
+      required_error: "reservationId is required!",
     })
     .refine((id) => Types.ObjectId.isValid(id), {
-      message: "scheduleId must be a valid ObjectId",
-    }),
-  restaurantId: z
-    .string({
-      required_error: "restaurantId is required!",
-    })
-    .refine((id) => Types.ObjectId.isValid(id), {
-      message: "restaurantId must be a valid ObjectId",
+      message: "reservationId must be a valid ObjectId",
     }),
   guest: z
     .number()

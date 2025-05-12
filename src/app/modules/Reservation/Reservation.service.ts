@@ -232,6 +232,81 @@ const getReservationsByDateService = async (
     return modifiedResult;
 };
 
+
+const getUserReservationsByDateService = async (
+  restaurantId: string,
+  date: string
+) => {
+  
+
+   const restaurant = await RestaurantModel.findById(restaurantId);
+    if (!restaurant) {
+      throw new AppError(404, "Restaurant Not Found");
+    }
+
+  if(!isValidDate(date)){
+      throw new AppError(400, "Provide Valid Date")
+  }
+
+  let filterQuery = {};
+  if (date) {
+    const start = `${date}T00:00:00.000+00:00`;
+    const end = `${date}T23:59:59.999+00:00`;
+    filterQuery = {
+      startDateTime: { $gte: new Date(start), $lte: new Date(end) },
+    };
+  }
+
+
+ 
+  const result = await ReservationModel.aggregate([
+    {
+      $match: {
+        restaurantId: new ObjectId(restaurantId),
+      },
+    },
+    {
+      $lookup: {
+        from: "schedules",
+        localField: "scheduleId",
+        foreignField: "_id",
+        as: "schedule",
+      },
+    },
+    {
+      $unwind: "$schedule",
+    },
+    {
+      $project: {
+        _id: 1,
+        seats: 1,
+        startDateTime: "$schedule.startDateTime",
+        endDateTime: "$schedule.endDateTime",
+      },
+    },
+    {
+      $match : {
+        ...filterQuery
+      }
+    },
+    {
+      $addFields: {
+        date: { $dateToString: { format: "%Y-%m-%d", date: "$startDateTime" } },
+      },
+    },
+    { $sort: { date: -1 } },
+  ]);
+
+
+   const modifiedResult = result?.length > 0 ? result?.map((reservation)=>({
+      _id:reservation._id,
+      date:reservation.date,
+      time: convertUTCtimeString(reservation.startDateTime) + " - " + convertUTCtimeString(reservation.endDateTime)
+    })) : []
+  
+    return modifiedResult;
+};
+
 const getSingleReservationService = async (id: string) => {
   const result = await ReservationModel.findById(id);
   if (!result) {
@@ -271,6 +346,7 @@ export {
   createReservationService,
   getReservationsService,
   getReservationsByDateService,
+  getUserReservationsByDateService,
   getSingleReservationService,
   updateReservationService,
   deleteReservationService,

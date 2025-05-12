@@ -260,7 +260,6 @@ const getSchedulesByDateService = async (
     { $sort: { startDateTime: 1, endDateTime: 1 } },
   ]);
 
-  const time = convertUTCtimeString("2025-05-15T10:00:00.000Z");
 
   const modifiedResult = result?.length > 0 ? result?.map((schedule)=>({
     _id:schedule._id,

@@ -272,15 +272,10 @@ const getRestaurantReviewsService = async (restaurantId: string, query: TReviewQ
     },
     {
       $project: {
-        reviewId: "$_id",
-        userId: "$user._id",
         fullName: "$user.fullName",
-        email: "$user.email",
-        phone: "$user.phone",
         profileImg: "$user.profileImg",
         star: "$star",
         comment: "$comment",
-        createdAt: "$createdAt",
         _id:0
       }
     },
@@ -329,9 +324,119 @@ return {
    
 }
 
+
+const getUserRestaurantReviewsService = async (loginUserId: string, query: TReviewQuery) => {
+  const ObjectId = Types.ObjectId;
+    
+  // 1. Extract query parameters
+  const {
+    searchTerm, 
+    page = 1, 
+    limit = 10, 
+    sortOrder = "desc",
+    sortBy = "createdAt", 
+    ...filters // Any additional filters
+  } = query;
+
+
+  // 2. Set up pagination
+  const skip = (Number(page) - 1) * Number(limit);
+
+  //3. setup sorting
+  const sortDirection = sortOrder === "asc" ? 1 : -1;
+
+  //4. setup searching
+    let searchQuery = {};
+    if (searchTerm) {
+      searchQuery = makeSearchQuery(searchTerm, ReviewSearchFields);
+    }
+  
+    //5 setup filters
+    let filterQuery = {};
+    if (filters) {
+      filterQuery = makeFilterQuery(filters);
+    }
+  
+  const result = await ReviewModel.aggregate([
+    {
+      $match: { userId: new ObjectId(loginUserId) }
+    },
+     {
+      $lookup: {
+        from: "restaurants",
+        localField: "restaurantId",
+        foreignField: "_id",
+        as: "restaurant",
+      },
+    },
+    {
+      $unwind: "$restaurant"
+    },
+    {
+      $match: {
+        ...searchQuery,
+        ...filterQuery
+      }
+    },
+    {
+      $project: {
+        restaurantId:1,
+        restaurantName: "$restaurant.name",
+        restaurantImg: "$restaurant.restaurantImg",
+        star: "$star",
+        comment: "$comment",
+        _id:0
+      }
+    },
+    { $sort: { [sortBy]: sortDirection } },
+    { $skip: skip },
+    { $limit: Number(limit) },
+  ])
+
+   // total count of matching users 
+  const totalReviewResult = await ReviewModel.aggregate([
+    {
+       $match: { userId: new ObjectId(loginUserId) }
+    },
+    {
+      $lookup: {
+        from: "users",
+        localField: "userId",
+        foreignField: "_id",
+        as: "user",
+      },
+    },
+    {
+      $unwind: "$user"
+    },
+    {
+      $match: {
+        ...searchQuery,
+        ...filterQuery
+      }
+    },
+    { $count: "totalCount" }
+  ])
+
+  const totalCount = totalReviewResult[0]?.totalCount || 0;
+  const totalPages = Math.ceil(totalCount / Number(limit));
+
+return {
+  meta: {
+    page: Number(page), //currentPage
+    limit: Number(limit),
+    totalPages,
+    total: totalCount,
+  },
+  data: result,
+};
+   
+}
+
 export {
     createReviewService,
     deleteReviewService,
     getRestaurantReviewsService,
-    getMyRestaurantReviewsService
+    getMyRestaurantReviewsService,
+    getUserRestaurantReviewsService
 }

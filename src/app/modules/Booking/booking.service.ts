@@ -15,6 +15,7 @@ import { makeFilterQuery, makeSearchQuery } from "../../helper/QueryBuilder";
 import { BookingSearchFields, MyBookingSearchFields } from "./booking.constant";
 import ObjectId from "../../utils/ObjectId";
 import ReservationModel from "../Reservation/Reservation.model";
+import convertUTCtimeString from "../../utils/convertUTCtimeString";
 
 const createBookingWithoutPaymentService = async (
   loginUserId: string,
@@ -26,8 +27,6 @@ const createBookingWithoutPaymentService = async (
   if (!reservation) {
     throw new AppError(404, "Reservation not found");
   }
-
-  return reservation;
   
  //check availableSeats
   const availableSeats = Number(reservation?.seats);
@@ -39,8 +38,7 @@ const createBookingWithoutPaymentService = async (
   }
 
   //generate token
-  const token = Math.floor(1000 + Math.random() * 900000);
-
+  const token = Math.floor(100000 + Math.random() * 900000);
 
 
   //check you have already booked the 10 seats // you can maximum 10 seats for one day
@@ -68,9 +66,9 @@ const createBookingWithoutPaymentService = async (
     //create the booking
     const newBooking = await BookingModel.create([{
     userId: loginUserId,
-    scheduleId,
-    restaurantId: restaurantId,
-    ownerId: restaurant?.ownerId,
+    scheduleId: reservation?.scheduleId,
+    restaurantId: reservation?.restaurantId,
+    ownerId: reservation?.ownerId,
     token,
     guest
     }], { session });
@@ -79,9 +77,9 @@ const createBookingWithoutPaymentService = async (
     //update the reservation seats
     await ReservationModel.updateOne(
       {
-        scheduleId,
-        restaurantId: restaurantId,
-        ownerId: restaurant?.ownerId,
+        scheduleId: reservation?.scheduleId,
+        restaurantId: reservation?.restaurantId,
+        ownerId: reservation?.ownerId,
         seats: { $gt: 0 },
       },
       { $inc: { seats: -guest } }, // Decrease seats
@@ -241,8 +239,6 @@ const getBookingsService = async (
   // 2. Set up pagination
   const skip = (Number(page) - 1) * Number(limit);
 
-  //3. setup sorting
-  const sortDirection = sortOrder === "asc" ? 1 : -1;
 
   //4. setup searching
   let searchQuery: any = {};
@@ -311,9 +307,7 @@ const getBookingsService = async (
         customerName: "$user.fullName",
         customerEmail: "$user.email",
         customerPhone: "$user.phone",
-        diningName: "$dining.name",
-        scheduleId: "$scheduleId",
-        date: "$date",
+        customerImg: "$user.profileImg",
         token: "$token",
         startDateTime: "$schedule.startDateTime",
         endDateTime: "$schedule.endDateTime",
@@ -322,14 +316,19 @@ const getBookingsService = async (
         cancellationCharge: "$cancellationCharge",
         status: "$status",
         paymentStatus: "$paymentStatus",
-        createdAt: "$createdAt",
-        updatedAt: "$updatedAt",
+        // createdAt: "$createdAt",
+        // updatedAt: "$updatedAt",
       },
     },
      {
       $match: {
         ...filterQuery,
         ...searchQuery,
+      },
+    },
+    {
+      $addFields: {
+        date: { $dateToString: { format: "%Y-%m-%d", date: "$startDateTime" } },
       },
     },
     {
@@ -355,16 +354,21 @@ const getBookingsService = async (
     {
       $unwind: "$user",
     },
-    {
-      $lookup: {
-        from: "dinings",
-        localField: "diningId",
-        foreignField: "_id",
-        as: "dining",
+     {
+      $project: {
+        _id: "$_id",
+        userId: "$userId",
+        customerName: "$user.fullName",
+        customerEmail: "$user.email",
+        customerPhone: "$user.phone", 
+        startDateTime: "$schedule.startDateTime",
+        endDateTime: "$schedule.endDateTime",
+         amount: "$amount",
+        guest: "$guest",
+        cancellationCharge: "$cancellationCharge",
+        status: "$status",
+        paymentStatus: "$paymentStatus",
       },
-    },
-    {
-      $unwind: "$dining",
     },
     {
       $match: {
@@ -378,6 +382,28 @@ const getBookingsService = async (
   const totalCount = totalBookingResult[0]?.totalCount || 0;
   const totalPages = Math.ceil(totalCount / Number(limit));
 
+   const modifiedResult =
+     result?.length > 0
+       ? result?.map((booking) => ({
+           userId: booking?.userId,
+           customerName: booking?.customerName,
+           customerEmail: booking?.customerEmail,
+           customerPhone: booking?.customerPhone,
+           customerImg: booking?.customerImg,
+           token: booking?.token,
+           amount: booking?.amount,
+           guest: booking?.guest,
+           cancellationCharge: booking?.cancellationCharge,
+           paymentStatus: booking?.paymentStatus,
+           date: booking?.date,
+           time:
+             convertUTCtimeString(booking.startDateTime) +
+             " - " +
+             convertUTCtimeString(booking.endDateTime),
+         }))
+       : [];
+
+
   return {
     meta: {
       page: Number(page), //currentPage
@@ -385,7 +411,7 @@ const getBookingsService = async (
       totalPages,
       total: totalCount,
     },
-    data: result,
+    data: modifiedResult,
   };
 };
 
@@ -442,17 +468,6 @@ const getMyBookingsService = async (
       $unwind: "$restaurant",
     },
     {
-      $lookup: {
-        from: "dinings",
-        localField: "diningId",
-        foreignField: "_id",
-        as: "dining",
-      },
-    },
-    {
-      $unwind: "$dining",
-    },
-    {
       $match: {
         ...filterQuery,
         ...searchQuery,
@@ -462,10 +477,6 @@ const getMyBookingsService = async (
       $project: {
         _id: "$_id",
         restaurantName: "$restaurant.name",
-        diningName: "$dining.name",
-        date: "$date",
-        checkIn: "$checkIn",
-        checkOuT: "$checkOut",
         token: "$token",
         startDateTime: "$startDateTime",
         endDateTime: "$endDateTime",
@@ -498,17 +509,6 @@ const getMyBookingsService = async (
     },
     {
       $unwind: "$restaurant",
-    },
-    {
-      $lookup: {
-        from: "dinings",
-        localField: "diningId",
-        foreignField: "_id",
-        as: "dining",
-      },
-    },
-    {
-      $unwind: "$dining",
     },
     {
       $match: {

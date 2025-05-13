@@ -16,6 +16,7 @@ router.post(
 
 router.get(
   '/get-single-reservation/:reservationId',
+  AuthMiddleware(UserRole.user),
   ReservationController.getSingleReservation,
 );
 

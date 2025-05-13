@@ -307,8 +307,8 @@ const getUserReservationsByDateService = async (
     return modifiedResult;
 };
 
-const getSingleReservationService = async (id: string) => {
-  const result = await ReservationModel.findById(id);
+const getSingleReservationService = async (reservationId: string) => {
+  const result = await ReservationModel.findById(reservationId).select("_id seats");
   if (!result) {
     throw new AppError(404, "Reservation Not Found");
   }

@@ -306,7 +306,7 @@ try {
   //update the table seats
   await TableModel.updateOne(
     { _id: tableBooking.tableId, seats: { $gt: 0 } },
-    { $inc: { seats: +tableBooking.guest } }, // Increase availableSeats
+    { $inc: { seats: + 3 } }, // Increase availableSeats
     { session }
   );
 

@@ -268,8 +268,8 @@ return {
 };
 };
 
-const getSingle${capitalize(moduleName)}Service = async (id: string) => {
-  const result = await ${capitalize(moduleName)}Model.findById(id);
+const getSingle${capitalize(moduleName)}Service = async (${moduleName.toLowerCase()}Id: string) => {
+  const result = await ${capitalize(moduleName)}Model.findById(${moduleName.toLowerCase()}Id);
   if (!result) {
     throw new AppError(404, '${capitalize(moduleName)} Not Found');
   }

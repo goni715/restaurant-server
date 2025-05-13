@@ -1,16 +1,12 @@
 import mongoose, { Types } from "mongoose";
 import AppError from "../../errors/AppError";
-import ScheduleModel from "../Schedule/schedule.model";
 import {
   IBookingPayload,
   TBookingQuery,
   TBookingStatus,
 } from "./booking.interface";
 import BookingModel from "./booking.model";
-import PaymentModel from "../Payment/payment.model";
-import DiningModel from "../Dining/dining.model";
 import RestaurantModel from "../Restaurant/restaurant.model";
-import getPercentageValue from "../../utils/getPercentageValue";
 import { makeFilterQuery, makeSearchQuery } from "../../helper/QueryBuilder";
 import { BookingSearchFields, MyBookingSearchFields } from "./booking.constant";
 import ObjectId from "../../utils/ObjectId";

@@ -226,6 +226,7 @@ const getReservationsByDateService = async (
    const modifiedResult = result?.length > 0 ? result?.map((reservation)=>({
       _id:reservation._id,
       date:reservation.date,
+      seats:reservation.seats,
       time: convertUTCtimeString(reservation.startDateTime) + " - " + convertUTCtimeString(reservation.endDateTime)
     })) : []
   

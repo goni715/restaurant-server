@@ -276,6 +276,7 @@ const getRestaurantReviewsService = async (restaurantId: string, query: TReviewQ
         profileImg: "$user.profileImg",
         star: "$star",
         comment: "$comment",
+        createdAt: "$createdAt",
         _id:0
       }
     },
@@ -385,6 +386,7 @@ const getUserRestaurantReviewsService = async (loginUserId: string, query: TRevi
         restaurantImg: "$restaurant.restaurantImg",
         star: "$star",
         comment: "$comment",
+        createdAt: "$createdAt",
         _id:0
       }
     },

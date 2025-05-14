@@ -125,13 +125,15 @@ const getReservationsService = async (
       $group: {
         _id: "$date",
         totalSeats: { $sum: "$seats"},
+        totalSchedules: {$sum:1}
       }
     },
     {
       $project: {
         _id:0,
         date: "$_id",
-        totalSeats:1
+        totalSeats:1,
+        totalSchedules:1
       }
     },
     { $sort: { date: -1 } },

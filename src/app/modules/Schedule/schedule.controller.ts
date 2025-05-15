@@ -34,8 +34,8 @@ const getSchedules = catchAsync(async (req, res) => {
 
 const getSchedulesByDate = catchAsync(async (req, res) => {
   const loginUserId = req.headers.id;
-  const validatedQuery = pickValidFields(req.query, ScheduleValidFields);
-  const result = await getSchedulesByDateService(loginUserId as string, validatedQuery);
+  const { date } = req.params;
+  const result = await getSchedulesByDateService(loginUserId as string, date);
   
     sendResponse(res, {
       statusCode: 200,

@@ -109,7 +109,6 @@ const approveRestaurant = catchAsync(async (req, res) => {
 
 const updateRestaurant = catchAsync(async (req, res) => {
   const loginUserId = req.headers.id;
-  console.log(req.body);
   const result = await updateRestaurantService(loginUserId as string, req.body);
   sendResponse(res, {
     statusCode: 200,

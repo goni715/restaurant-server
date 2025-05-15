@@ -1,5 +1,5 @@
 export const TableBookingSearchFields = [
-    "name",
+    "fullName",
     "token",
   ];
   

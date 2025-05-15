@@ -6,7 +6,6 @@ import { ZodEffects, ZodObject, ZodTypeAny } from "zod";
     const validationMiddleware = (schema: ZodTypeAny ) => {
 
     return async (req:Request, res:Response, next: NextFunction)=> {
-        console.log(req.params);
         try{
             const parsedData = await schema.parseAsync({...req.body, ...req.cookies});
             req.body=parsedData;

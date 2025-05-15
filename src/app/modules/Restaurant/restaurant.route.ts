@@ -66,6 +66,13 @@ router.patch(
   RestaurantController.approveRestaurant
 );
 
+
+router.patch(
+  "/update-restaurant",
+  AuthMiddleware(UserRole.owner),
+  RestaurantController.updateRestaurant
+);
+
 router.patch(
   "/update-restaurant-img",
   AuthMiddleware(UserRole.owner),

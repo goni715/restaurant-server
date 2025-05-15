@@ -183,27 +183,13 @@ const getSchedulesService = async (
 
 const getSchedulesByDateService = async (
   loginUserId: string,
-  query: TScheduleQuery
+  date: string
 ) => {
   const ObjectId = Types.ObjectId;
-  // 1. Extract query parameters
-  const {
-    page = 1,
-    limit = 10,
-    sortOrder = "asc",
-    sortBy = "startDateTime",
-    date,
-    startDate,
-    endDate,
-    //...filters // Any additional filters
-  } = query;
-
-  // 2. Set up pagination
-  const skip = (Number(page) - 1) * Number(limit);
-
-  //3. setup sorting
-  const sortDirection = sortOrder === "asc" ? 1 : -1;
-
+ 
+if (!isValidDate(date)) {
+    throw new AppError(400, "Provide Valid Date");
+  }
   //4 setup filters
   let filterQuery = {};
 
@@ -211,21 +197,11 @@ const getSchedulesByDateService = async (
     throw new AppError(400, `Please provide valid date like "YYYY-MM-DD" formate`)
   }
   //check if only filter by date
-  if (date && !startDate && !endDate) {
+  if (date) {
     const start = `${date}T00:00:00.000+00:00`;
     const end = `${date}T23:59:59.999+00:00`;
     filterQuery = {
       startDateTime: { $gte: new Date(start), $lte: new Date(end) },
-    };
-  }
-
-  //check if startDate & endDate exist
-  if (startDate && endDate) {
-    const start = `${startDate}T00:00:00.000+00:00`;
-    const end = `${endDate}T23:59:59.999+00:00`;
-    filterQuery = {
-      startDateTime: { $gte: new Date(start) },
-      endDateTime: { $lte: new Date(end) },
     };
   }
 

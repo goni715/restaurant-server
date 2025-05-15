@@ -1,7 +1,8 @@
 export const BookingSearchFields = [
   "customerName",
   "customerEmail",
-  "customerPhone"
+  "customerPhone",
+  "token"
 ];
 
 export const MyBookingSearchFields = [

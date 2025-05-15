@@ -20,7 +20,7 @@ router.get(
   ScheduleController.getSchedules
 );
 router.get(
-  "/get-schedules-by-date",
+  "/get-schedules-by-date/:date",
   AuthMiddleware(UserRole.owner),
   ScheduleController.getSchedulesByDate
 );

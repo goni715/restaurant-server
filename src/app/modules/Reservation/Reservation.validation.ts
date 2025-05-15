@@ -19,6 +19,10 @@ export const createReservationValidationSchema = z.object({
 });
 
 export const updateReservationValidationSchema = z.object({
-  name: z.string().optional(),
-  description: z.string().optional(),
+  seats: z
+    .number({
+      required_error: "Seats are required",
+    })
+    .positive("Seats must be a positive number")
+    .min(1, "Seats must be at least 1"),
 });

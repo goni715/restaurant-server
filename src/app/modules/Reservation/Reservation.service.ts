@@ -12,6 +12,7 @@ import RestaurantModel from "../Restaurant/restaurant.model";
 import ObjectId from "../../utils/ObjectId";
 import isValidDate from "../../utils/isValidDate";
 import convertUTCtimeString from "../../utils/convertUTCtimeString";
+import BookingModel from "../Booking/booking.model";
 
 const createReservationService = async (
   loginUserId: string,
@@ -70,25 +71,26 @@ const getReservationsService = async (
     limit = 10,
     sortOrder = "desc",
     sortBy = "createdAt",
+    date,
     ...filters // Any additional filters
   } = query;
 
   // 2. Set up pagination
   const skip = (Number(page) - 1) * Number(limit);
 
-  //3. setup sorting
-  const sortDirection = sortOrder === "asc" ? 1 : -1;
-
-  //4. setup searching
-  let searchQuery = {};
-  if (searchTerm) {
-    searchQuery = makeSearchQuery(searchTerm, ReservationSearchableFields);
-  }
-
+ 
   //5 setup filters
   let filterQuery = {};
   if (filters) {
     filterQuery = makeFilterQuery(filters);
+  }
+
+   if (date) {
+    const start = `${date}T00:00:00.000+00:00`;
+    const end = `${date}T23:59:59.999+00:00`;
+    filterQuery = {
+      startDateTime: { $gte: new Date(start), $lte: new Date(end) },
+    };
   }
   const result = await ReservationModel.aggregate([
     {
@@ -117,6 +119,11 @@ const getReservationsService = async (
       },
     },
     {
+      $match: {
+        ...filterQuery
+      }
+    },
+    {
       $addFields: {
         date: { $dateToString: { format: "%Y-%m-%d", date: "$startDateTime" } },
       },
@@ -124,17 +131,17 @@ const getReservationsService = async (
     {
       $group: {
         _id: "$date",
-        totalSeats: { $sum: "$seats"},
-        totalSchedules: {$sum:1}
-      }
+        totalSeats: { $sum: "$seats" },
+        totalSchedules: { $sum: 1 },
+      },
     },
     {
       $project: {
-        _id:0,
+        _id: 0,
         date: "$_id",
-        totalSeats:1,
-        totalSchedules:1
-      }
+        totalSeats: 1,
+        totalSchedules: 1,
+      },
     },
     { $sort: { date: -1 } },
     { $skip: skip },
@@ -165,14 +172,12 @@ const getReservationsService = async (
   };
 };
 
-
 const getReservationsByDateService = async (
   loginUserId: string,
   date: string
 ) => {
-  
-  if(!isValidDate(date)){
-      throw new AppError(400, "Provide Valid Date")
+  if (!isValidDate(date)) {
+    throw new AppError(400, "Provide Valid Date");
   }
 
   let filterQuery = {};
@@ -184,8 +189,6 @@ const getReservationsByDateService = async (
     };
   }
 
-
- 
   const result = await ReservationModel.aggregate([
     {
       $match: {
@@ -212,9 +215,9 @@ const getReservationsByDateService = async (
       },
     },
     {
-      $match : {
-        ...filterQuery
-      }
+      $match: {
+        ...filterQuery,
+      },
     },
     {
       $addFields: {
@@ -224,31 +227,33 @@ const getReservationsByDateService = async (
     { $sort: { date: -1 } },
   ]);
 
+  const modifiedResult =
+    result?.length > 0
+      ? result?.map((reservation) => ({
+          _id: reservation._id,
+          date: reservation.date,
+          seats: reservation.seats,
+          time:
+            convertUTCtimeString(reservation.startDateTime) +
+            " - " +
+            convertUTCtimeString(reservation.endDateTime),
+        }))
+      : [];
 
-   const modifiedResult = result?.length > 0 ? result?.map((reservation)=>({
-      _id:reservation._id,
-      date:reservation.date,
-      seats:reservation.seats,
-      time: convertUTCtimeString(reservation.startDateTime) + " - " + convertUTCtimeString(reservation.endDateTime)
-    })) : []
-  
-    return modifiedResult;
+  return modifiedResult;
 };
-
 
 const getUserReservationsByDateService = async (
   restaurantId: string,
   date: string
 ) => {
-  
+  const restaurant = await RestaurantModel.findById(restaurantId);
+  if (!restaurant) {
+    throw new AppError(404, "Restaurant Not Found");
+  }
 
-   const restaurant = await RestaurantModel.findById(restaurantId);
-    if (!restaurant) {
-      throw new AppError(404, "Restaurant Not Found");
-    }
-
-  if(!isValidDate(date)){
-      throw new AppError(400, "Provide Valid Date")
+  if (!isValidDate(date)) {
+    throw new AppError(400, "Provide Valid Date");
   }
 
   let filterQuery = {};
@@ -260,8 +265,6 @@ const getUserReservationsByDateService = async (
     };
   }
 
-
- 
   const result = await ReservationModel.aggregate([
     {
       $match: {
@@ -288,9 +291,9 @@ const getUserReservationsByDateService = async (
       },
     },
     {
-      $match : {
-        ...filterQuery
-      }
+      $match: {
+        ...filterQuery,
+      },
     },
     {
       $addFields: {
@@ -300,18 +303,25 @@ const getUserReservationsByDateService = async (
     { $sort: { date: -1 } },
   ]);
 
+  const modifiedResult =
+    result?.length > 0
+      ? result?.map((reservation) => ({
+          _id: reservation._id,
+          date: reservation.date,
+          time:
+            convertUTCtimeString(reservation.startDateTime) +
+            " - " +
+            convertUTCtimeString(reservation.endDateTime),
+        }))
+      : [];
 
-   const modifiedResult = result?.length > 0 ? result?.map((reservation)=>({
-      _id:reservation._id,
-      date:reservation.date,
-      time: convertUTCtimeString(reservation.startDateTime) + " - " + convertUTCtimeString(reservation.endDateTime)
-    })) : []
-  
-    return modifiedResult;
+  return modifiedResult;
 };
 
 const getSingleReservationService = async (reservationId: string) => {
-  const result = await ReservationModel.findById(reservationId).select("_id seats");
+  const result = await ReservationModel.findById(reservationId).select(
+    "_id seats"
+  );
   if (!result) {
     throw new AppError(404, "Reservation Not Found");
   }
@@ -320,29 +330,57 @@ const getSingleReservationService = async (reservationId: string) => {
 };
 
 const updateReservationService = async (
+  loginUserId: string,
   reservationId: string,
-  payload: any
+  payload: Partial<IReservationPayload>
 ) => {
-  const reservation = await ReservationModel.findById(reservationId);
+  const reservation = await ReservationModel.findOne({
+    _id: reservationId,
+    ownerId: loginUserId,
+  });
+
   if (!reservation) {
     throw new AppError(404, "Reservation Not Found");
   }
+
   const result = await ReservationModel.updateOne(
     { _id: reservationId },
     payload
+    //{ runValidators:true } //mongoose valid will be working, When you want to update
   );
-
   return result;
 };
 
-const deleteReservationService = async (id: string) => {
-  const deletedService = await ReservationModel.deleteOne({ _id: id });
+const deleteReservationService = async (
+  loginUserId: string,
+  reservationId: string
+) => {
+  const reservation = await ReservationModel.findOne({
+    _id: reservationId,
+    ownerId: loginUserId,
+  });
 
-  if (!deletedService) {
-    throw new AppError(400, "Failed to delete Reservation");
+  if (!reservation) {
+    throw new AppError(404, "Reservation Not Found");
   }
 
-  return deletedService;
+  //check associate with booking
+  const associateWithBooking = await BookingModel.findOne({
+    scheduleId: reservation.scheduleId,
+    ownerId: reservation.ownerId,
+    restaurantId: reservation.restaurantId,
+  });
+  if (associateWithBooking) {
+    throw new AppError(
+      409,
+      "Failled to delete, This Schedule is associated with Booking"
+    );
+  }
+  const result = await ReservationModel.deleteOne({
+    _id: reservationId,
+    ownerId: loginUserId,
+  });
+  return result;
 };
 
 export {

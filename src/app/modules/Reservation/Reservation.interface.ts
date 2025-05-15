@@ -19,5 +19,5 @@ export type TReservationQuery = {
   limit?: string;
   sortBy?: string;
   sortOrder?: "asc" | "desc";
-  status?: string,
+  date?: string,
 };

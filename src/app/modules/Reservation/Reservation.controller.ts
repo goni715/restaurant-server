@@ -65,8 +65,9 @@ const getUserReservationsByDate = catchAsync(async (req, res) => {
 });
 
 const updateReservation = catchAsync(async (req, res) => {
+  const loginUserId = req.headers.id;
   const { reservationId } = req.params;
-  const result = await updateReservationService(reservationId, req.body);
+  const result = await updateReservationService(loginUserId as string,reservationId, req.body);
 
   sendResponse(res, {
     statusCode: 200,
@@ -77,8 +78,9 @@ const updateReservation = catchAsync(async (req, res) => {
 });
 
 const deleteReservation = catchAsync(async (req, res) => {
-  const { id } = req.params;
-  const result = await deleteReservationService(id);
+  const loginUserId = req.headers.id;
+  const { reservationId } = req.params;
+  const result = await deleteReservationService(loginUserId as string,reservationId);
 
   sendResponse(res, {
     statusCode: 200,

@@ -22,12 +22,14 @@ router.get(
 
 router.patch(
   '/update-reservation/:reservationId',
+  AuthMiddleware("owner"),
   validationMiddleware(updateReservationValidationSchema),
   ReservationController.updateReservation,
 );
 
 router.delete(
   '/delete-reservation/:reservationId',
+  AuthMiddleware("owner"),
   ReservationController.deleteReservation,
 );
 

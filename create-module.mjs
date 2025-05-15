@@ -291,14 +291,13 @@ const update${capitalize(moduleName)}Service = async (${moduleName.toLowerCase()
   return result;
 };
 
-const delete${capitalize(moduleName)}Service = async (id: string) => {
-  const deletedService = await ${capitalize(moduleName)}Model.deleteOne({ _id:id });
-
-  if (!deletedService) {
-    throw new AppError(400, 'Failed to delete ${capitalize(moduleName)}');
+const delete${capitalize(moduleName)}Service = async (${moduleName.toLowerCase()}Id: string) => {
+  const ${moduleName.toLowerCase()} = await ${capitalize(moduleName)}Model.findById(${moduleName.toLowerCase()}Id);
+  if(!${moduleName.toLowerCase()}){
+    throw new AppError(404, "${capitalize(moduleName)} Not Found");
   }
-
-  return deletedService;
+  const result = await ${capitalize(moduleName)}Model.deleteOne({ _id:moduleName.toLowerCase()}Id });
+  return result;
 };
 
 export {

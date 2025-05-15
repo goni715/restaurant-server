@@ -10,5 +10,6 @@ export const TableBookingValidFields: string[] = [
   "limit",
   "sortBy",
   "sortOrder",
-  "availability"
+  "availability",
+  "date"
 ];

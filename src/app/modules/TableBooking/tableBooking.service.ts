@@ -137,17 +137,17 @@ const getTableBookingsService = async (
     const end = `${date}T23:59:59.999+00:00`;
     filterQuery = {
       ...filterQuery,
-      "schedule.startDateTime": { $gte: new Date(start), $lte: new Date(end) },
+      "startDateTime": { $gte: new Date(start), $lte: new Date(end) },
     };
   }
 
   //add additional filters
-  if (filters) {
-    filterQuery = {
-      ...filterQuery,
-      ...makeFilterQuery(filters),
-    };
-  }
+  // if (filters) {
+  //   filterQuery = {
+  //     ...filterQuery,
+  //     ...makeFilterQuery(filters),
+  //   };
+  // }
 
   //check restaurant exist
   const restaurant = await RestaurantModel.findOne({ ownerId: loginUserId });
@@ -160,7 +160,6 @@ const getTableBookingsService = async (
       $match: {
         restaurantId: new ObjectId(restaurant._id),
         ownerId: new ObjectId(loginUserId),
-        ...filterQuery,
       },
     },
     {
@@ -235,7 +234,8 @@ const getTableBookingsService = async (
     },
     {
       $match: {
-        ...searchQuery,
+         ...filterQuery,
+        ...searchQuery
       },
     },
     {
@@ -251,7 +251,6 @@ const getTableBookingsService = async (
       $match: {
         restaurantId: new ObjectId(restaurant._id),
         ownerId: new ObjectId(loginUserId),
-        ...filterQuery,
       },
     },
     {
@@ -305,6 +304,7 @@ const getTableBookingsService = async (
     {
       $match: {
         ...searchQuery,
+        ...filterQuery
       },
     },
     { $count: "totalCount" },

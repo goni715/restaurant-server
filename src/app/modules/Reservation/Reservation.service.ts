@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import AppError from "../../errors/AppError";
-import { ReservationSearchableFields } from "./Reservation.constant";
 import {
   IReservationPayload,
   TReservationQuery,
@@ -13,12 +12,13 @@ import ObjectId from "../../utils/ObjectId";
 import isValidDate from "../../utils/isValidDate";
 import convertUTCtimeString from "../../utils/convertUTCtimeString";
 import BookingModel from "../Booking/booking.model";
+import DiningModel from "../Dining/dining.model";
 
 const createReservationService = async (
   loginUserId: string,
   payload: IReservationPayload
 ) => {
-  const { scheduleIds, seats } = payload;
+  const { scheduleIds,dinings, seats } = payload;
 
   //check restaurant
   const restaurant = await RestaurantModel.findOne({
@@ -29,16 +29,35 @@ const createReservationService = async (
     throw new AppError(404, "Restaurant Not Found");
   }
 
+
+
+  //check diningId
+  for (let i = 0; i < dinings.length; i++) {
+    const dining = await DiningModel.findOne({
+      ownerId: loginUserId,
+      _id: dinings[i],
+    });
+    if(!dining){
+      throw new AppError(404, `This "${dinings[i]}" Id not found, please provide correct all diningId`)
+    }
+  }
+
+
+  //check scheduleId
   let scheduleIdsArray = [];
   for (let i = 0; i < scheduleIds.length; i++) {
     const schedule = await ScheduleModel.findOne({
       ownerId: loginUserId,
       _id: scheduleIds[i],
     });
+    if(!schedule){
+      throw new AppError(404, `This "${scheduleIds[i]}" Id not found, please provide correct all Schedule Id`)
+    }
     if (schedule) {
       scheduleIdsArray.push(scheduleIds[i]);
     }
   }
+
 
   let reservationData = [];
   for (let i = 0; i < scheduleIdsArray.length; i++) {
@@ -52,6 +71,7 @@ const createReservationService = async (
         scheduleId: scheduleIdsArray[i],
         ownerId: loginUserId,
         restaurantId: restaurant?._id,
+        dinings,
         seats,
       });
     }
@@ -109,11 +129,20 @@ const getReservationsService = async (
     {
       $unwind: "$schedule",
     },
+     {
+      $lookup: {
+        from: "dinings",
+        localField: "dinings",
+        foreignField: "_id",
+        as: "dinings",
+      },
+    },
     {
       $project: {
         _id: 1,
         scheduleId: 1,
         seats: 1,
+        dinings:1,
         startDateTime: "$schedule.startDateTime",
         endDateTime: "$schedule.endDateTime",
       },
@@ -126,23 +155,26 @@ const getReservationsService = async (
     {
       $addFields: {
         date: { $dateToString: { format: "%Y-%m-%d", date: "$startDateTime" } },
+        diningCount: { $size: "$dinings" }
       },
     },
     {
       $group: {
         _id: "$date",
         totalSeats: { $sum: "$seats" },
+        //totalDining: { $sum: "$diningCount" },
         totalSchedules: { $sum: 1 },
       },
     },
-    {
-      $project: {
-        _id: 0,
-        date: "$_id",
-        totalSeats: 1,
-        totalSchedules: 1,
-      },
-    },
+    // {
+    //   $project: {
+    //     _id: 0,
+    //     date: "$_id",
+    //     totalSeats: 1,
+    //     totalDining:1,
+    //     totalSchedules: 1,
+    //   },
+    // },
     { $sort: { date: -1 } },
     { $skip: skip },
     { $limit: Number(limit) },

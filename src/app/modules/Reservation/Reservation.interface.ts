@@ -5,11 +5,13 @@ export interface IReservation {
   scheduleId: Types.ObjectId;
   ownerId: Types.ObjectId;
   restaurantId: Types.ObjectId;
+  dinings: Types.ObjectId[]
   seats?: number;
 };
 
 export interface IReservationPayload {
   scheduleIds: Types.ObjectId[];
+  dinings: Types.ObjectId[];
   seats?: number;
 };
 

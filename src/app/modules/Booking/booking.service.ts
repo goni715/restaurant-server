@@ -252,7 +252,7 @@ const getBookingsService = async (
     const end = `${date}T23:59:59.999+00:00`;
     filterQuery = {
       ...filterQuery,
-      date: { $gte: new Date(start), $lte: new Date(end) },
+      startDateTime: { $gte: new Date(start), $lte: new Date(end) },
     };
   }
 
@@ -381,6 +381,7 @@ const getBookingsService = async (
    const modifiedResult =
      result?.length > 0
        ? result?.map((booking) => ({
+           _id: booking?._id,
            userId: booking?.userId,
            customerName: booking?.customerName,
            customerEmail: booking?.customerEmail,

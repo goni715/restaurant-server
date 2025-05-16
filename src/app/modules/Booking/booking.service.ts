@@ -17,13 +17,28 @@ const createBookingWithoutPaymentService = async (
   loginUserId: string,
   payload: IBookingPayload
 ) => {
-  const { reservationId, guest } = payload;
-  const reservation = await ReservationModel.findById(reservationId);
-
-  if (!reservation) {
-    throw new AppError(404, "Reservation not found");
+  const { reservationId, diningId, guest } = payload;
+  const findReservation = await ReservationModel.aggregate([
+    {
+      $match: {
+        _id: new ObjectId(reservationId),
+      }
+    }
+  ])
+  if (findReservation.length ===0) {
+    throw new AppError(404, "Reservation Not Found");
   }
+
+  const reservation = findReservation[0];
+
   
+  //check dining
+  const dining = reservation?.dinings?.find((cv:any)=> cv.toString() === diningId);
+ if (!dining) {
+   throw new AppError(404, `dining not found`);
+ }
+
+
  //check availableSeats
   const availableSeats = Number(reservation?.seats);
   if(availableSeats < guest) {
@@ -63,6 +78,7 @@ const createBookingWithoutPaymentService = async (
     const newBooking = await BookingModel.create([{
     userId: loginUserId,
     scheduleId: reservation?.scheduleId,
+    diningId,
     restaurantId: reservation?.restaurantId,
     ownerId: reservation?.ownerId,
     token,
@@ -296,6 +312,17 @@ const getBookingsService = async (
     {
       $unwind: "$schedule"
     },
+     {
+      $lookup: {
+        from: "dinings",
+        localField: "diningId",
+        foreignField: "_id",
+        as: "dining"
+      }
+    },
+    {
+      $unwind: "$dining"
+    },
     {
       $project: {
         _id: "$_id",
@@ -307,6 +334,7 @@ const getBookingsService = async (
         token: "$token",
         startDateTime: "$schedule.startDateTime",
         endDateTime: "$schedule.endDateTime",
+        diningName: "$dining.name",
         amount: "$amount",
         guest: "$guest",
         cancellationCharge: "$cancellationCharge",
@@ -359,7 +387,7 @@ const getBookingsService = async (
         customerPhone: "$user.phone", 
         startDateTime: "$schedule.startDateTime",
         endDateTime: "$schedule.endDateTime",
-         amount: "$amount",
+        amount: "$amount",
         guest: "$guest",
         cancellationCharge: "$cancellationCharge",
         status: "$status",
@@ -387,6 +415,7 @@ const getBookingsService = async (
            customerEmail: booking?.customerEmail,
            customerPhone: booking?.customerPhone,
            customerImg: booking?.customerImg,
+           diningName: booking?.diningName,
            token: booking?.token,
            amount: booking?.amount,
            guest: booking?.guest,
@@ -593,6 +622,17 @@ const getSingleBookingService = async (
     {
       $unwind: "$schedule",
     },
+     {
+      $lookup: {
+        from: "dinings",
+        localField: "diningId",
+        foreignField: "_id",
+        as: "dining"
+      }
+    },
+    {
+      $unwind: "$dining"
+    },
     {
       $project: {
         _id: 1,
@@ -600,19 +640,22 @@ const getSingleBookingService = async (
         restaurantId: 1,
         ownerId: 1,
         scheduleId:1,
+        diningId:1,
+        diningName: "$dining.name",
         startDateTime: "$schedule.startDateTime",
         endDateTime: "$schedule.endDateTime",
         token: 1,
         amount: 1,
         guest: 1,
         cancellationCharge: 1,
-        status: 1,
-        //paymentStatus: 1,
-        //createdAt: 1,
-        //updatedAt: 1,
         customerName: "$user.fullName",
         customerEmail: "$user.email",
         customerPhone: "$user.phone",
+      },
+    },
+    {
+      $addFields: {
+        date: { $dateToString: { format: "%Y-%m-%d", date: "$startDateTime" } },
       },
     },
   ]);
@@ -621,7 +664,17 @@ const getSingleBookingService = async (
     throw new AppError(404, "Booking Not Found");
   }
 
-  return booking[0];
+  const { startDateTime, endDateTime, ...rest } = booking[0];
+
+  const modifiedResult = {
+    ...rest,
+    time:
+      convertUTCtimeString(startDateTime) +
+      " - " +
+      convertUTCtimeString(endDateTime),
+  };
+
+  return modifiedResult;
 };
 
 export {

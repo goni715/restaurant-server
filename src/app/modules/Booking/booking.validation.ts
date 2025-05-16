@@ -74,6 +74,13 @@ export const createBookingWithoutPaymentSchema = z.object({
     .refine((id) => Types.ObjectId.isValid(id), {
       message: "reservationId must be a valid ObjectId",
     }),
+  diningId: z
+    .string({
+      required_error: "diningId is required!",
+    })
+    .refine((id) => Types.ObjectId.isValid(id), {
+      message: "diningId must be a valid ObjectId",
+    }),
   guest: z
     .number()
     .positive("Guest must be a positive number")

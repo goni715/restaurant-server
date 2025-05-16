@@ -9,7 +9,7 @@ export interface IBooking {
     ownerId: Types.ObjectId;
     userId: Types.ObjectId;
     scheduleId: Types.ObjectId;
-    //diningId: Types.ObjectId;
+    diningId: Types.ObjectId;
     token: string;
     amount: number;
     guest: number;
@@ -21,7 +21,7 @@ export interface IBooking {
 
 export interface IBookingPayload {
     reservationId: Types.ObjectId;
-    //diningId: Types.ObjectId;
+    diningId: Types.ObjectId;
     amount: number;
     guest: number;
 }

@@ -15,6 +15,11 @@ const bookingSchema = new Schema<IBooking>(
       required: true,
       ref: "Schedule",
     },
+    diningId: {
+      type: Schema.Types.ObjectId,
+      required: true,
+      ref: "Dining",
+    },
     restaurantId: {
       type: Schema.Types.ObjectId,
       required: true,

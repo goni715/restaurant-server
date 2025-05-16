@@ -30,4 +30,11 @@ export const updateReservationValidationSchema = z.object({
     })
     .positive("Seats must be a positive number")
     .min(1, "Seats must be at least 1"),
+  dinings: z
+    .array(
+      z.string().refine((id) => Types.ObjectId.isValid(id), {
+        message: "Each diningId must be a valid ObjectId",
+      })
+    )
+    .min(1, "At least one diningId is required").optional()
 });

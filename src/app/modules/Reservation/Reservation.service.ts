@@ -129,20 +129,11 @@ const getReservationsService = async (
     {
       $unwind: "$schedule",
     },
-     {
-      $lookup: {
-        from: "dinings",
-        localField: "dinings",
-        foreignField: "_id",
-        as: "dinings",
-      },
-    },
     {
       $project: {
         _id: 1,
         scheduleId: 1,
         seats: 1,
-        dinings:1,
         startDateTime: "$schedule.startDateTime",
         endDateTime: "$schedule.endDateTime",
       },
@@ -155,26 +146,23 @@ const getReservationsService = async (
     {
       $addFields: {
         date: { $dateToString: { format: "%Y-%m-%d", date: "$startDateTime" } },
-        diningCount: { $size: "$dinings" }
       },
     },
     {
       $group: {
         _id: "$date",
         totalSeats: { $sum: "$seats" },
-        //totalDining: { $sum: "$diningCount" },
         totalSchedules: { $sum: 1 },
       },
     },
-    // {
-    //   $project: {
-    //     _id: 0,
-    //     date: "$_id",
-    //     totalSeats: 1,
-    //     totalDining:1,
-    //     totalSchedules: 1,
-    //   },
-    // },
+    {
+      $project: {
+        _id: 0,
+        date: "$_id",
+        totalSeats: 1,
+        totalSchedules: 1,
+      },
+    },
     { $sort: { date: -1 } },
     { $skip: skip },
     { $limit: Number(limit) },
@@ -227,6 +215,14 @@ const getReservationsByDateService = async (
         ownerId: new ObjectId(loginUserId),
       },
     },
+     {
+      $lookup: {
+        from: "dinings",
+        localField: "dinings",
+        foreignField: "_id",
+        as: "Dinings",
+      },
+    },
     {
       $lookup: {
         from: "schedules",
@@ -244,6 +240,18 @@ const getReservationsByDateService = async (
         seats: 1,
         startDateTime: "$schedule.startDateTime",
         endDateTime: "$schedule.endDateTime",
+        diningIds: "$dinings",
+        dinings: {
+          $map: {
+            input: "$Dinings",
+            as: "dining",
+            // in: {
+            //   diningId: "$$dining._id", // Extract _id as diningId
+            //   diningName: "$$dining.name", // Extract name as diningName
+            // },
+            in:"$$dining.name"
+          },
+        }
       },
     },
     {
@@ -254,6 +262,7 @@ const getReservationsByDateService = async (
     {
       $addFields: {
         date: { $dateToString: { format: "%Y-%m-%d", date: "$startDateTime" } },
+        totalDining: {$size: "$dinings"}
       },
     },
     { $sort: { date: -1 } },
@@ -265,6 +274,9 @@ const getReservationsByDateService = async (
           _id: reservation._id,
           date: reservation.date,
           seats: reservation.seats,
+          totalDining: reservation?.totalDining,
+          dinings:reservation?.dinings,
+          diningIds:reservation?.diningIds,
           time:
             convertUTCtimeString(reservation.startDateTime) +
             " - " +
@@ -351,14 +363,42 @@ const getUserReservationsByDateService = async (
 };
 
 const getSingleReservationService = async (reservationId: string) => {
-  const result = await ReservationModel.findById(reservationId).select(
-    "_id seats"
-  );
-  if (!result) {
+  const result = await ReservationModel.aggregate([
+    {
+      $match: {
+        _id: new ObjectId(reservationId),
+      }
+    },
+    {
+      $lookup: {
+        from: "dinings",
+        localField: "dinings",
+        foreignField: "_id",
+        as: "dinings",
+      },
+    },
+    {
+      $project: {
+        _id: 1,
+        seats: 1,
+        dinings: {
+          $map: {
+            input: "$dinings",
+            as: "dining",
+            in: {
+              diningId: "$$dining._id", // Extract _id as diningId
+              diningName: "$$dining.name", // Extract name as diningName
+            },
+          },
+        }
+      },
+    },
+  ])
+  if (result.length ===0) {
     throw new AppError(404, "Reservation Not Found");
   }
 
-  return result;
+  return result[0];
 };
 
 const updateReservationService = async (

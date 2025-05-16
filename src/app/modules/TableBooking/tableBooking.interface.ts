@@ -10,6 +10,7 @@ export interface ITableBooking {
     ownerId: Types.ObjectId;
     diningId: Types.ObjectId;
     restaurantId: Types.ObjectId;
+    guest: number;
 }
 
 export type TTableBookingQuery = {

@@ -634,6 +634,29 @@ const getSingleBookingService = async (
       $unwind: "$dining"
     },
     {
+       $lookup: {
+        from: "tablebookings",
+        localField: "_id",
+        foreignField: "bookingId",
+        as: "tableBooking"
+      }
+    },
+    {
+  $addFields: {
+    tableBookedGuests: {
+      $sum: {
+        $map: {
+          input: "$tableBooking",
+          as: "tb",
+          in: "$$tb.guest"
+        }
+      }
+    }
+  }
+},
+
+
+    {
       $project: {
         _id: 1,
         userId: 1,
@@ -651,6 +674,7 @@ const getSingleBookingService = async (
         customerName: "$user.fullName",
         customerEmail: "$user.email",
         customerPhone: "$user.phone",
+        tableBookedGuests: 1
       },
     },
     {
@@ -664,10 +688,13 @@ const getSingleBookingService = async (
     throw new AppError(404, "Booking Not Found");
   }
 
-  const { startDateTime, endDateTime, ...rest } = booking[0];
+  const { startDateTime, guest, tableBookedGuests, endDateTime, ...rest } = booking[0];
 
   const modifiedResult = {
     ...rest,
+    guest,
+    tableBookedGuests,
+    remainingBookedGuests: Number(guest - tableBookedGuests),
     time:
       convertUTCtimeString(startDateTime) +
       " - " +

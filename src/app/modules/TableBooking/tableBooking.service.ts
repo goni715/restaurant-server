@@ -13,7 +13,7 @@ const createTableBookingService = async (
   loginUserId: string,
   payload: ITableBooking
 ) => {
-  const { bookingId, tableId } = payload;
+  const { bookingId, tableId, guest } = payload;
   const table = await TableModel.findOne({
     _id: tableId,
     ownerId: loginUserId,
@@ -32,23 +32,44 @@ const createTableBookingService = async (
     throw new AppError(404, "Booking Not Found");
   }
 
-  const bookingGuest = booking.guest;
-
-  //check availableSeats
+  // //check availableSeats
   const availableSeats = table.seats;
-  if (availableSeats < bookingGuest) {
+  if (availableSeats < guest) {
     throw new AppError(
-      400,
+      404,
       "There are no available seats in this table at this moment"
     );
   }
 
-  //check already booked table
-  const tableBooking = await TableBookingModel.findOne({
-    bookingId,
-  });
-  if (tableBooking) {
-    throw new AppError(409, "Already booked the table");
+  //checked alreadyBooked Seats
+  const tableBooking = await TableBookingModel.aggregate([
+    {
+      $match: {
+        bookingId: new ObjectId(bookingId),
+      },
+    },
+    {
+      $group: {
+        _id: new ObjectId(bookingId),
+        totalBookedSeats: {
+          $sum: "$guest",
+        },
+      },
+    },
+  ]);
+
+  const alreadyTableBookedSeats =
+    tableBooking?.length > 0 ? tableBooking[0].totalBookedSeats : 0;
+  const dueBookingSeats = Number(booking.guest - alreadyTableBookedSeats);
+  if (alreadyTableBookedSeats === booking.guest) {
+    throw new AppError(409, "You have already booked your seats on the table");
+  }
+
+  if (guest > dueBookingSeats) {
+    throw new AppError(
+      409,
+      `You will be able to book only ${dueBookingSeats} seat(s)`
+    );
   }
 
   //transaction & rollback part
@@ -69,24 +90,49 @@ const createTableBookingService = async (
           ownerId: table.ownerId,
           restaurantId: table.restaurantId,
           diningId: table.diningId,
+          guest,
         },
       ],
       { session }
     );
 
-    //database-process-02
-    //update the table
-    await BookingModel.updateOne(
-      { _id: bookingId },
-      { status: "seating" },
-      { runValidators: true, session }
+    //check again
+    const tableBooked = await TableBookingModel.aggregate(
+      [
+        {
+          $match: {
+            bookingId: new ObjectId(bookingId),
+          },
+        },
+        {
+          $group: {
+            _id: new ObjectId(bookingId),
+            totalBookedSeats: {
+              $sum: "$guest",
+            },
+          },
+        },
+      ],
+      { session }
     );
+
+    const alreadyBookedSeats =
+      tableBooked?.length > 0 ? tableBooked[0].totalBookedSeats : 0;
+    if (alreadyBookedSeats === booking.guest) {
+      //database-process-02
+      //update the table
+      await BookingModel.updateOne(
+        { _id: bookingId },
+        { status: "seating" },
+        { runValidators: true, session }
+      );
+    }
 
     //database-process-03
     //update the table
     await TableModel.updateOne(
       { _id: tableId, seats: { $gt: 0 } },
-      { $inc: { seats: -bookingGuest } }, // Decrease availableSeats
+      { $inc: { seats: -guest } }, // Decrease availableSeats
       { runValidators: true, session }
     );
 
@@ -137,7 +183,7 @@ const getTableBookingsService = async (
     const end = `${date}T23:59:59.999+00:00`;
     filterQuery = {
       ...filterQuery,
-      "startDateTime": { $gte: new Date(start), $lte: new Date(end) },
+      startDateTime: { $gte: new Date(start), $lte: new Date(end) },
     };
   }
 
@@ -234,8 +280,8 @@ const getTableBookingsService = async (
     },
     {
       $match: {
-         ...filterQuery,
-        ...searchQuery
+        ...filterQuery,
+        ...searchQuery,
       },
     },
     {
@@ -304,7 +350,7 @@ const getTableBookingsService = async (
     {
       $match: {
         ...searchQuery,
-        ...filterQuery
+        ...filterQuery,
       },
     },
     { $count: "totalCount" },

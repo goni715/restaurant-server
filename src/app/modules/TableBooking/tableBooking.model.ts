@@ -13,7 +13,6 @@ const tableBookingSchema = new Schema<ITableBooking>(
     bookingId: {
       type: Schema.Types.ObjectId,
       required: true,
-      unique: true,
       ref: "Booking"
    },
     tableId: {
@@ -41,16 +40,16 @@ const tableBookingSchema = new Schema<ITableBooking>(
       required: true,
       ref: "Restaurant",
     },
-    
-    // availability: {
-    //   type: String,
-    //   required: true,
-    //   default: "Waitlist",
-    //   enum: {
-    //     values: [ "Waitlist", "Seating", "Booked","Completed"],
-    //     message: '{VALUE} is not supported'
-    //   }
-    // },
+     guest: {
+      type: Number,
+      required: true,
+      validate: {
+        validator: function (value) {
+          return value > 0; // Ensures the number is positive
+        },
+        message: "seats must be a positive number",
+      },
+    }
   },
   {
     timestamps: true,

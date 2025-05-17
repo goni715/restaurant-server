@@ -502,7 +502,11 @@ const getMyBookingsService = async (
     {
       $project: {
         _id: "$_id",
+        restaurantId: "$restaurant._id",
         restaurantName: "$restaurant.name",
+        restaurantImg:"$restaurant.restaurantImg",
+        restaurantLocation:"$restaurant.location",
+        restaurantAddress:"$restaurant.address",
         token: "$token",
         startDateTime: "$startDateTime",
         endDateTime: "$endDateTime",

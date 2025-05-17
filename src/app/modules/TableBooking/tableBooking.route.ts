@@ -18,6 +18,11 @@ router.get(
   AuthMiddleware(UserRole.owner),
   TableBookingController.getTableBookings
 );
+router.get(
+  "/get-table-bookings-by-bookingId/:bookingId",
+  AuthMiddleware(UserRole.owner),
+  TableBookingController.getTableBookingsByBookingId
+);
 router.patch(
   "/change-availability/:tableBookingId",
   AuthMiddleware(UserRole.owner),

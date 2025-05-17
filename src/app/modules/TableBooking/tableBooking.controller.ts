@@ -2,7 +2,7 @@ import catchAsync from "../../utils/catchAsync";
 import pickValidFields from "../../utils/pickValidFields";
 import sendResponse from "../../utils/sendResponse";
 import { TableBookingValidFields } from "./tableBooking.constant";
-import { changeAvailabilityService, createTableBookingService, deleteTableBookingService, getTableBookingsService } from "./tableBooking.service";
+import { changeAvailabilityService, createTableBookingService, deleteTableBookingService, getTableBookingsByBookingIdService, getTableBookingsService } from "./tableBooking.service";
 
 
 const createTableBooking = catchAsync(async (req, res) => {
@@ -28,6 +28,19 @@ const getTableBookings = catchAsync(async (req, res) => {
       message: "Table Booking List retrieved successfully",
       meta: result.meta,
       data: result.data
+    });
+});
+
+const getTableBookingsByBookingId = catchAsync(async (req, res) => {
+  const loginUserId = req.headers.id;
+  const { bookingId } = req.params;
+  const result = await getTableBookingsByBookingIdService(loginUserId as string, bookingId);
+  
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: "Table Booking List retrieved successfully",
+      data: result
     });
 });
 
@@ -61,6 +74,7 @@ const deleteTableBooking = catchAsync(async (req, res) => {
 const TableBookingController = {
     createTableBooking,
     getTableBookings,
+    getTableBookingsByBookingId,
     changeAvailability,
     deleteTableBooking
 };

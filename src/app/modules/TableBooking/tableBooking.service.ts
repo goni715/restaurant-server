@@ -4,10 +4,11 @@ import TableModel from "../Table/table.model";
 import { ITableBooking, TTableBookingQuery } from "./tableBooking.interface";
 import TableBookingModel from "./tableBooking.model";
 import BookingModel from "../Booking/booking.model";
-import { makeFilterQuery, makeSearchQuery } from "../../helper/QueryBuilder";
+import { makeSearchQuery } from "../../helper/QueryBuilder";
 import { TableBookingSearchFields } from "./tableBooking.constant";
 import RestaurantModel from "../Restaurant/restaurant.model";
 import ObjectId from "../../utils/ObjectId";
+import convertUTCtimeString from "../../utils/convertUTCtimeString";
 
 const createTableBookingService = async (
   loginUserId: string,
@@ -165,7 +166,7 @@ const getTableBookingsService = async (
   const skip = (Number(page) - 1) * Number(limit);
 
   //3. setup sorting
-  const sortDirection = sortOrder === "asc" ? 1 : -1;
+  //const sortDirection = sortOrder === "asc" ? 1 : -1;
 
   //4. setup searching
   let searchQuery: any = {};
@@ -187,21 +188,13 @@ const getTableBookingsService = async (
     };
   }
 
-  //add additional filters
-  // if (filters) {
-  //   filterQuery = {
-  //     ...filterQuery,
-  //     ...makeFilterQuery(filters),
-  //   };
-  // }
-
   //check restaurant exist
   const restaurant = await RestaurantModel.findOne({ ownerId: loginUserId });
   if (!restaurant) {
     throw new AppError(404, "Restaurant not found");
   }
 
-  const result = await TableBookingModel.aggregate([
+   const result = await TableBookingModel.aggregate([
     {
       $match: {
         restaurantId: new ObjectId(restaurant._id),
@@ -209,37 +202,34 @@ const getTableBookingsService = async (
       },
     },
     {
-      $lookup: {
-        from: "dinings",
-        localField: "diningId",
-        foreignField: "_id",
-        as: "dining",
-      },
-    },
-    {
-      $unwind: "$dining",
+      $group: {
+        _id: "$bookingId",
+        bookedSeats: {
+           $sum: "$guest"
+        }
+      }
     },
     {
       $lookup: {
-        from: "tables",
-        localField: "tableId",
+        from: "bookings",
+        localField: "_id", //This is bookingId
         foreignField: "_id",
-        as: "table",
+        as: "booking",
       },
     },
     {
-      $unwind: "$table",
+      $unwind: "$booking",
     },
     {
-      $lookup: {
-        from: "schedules",
-        localField: "scheduleId",
-        foreignField: "_id",
-        as: "schedule",
-      },
-    },
-    {
-      $unwind: "$schedule",
+      $project: {
+        _id:0,
+        bookingId:"$_id",
+        bookedSeats:1,
+        userId: "$booking.userId",
+        scheduleId: "$booking.scheduleId",
+        diningId: "$booking.diningId",
+        token: "$booking.token"
+      }
     },
     {
       $lookup: {
@@ -254,28 +244,42 @@ const getTableBookingsService = async (
     },
     {
       $lookup: {
-        from: "bookings",
-        localField: "bookingId",
+        from: "schedules",
+        localField: "scheduleId",
         foreignField: "_id",
-        as: "booking",
+        as: "schedule",
       },
     },
     {
-      $unwind: "$booking",
+      $unwind: "$schedule",
+    },
+     {
+      $lookup: {
+        from: "dinings",
+        localField: "diningId",
+        foreignField: "_id",
+        as: "dining"
+      }
+    },
+    {
+      $unwind: "$dining"
     },
     {
       $project: {
         bookingId: 1,
+        token:1,
+        bookedSeats:1,
         fullName: "$user.fullName",
         email: "$user.email",
         phone: "$user.phone",
-        startDateTime: "$schedule.startDateTime",
-        endDateTime: "$schedule.endDateTime",
         diningName: "$dining.name",
-        createdAt: "$createdAt",
-        updatedAt: "$updatedAt",
-        token: "$booking.token",
-        guest: "$booking.guest",
+        startDateTime: "$schedule.startDateTime",
+        endDateTime: "$schedule.startDateTime",
+      }
+    },
+    {
+      $addFields: {
+        date: { $dateToString: { format: "%Y-%m-%d", date: "$startDateTime" } },
       },
     },
     {
@@ -285,11 +289,32 @@ const getTableBookingsService = async (
       },
     },
     {
-      $sort: { createdAt: 1 }, //after projection
+      $sort: { startDateTime: -1 }, //after projection
     },
     { $skip: skip },
     { $limit: Number(limit) },
   ]);
+
+
+  //modify the result
+   const modifiedResult =
+     result?.length > 0
+       ? result?.map((tablebooking) => ({
+           bookingId: tablebooking?.bookingId,
+           token: tablebooking?.token,
+           bookedSeats: tablebooking?.bookedSeats,
+           fullName: tablebooking?.fullName,
+           email: tablebooking?.email,
+           phone: tablebooking?.phone,
+           date: tablebooking?.date,
+           diningName: tablebooking?.diningName,
+           time:
+             convertUTCtimeString(tablebooking?.startDateTime) +
+             " - " +
+             convertUTCtimeString(tablebooking?.endDateTime),
+         }))
+       : [];
+
 
   // total count
   const totalBookingResult = await TableBookingModel.aggregate([
@@ -300,15 +325,33 @@ const getTableBookingsService = async (
       },
     },
     {
+      $group: {
+        _id: "$bookingId",
+        bookedSeats: {
+           $sum: "$guest"
+        }
+      }
+    },
+    {
       $lookup: {
-        from: "schedules",
-        localField: "scheduleId",
+        from: "bookings",
+        localField: "_id", //This is bookingId
         foreignField: "_id",
-        as: "schedule",
+        as: "booking",
       },
     },
     {
-      $unwind: "$schedule",
+      $unwind: "$booking",
+    },
+    {
+      $project: {
+        _id:0,
+        bookingId:"$_id",
+        bookedSeats:1,
+        userId: "$booking.userId",
+        scheduleId: "$booking.scheduleId",
+        token: "$booking.token"
+      }
     },
     {
       $lookup: {
@@ -323,34 +366,35 @@ const getTableBookingsService = async (
     },
     {
       $lookup: {
-        from: "bookings",
-        localField: "bookingId",
+        from: "schedules",
+        localField: "scheduleId",
         foreignField: "_id",
-        as: "booking",
+        as: "schedule",
       },
     },
     {
-      $unwind: "$booking",
+      $unwind: "$schedule",
     },
     {
       $project: {
         bookingId: 1,
+        token:1,
+        bookedSeats:1,
         fullName: "$user.fullName",
         email: "$user.email",
         phone: "$user.phone",
         startDateTime: "$schedule.startDateTime",
-        endDateTime: "$schedule.endDateTime",
-        diningName: "$dining.name",
-        createdAt: "$createdAt",
-        updatedAt: "$updatedAt",
-        token: "$booking.token",
-        guest: "$booking.guest",
+      }
+    },
+    {
+      $addFields: {
+        date: { $dateToString: { format: "%Y-%m-%d", date: "$startDateTime" } },
       },
     },
     {
       $match: {
-        ...searchQuery,
         ...filterQuery,
+        ...searchQuery,
       },
     },
     { $count: "totalCount" },
@@ -366,7 +410,124 @@ const getTableBookingsService = async (
       totalPages,
       total: totalCount,
     },
-    data: result,
+    data: modifiedResult,
+  };
+};
+
+const getTableBookingsByBookingIdService = async (
+  loginUserId: string,
+  bookingId: string
+) => {
+ 
+  //check restaurant exist
+  const restaurant = await RestaurantModel.findOne({ ownerId: loginUserId });
+  if (!restaurant) {
+    throw new AppError(404, "Restaurant not found");
+  }
+
+  //check booking
+  const booking = await BookingModel.aggregate([
+  { $match: { _id: new mongoose.Types.ObjectId(bookingId) } },
+  {
+    $lookup: {
+      from: "users",
+      localField: "userId",
+      foreignField: "_id",
+      as: "user"
+    }
+  },
+  { $unwind: "$user" },
+   {
+      $lookup: {
+        from: "schedules",
+        localField: "scheduleId",
+        foreignField: "_id",
+        as: "schedule",
+      },
+    },
+    {
+      $unwind: "$schedule",
+    },
+     {
+      $lookup: {
+        from: "dinings",
+        localField: "diningId",
+        foreignField: "_id",
+        as: "dining"
+      }
+    },
+    {
+      $unwind: "$dining"
+    },
+  {
+    $project: {
+      bookingId:"$_id",
+      token:1,
+      _id:0,
+      customerName: "$user.fullName",
+      customerEmail: "$user.email",
+      customerPhone: "$user.phone",
+      customerImg: "$user.profileImg",
+      diningName: "$dining.name",
+      startDateTime: "$schedule.startDateTime",
+      endDateTime: "$schedule.endDateTime",
+    }
+  },
+   {
+      $addFields: {
+        date: { $dateToString: { format: "%Y-%m-%d", date: "$startDateTime" } },
+      },
+    },
+]);
+
+ if (booking?.length === 0) {
+    throw new AppError(404, "Booking not found");
+ }
+
+   const result = await TableBookingModel.aggregate([
+    {
+      $match: {
+        restaurantId: new ObjectId(restaurant._id),
+        ownerId: new ObjectId(loginUserId),
+        bookingId: new ObjectId(bookingId),
+      },
+    },
+    {
+      $group: {
+        _id: "$tableId",
+        bookedSeats: {
+          $sum: "$guest"
+        }
+      }
+    },
+    {
+      $lookup: {
+        from: "tables",
+        localField: "_id", //tableId
+        foreignField: "_id",
+        as: "table",
+      },
+    },
+    {
+      $unwind: "$table",
+    },
+    {
+      $project: {
+        _id:0,
+        bookedSeats:1,
+        tableName: "$table.name"
+      }
+    }
+  ]);
+
+
+  return {
+    ...booking[0],
+    time:
+      convertUTCtimeString(booking[0]?.startDateTime) +
+      " - " +
+      convertUTCtimeString(booking[0]?.endDateTime),
+    tableData: result,
   };
 };
 
@@ -440,6 +601,7 @@ const deleteTableBookingService = async (
 export {
   createTableBookingService,
   getTableBookingsService,
+  getTableBookingsByBookingIdService,
   changeAvailabilityService,
   deleteTableBookingService,
 };

@@ -517,6 +517,25 @@ const getTableBookingsByBookingIdService = async (
         bookedSeats:1,
         tableName: "$table.name"
       }
+    },
+    {
+      $facet: {
+        tableData: [
+         {
+           $project: {bookedSeats:1, tableName:1}
+         }
+        ],
+        totalBookedSeats: [
+          {
+            $group: {
+              _id:null,
+              total: {
+                $sum: "$bookedSeats"
+              }
+            }
+          }
+        ]
+      }
     }
   ]);
 
@@ -527,7 +546,8 @@ const getTableBookingsByBookingIdService = async (
       convertUTCtimeString(booking[0]?.startDateTime) +
       " - " +
       convertUTCtimeString(booking[0]?.endDateTime),
-    tableData: result,
+    tableData: result[0].tableData,
+    totalBookedSeats: result[0].totalBookedSeats[0]?.total || 0
   };
 };
 

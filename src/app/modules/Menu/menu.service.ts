@@ -326,6 +326,7 @@ const updateMenuService = async (req:Request, loginUserId: string, menuId:string
     payload.slug = slug;
     const menuExist = await MenuModel.findOne({
       _id: { $ne: menuId },
+      ownerId: loginUserId,
       slug
     });
     if (menuExist) {

@@ -20,6 +20,7 @@ import OwnerRoutes from '../modules/Owner/Owner.route';
 import FaqRoutes from '../modules/Faq/Faq.route';
 import PolicyRoutes from '../modules/Policy/Policy.route';
 import ReservationRoutes from '../modules/Reservation/Reservation.route';
+import PaymentRoutes from '../modules/Payment/payment.route';
 
 const router = express.Router();
 
@@ -108,7 +109,11 @@ const moduleRoutes = [
     {
         path: '/policy',
         route: PolicyRoutes
-    }    
+    },
+    {
+        path: '/payment',
+        route: PaymentRoutes
+    }     
 ]
 
 moduleRoutes.forEach((item, i)=> router.use(item.path, item.route));

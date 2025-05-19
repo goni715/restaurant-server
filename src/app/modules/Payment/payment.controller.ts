@@ -1,15 +1,15 @@
 import catchAsync from "../../utils/catchAsync";
 import sendResponse from "../../utils/sendResponse";
-import { initPaymentService } from "./payment.service";
+import { createPaymentIntentService } from "./payment.service";
 
 
-const initPayment = catchAsync(async (req, res) => {
-  const result = await initPaymentService();
+const createPaymentIntent = catchAsync(async (req, res) => {
+  const result = await createPaymentIntentService(req.body);
 
   sendResponse(res, {
     statusCode: 200,
     success: true,
-    message: "Payment is initiated successfully",
+    message: "Payment Intent is created successfully",
     data: result,
   });
 });
@@ -17,7 +17,7 @@ const initPayment = catchAsync(async (req, res) => {
 
 
 const PaymentController = {
-    initPayment
+    createPaymentIntent
  }
  
  export default PaymentController;

@@ -7,5 +7,4 @@ export interface IPayment {
     amount: number;
     transactionId: string;
     status: TPaymentStatus;
-    paymentGateWayData?: Object
 }

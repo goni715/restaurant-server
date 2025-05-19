@@ -13,6 +13,16 @@ const reviewSchema = new Schema<IReview>(
       required: true,
       ref: "Restaurant",
     },
+    ownerId: {
+      type: Schema.Types.ObjectId,
+      required: true,
+      ref: "Owner",
+    },
+    bookingId: {
+      type: Schema.Types.ObjectId,
+      required: true,
+      ref: "Booking",
+    },
     star: {
       type: Number,
       required: true,

@@ -5,6 +5,7 @@ import { IReviewPayload, TReviewQuery } from "./review.interface";
 import ReviewModel from "./review.model";
 import { makeFilterQuery, makeSearchQuery } from "../../helper/QueryBuilder";
 import { ReviewSearchFields } from "./review.constant";
+import BookingModel from "../Booking/booking.model";
 
 
 const createReviewService = async (
@@ -12,11 +13,36 @@ const createReviewService = async (
   payload: IReviewPayload
 ) => {
   const ObjectId = Types.ObjectId;
-  const { restaurantId, star, comment } = payload;
+  const { restaurantId, bookingId, star, comment } = payload;
   //check restaurant not exist
   const restaurant = await RestaurantModel.findById(restaurantId);
   if (!restaurant) {
     throw new AppError(404, "Restaurant Not Found");
+  }
+
+  //check booking
+  const booking = await BookingModel.findOne({
+    _id: bookingId,
+    restaurantId,
+  })
+  if(!booking){
+    throw new AppError(404, "booking not found");
+  }
+
+  if(booking.status !== "seating"){
+    throw new AppError(409, "You have no permission to review this restaurant");
+  }
+
+  //check if you already put the comment
+  const review = await ReviewModel.findOne({
+    userId: loginUserId,
+    bookingId,
+    restaurantId,
+    ownerId: restaurant?.ownerId,
+  })
+
+  if(review){
+    throw new AppError(409, "You have already reviewed this restaurant");
   }
 
   //transaction & rollback
@@ -29,7 +55,9 @@ const createReviewService = async (
     await ReviewModel.create(
       [{
         userId: loginUserId,
+        bookingId,
         restaurantId,
+        ownerId: restaurant?.ownerId,
         star,
         comment,
       }],
@@ -75,18 +103,22 @@ const createReviewService = async (
 };
 
 
-const deleteReviewService = async (reviewId: string) => {
+const deleteReviewService = async (loginUserId: string, reviewId: string) => {
   const ObjectId = Types.ObjectId;  
 
    //check review not exist
-   const review = await ReviewModel.findById(reviewId);
+   const review = await ReviewModel.findOne({
+    _id: reviewId,
+    ownerId: loginUserId
+   });
    if (!review) {
      throw new AppError(404, "Review Not Found");
    }
 
    //delete the review
    const result = await ReviewModel.deleteOne({
-    _id: new ObjectId(reviewId)
+    _id: new ObjectId(reviewId),
+    ownerId : new ObjectId(loginUserId)
    })
 
    return result;

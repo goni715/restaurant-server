@@ -5,7 +5,7 @@ import {
   TReservationQuery,
 } from "./Reservation.interface";
 import ReservationModel from "./Reservation.model";
-import { makeFilterQuery, makeSearchQuery } from "../../helper/QueryBuilder";
+import { makeFilterQuery } from "../../helper/QueryBuilder";
 import ScheduleModel from "../Schedule/schedule.model";
 import RestaurantModel from "../Restaurant/restaurant.model";
 import ObjectId from "../../utils/ObjectId";
@@ -344,7 +344,7 @@ const getUserReservationsByDateService = async (
         date: { $dateToString: { format: "%Y-%m-%d", date: "$startDateTime" } },
       },
     },
-    { $sort: { date: -1 } },
+    { $sort: { startDateTime: 1, endDateTime:1 } },
   ]);
 
   const modifiedResult =

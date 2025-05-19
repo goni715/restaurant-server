@@ -1,5 +1,5 @@
 
-export const ReviewSearchFields = ["comment", "user.fullName", "user.email"];
+export const ReviewSearchFields = ["user.fullName", "user.email"];
 
 
 

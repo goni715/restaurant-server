@@ -2,6 +2,13 @@ import { Types } from "mongoose";
 import { z } from "zod";
 
 export const createReviewValidationSchema = z.object({
+   bookingId: z
+    .string({
+      required_error: "bookingId is required!",
+    })
+    .refine((id) => Types.ObjectId.isValid(id), {
+      message: "bookingId must be a valid ObjectId",
+    }),
   restaurantId: z
     .string({
       required_error: "restaurantId is required!",

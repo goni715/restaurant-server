@@ -2,7 +2,7 @@ import { Types } from "mongoose";
 
 
 export type TPaymentStatus = "paid" | "unpaid";
-export type TBookingStatus = "pending" | "waitlist" | "cancelled";
+export type TBookingStatus = "pending" | "waitlist" | "seating";
 
 export interface IBooking {
     restaurantId: Types.ObjectId;

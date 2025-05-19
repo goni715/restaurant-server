@@ -1,6 +1,5 @@
 import { Types } from "mongoose";
 
-export type ITableAvailability = "Waitlist" | "Seating" | "Booked" | "Completed";
 
 export interface ITableBooking {
     bookingId: Types.ObjectId;

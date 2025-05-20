@@ -1,6 +1,6 @@
 import catchAsync from '../../utils/catchAsync';
 import sendResponse from '../../utils/sendResponse';
-import { createReservationService, updateReservationService, deleteReservationService, getReservationsService, getReservationsByDateService, getUserReservationsByDateService,  getDiningsByRestaurantIdAndScheduleIdService, getSeatsByDiningIdService } from './Reservation.service';
+import { createReservationService, updateReservationService, deleteReservationService, getReservationsService, getUserReservationsByDateService,  getDiningsByRestaurantIdAndScheduleIdService, getSeatsByDiningIdService, getReservationsByScheduleIdAndDiningIdService } from './Reservation.service';
 
 
 const createReservation = catchAsync(async (req, res) => {
@@ -29,10 +29,10 @@ const getReservations = catchAsync(async (req, res) => {
 });
 
 
-const getReservationsByDate = catchAsync(async (req, res) => {
+const getReservationsByScheduleIdAndDiningId = catchAsync(async (req, res) => {
   const loginUserId = req.headers.id;
-  const { date } = req.params;
-  const result = await getReservationsByDateService(loginUserId as string, date);
+  const { scheduleId, diningId } = req.params;
+  const result = await getReservationsByScheduleIdAndDiningIdService(loginUserId as string, scheduleId, diningId);
 
   sendResponse(res, {
     statusCode: 200,
@@ -65,7 +65,7 @@ const getDiningsByRestaurantIdAndScheduleId = catchAsync(async (req, res) => {
   sendResponse(res, {
     statusCode: 200,
     success: true,
-    message: 'Reservations are retrieved successfully',
+    message: 'Dinings are retrieved successfully',
     data: result
   });
 });
@@ -78,7 +78,7 @@ const getSeatsByDiningId = catchAsync(async (req, res) => {
   sendResponse(res, {
     statusCode: 200,
     success: true,
-    message: 'Reservations are retrieved successfully',
+    message: 'Seats are retrieved successfully',
     data: result
   });
 });
@@ -112,7 +112,7 @@ const deleteReservation = catchAsync(async (req, res) => {
 const ReservationController = {
   createReservation,
   getReservations,
-  getReservationsByDate,
+  getReservationsByScheduleIdAndDiningId,
   getUserReservationsByDate,
   getDiningsByRestaurantIdAndScheduleId,
   getSeatsByDiningId,

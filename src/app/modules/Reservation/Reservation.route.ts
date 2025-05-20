@@ -37,9 +37,9 @@ router.get(
 );
 
 router.get(
-  "/get-reservations-by-date/:date",
+  "/get-reservations-by-scheduleId-and-diningId/:scheduleId/:diningId",
   AuthMiddleware(UserRole.owner),
-  ReservationController.getReservationsByDate
+  ReservationController.getReservationsByScheduleIdAndDiningId
 );
 
 router.get(

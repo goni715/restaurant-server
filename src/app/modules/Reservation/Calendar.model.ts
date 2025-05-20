@@ -1,7 +1,7 @@
 import { Schema, model } from "mongoose";
-import { IReservation } from "./Reservation.interface";
+import { ICalendar } from "./Reservation.interface";
 
-const reservationSchema = new Schema<IReservation>(
+const calendarSchema = new Schema<ICalendar>(
   {
     scheduleId: {
       type: Schema.Types.ObjectId,
@@ -40,5 +40,5 @@ const reservationSchema = new Schema<IReservation>(
   }
 );
 
-const ReservationModel = model<IReservation>("Reservation", reservationSchema);
-export default ReservationModel;
+const CalendarModel = model<ICalendar>("Calendar", calendarSchema);
+export default CalendarModel;

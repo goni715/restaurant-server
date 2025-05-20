@@ -14,31 +14,56 @@ import ReservationModel from "../Reservation/Reservation.model";
 import convertUTCtimeString from "../../utils/convertUTCtimeString";
 import PaymentModel from "../Payment/payment.model";
 import getPercentageValue from "../../utils/getPercentageValue";
+import CalendarModel from "../Reservation/Calendar.model";
+import ScheduleModel from "../Schedule/schedule.model";
+import DiningModel from "../Dining/dining.model";
 
 const createBookingWithoutPaymentService = async (
   loginUserId: string,
   payload: IBookingPayload
 ) => {
-  const { reservationId, diningId, guest } = payload;
-  const findReservation = await ReservationModel.aggregate([
-    {
-      $match: {
-        _id: new ObjectId(reservationId),
-      }
-    }
-  ])
-  if (findReservation.length ===0) {
-    throw new AppError(404, "Reservation Not Found");
+  const { restaurantId, scheduleId, diningId, guest } = payload;
+   //check restaurant
+  const restaurant = await RestaurantModel.findOne({
+    _id: restaurantId,
+  });
+
+  if (!restaurant) {
+    throw new AppError(404, "Restaurant Not Found");
   }
 
-  const reservation = findReservation[0];
+   // //check schedule
+    const schedule = await ScheduleModel.findOne({
+        _id: scheduleId,
+        restaurantId,
+        ownerId: restaurant.ownerId
+    });
 
-  
-  //check dining
-  const dining = reservation?.dinings?.find((cv:any)=> cv.toString() === diningId);
- if (!dining) {
-   throw new AppError(404, `dining not found`);
- }
+    if(!schedule){
+        throw new AppError(404, "Schedule not found");
+    }
+
+    //check dining
+    const dining = await DiningModel.findOne({
+      ownerId: restaurant.ownerId,
+      _id: diningId,
+      restaurantId: restaurant._id
+    })
+     if(!dining){
+      throw new AppError(404, 'This dining not found');
+     }
+
+
+     //check reservation
+  const reservation = await CalendarModel.findOne(
+    {
+      scheduleId: new ObjectId(scheduleId),
+      diningId: new ObjectId(diningId),
+    }
+  )
+  if (!reservation) {
+    throw new AppError(404, "Reservation Not Found");
+  }
 
 
  //check availableSeats
@@ -49,6 +74,7 @@ const createBookingWithoutPaymentService = async (
       "There are no available seats at this moment or schedule"
     );
   }
+
 
   //generate token
   const token = Math.floor(100000 + Math.random() * 900000);
@@ -89,7 +115,7 @@ const createBookingWithoutPaymentService = async (
 
     //database-process-02
     //update the reservation seats
-    await ReservationModel.updateOne(
+    await CalendarModel.updateOne(
       {
         scheduleId: reservation?.scheduleId,
         restaurantId: reservation?.restaurantId,

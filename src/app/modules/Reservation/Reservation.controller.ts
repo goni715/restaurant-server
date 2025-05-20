@@ -1,6 +1,7 @@
 import catchAsync from '../../utils/catchAsync';
 import sendResponse from '../../utils/sendResponse';
-import { createReservationService, getSingleReservationService, updateReservationService, deleteReservationService, getReservationsService, getReservationsByDateService, getUserReservationsByDateService } from './Reservation.service';
+import { createReservationService, updateReservationService, deleteReservationService, getReservationsService, getReservationsByDateService, getUserReservationsByDateService,  getDiningsByRestaurantIdAndScheduleIdService, getSeatsByDiningIdService } from './Reservation.service';
+
 
 const createReservation = catchAsync(async (req, res) => {
   const loginUserId = req.headers.id;
@@ -10,18 +11,6 @@ const createReservation = catchAsync(async (req, res) => {
     statusCode: 201,
     success: true,
     message: 'Reservation created successfully',
-    data: result,
-  });
-});
-
-const getSingleReservation = catchAsync(async (req, res) => {
-  const { reservationId } = req.params;
-  const result = await getSingleReservationService(reservationId);
-
-  sendResponse(res, {
-    statusCode: 200,
-    success: true,
-    message: 'Reservation is retrieved successfully',
     data: result,
   });
 });
@@ -39,6 +28,7 @@ const getReservations = catchAsync(async (req, res) => {
   });
 });
 
+
 const getReservationsByDate = catchAsync(async (req, res) => {
   const loginUserId = req.headers.id;
   const { date } = req.params;
@@ -52,9 +42,38 @@ const getReservationsByDate = catchAsync(async (req, res) => {
   });
 });
 
+
+
 const getUserReservationsByDate = catchAsync(async (req, res) => {
   const { restaurantId, date } = req.params;
   const result = await getUserReservationsByDateService(restaurantId, date);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Reservations are retrieved successfully',
+    data: result
+  });
+});
+
+
+
+const getDiningsByRestaurantIdAndScheduleId = catchAsync(async (req, res) => {
+  const { restaurantId, scheduleId } = req.params;
+  const result = await getDiningsByRestaurantIdAndScheduleIdService(restaurantId, scheduleId);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Reservations are retrieved successfully',
+    data: result
+  });
+});
+
+
+const getSeatsByDiningId = catchAsync(async (req, res) => {
+  const { diningId } = req.params;
+  const result = await getSeatsByDiningIdService(diningId);
 
   sendResponse(res, {
     statusCode: 200,
@@ -92,10 +111,11 @@ const deleteReservation = catchAsync(async (req, res) => {
 
 const ReservationController = {
   createReservation,
-  getSingleReservation,
   getReservations,
   getReservationsByDate,
   getUserReservationsByDate,
+  getDiningsByRestaurantIdAndScheduleId,
+  getSeatsByDiningId,
   updateReservation,
   deleteReservation,
 };

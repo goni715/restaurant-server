@@ -167,6 +167,10 @@ const forgotPassSendOtpService = async (email: string) => {
 //step-02
 const forgotPassVerifyOtpService = async (payload: IVerifyOTp) => {
   const { email, otp } = payload;
+
+  console.log({
+    ...payload
+  });
   const user = await UserModel.findOne({ email });
   if (!user) {
     throw new AppError(404, `Couldn't find this email address`);

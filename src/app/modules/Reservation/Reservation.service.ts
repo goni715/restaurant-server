@@ -14,11 +14,12 @@ import convertUTCtimeString from "../../utils/convertUTCtimeString";
 import BookingModel from "../Booking/booking.model";
 import DiningModel from "../Dining/dining.model";
 
+
 const createReservationService = async (
   loginUserId: string,
   payload: IReservationPayload
 ) => {
-  const { scheduleIds,dinings, seats } = payload;
+  const { scheduleId,diningId, seats } = payload;
 
   //check restaurant
   const restaurant = await RestaurantModel.findOne({
@@ -29,56 +30,47 @@ const createReservationService = async (
     throw new AppError(404, "Restaurant Not Found");
   }
 
+   // //check schedule
+    const schedule = await ScheduleModel.findOne({
+        ownerId: loginUserId,
+        _id: scheduleId
+    });
 
+    if(!schedule){
+        throw new AppError(404, "Schedule not found");
+    }
 
-  //check diningId
-  for (let i = 0; i < dinings.length; i++) {
+    //check dining
     const dining = await DiningModel.findOne({
       ownerId: loginUserId,
-      _id: dinings[i],
-    });
-    if(!dining){
-      throw new AppError(404, `This "${dinings[i]}" Id not found, please provide correct all diningId`)
+      _id: diningId,
+      restaurantId: restaurant._id
+    })
+     if(!dining){
+      throw new AppError(404, 'This dining not found');
+     }
+
+     //check if already exist
+     const calendar = await ReservationModel.findOne({
+       ownerId: loginUserId,
+       restaurantId: restaurant?._id,
+       scheduleId,
+       diningId,
+     })
+
+    if(calendar){
+      throw new AppError(409, "Calender is already exist")
     }
-  }
 
+     const result = await ReservationModel.create({
+       ownerId: loginUserId,
+       restaurantId: restaurant?._id,
+       scheduleId,
+       diningId,
+       seats,
+     });
 
-  //check scheduleId
-  let scheduleIdsArray = [];
-  for (let i = 0; i < scheduleIds.length; i++) {
-    const schedule = await ScheduleModel.findOne({
-      ownerId: loginUserId,
-      _id: scheduleIds[i],
-    });
-    if(!schedule){
-      throw new AppError(404, `This "${scheduleIds[i]}" Id not found, please provide correct all Schedule Id`)
-    }
-    if (schedule) {
-      scheduleIdsArray.push(scheduleIds[i]);
-    }
-  }
-
-
-  let reservationData = [];
-  for (let i = 0; i < scheduleIdsArray.length; i++) {
-    const reservation = await ReservationModel.findOne({
-      ownerId: loginUserId,
-      scheduleId: scheduleIdsArray[i],
-    });
-
-    if (!reservation) {
-      reservationData.push({
-        scheduleId: scheduleIdsArray[i],
-        ownerId: loginUserId,
-        restaurantId: restaurant?._id,
-        dinings,
-        seats,
-      });
-    }
-  }
-
-  const result = await ReservationModel.insertMany(reservationData);
-  return result;
+     return result
 };
 
 const getReservationsService = async (
@@ -118,6 +110,23 @@ const getReservationsService = async (
         ownerId: new ObjectId(loginUserId),
       },
     },
+     {
+      $group: {
+        _id: {
+          scheduleId: "$scheduleId",
+          diningId: "$diningId",
+        },
+        totalSeats: { $sum: "$seats" },
+      },
+    },
+     {
+      $project: {
+        _id:0,
+        scheduleId: "$_id.scheduleId",
+        diningId: "$_id.diningId",
+        totalSeats:1,
+      }
+    },
     {
       $lookup: {
         from: "schedules",
@@ -129,29 +138,42 @@ const getReservationsService = async (
     {
       $unwind: "$schedule",
     },
+     {
+      $lookup: {
+        from: "dinings",
+        localField: "diningId",
+        foreignField: "_id",
+        as: "dining"
+      }
+    },
+    {
+      $unwind: "$dining"
+    },
     {
       $project: {
-        _id: 1,
-        scheduleId: 1,
-        seats: 1,
+        scheduleId: "$scheduleId",
+        diningId: "$diningId",
+        totalSeats:1,
+        totalTables:1,
         startDateTime: "$schedule.startDateTime",
         endDateTime: "$schedule.endDateTime",
-      },
-    },
+        diningName: "$dining.name"
+      }
+     },
     {
       $match: {
         ...filterQuery
       }
     },
     {
-      $addFields: {
+          $addFields: {
         date: { $dateToString: { format: "%Y-%m-%d", date: "$startDateTime" } },
-      },
+      }
     },
     {
       $group: {
         _id: "$date",
-        totalSeats: { $sum: "$seats" },
+        totalSeats: { $sum: "$totalSeats" },
         totalSchedules: { $sum: 1 },
       },
     },
@@ -218,10 +240,13 @@ const getReservationsByDateService = async (
      {
       $lookup: {
         from: "dinings",
-        localField: "dinings",
+        localField: "diningId",
         foreignField: "_id",
-        as: "Dinings",
+        as: "dining",
       },
+    },
+    {
+      $unwind: "$dining"
     },
     {
       $lookup: {
@@ -238,20 +263,12 @@ const getReservationsByDateService = async (
       $project: {
         _id: 1,
         seats: 1,
+        scheduleId:1,
+        diningId:1,
         startDateTime: "$schedule.startDateTime",
         endDateTime: "$schedule.endDateTime",
-        diningIds: "$dinings",
-        dinings: {
-          $map: {
-            input: "$Dinings",
-            as: "dining",
-            // in: {
-            //   diningId: "$$dining._id", // Extract _id as diningId
-            //   diningName: "$$dining.name", // Extract name as diningName
-            // },
-            in:"$$dining.name"
-          },
-        }
+        diningName: "$dining.name",
+        createdAt: 1
       },
     },
     {
@@ -262,21 +279,20 @@ const getReservationsByDateService = async (
     {
       $addFields: {
         date: { $dateToString: { format: "%Y-%m-%d", date: "$startDateTime" } },
-        totalDining: {$size: "$dinings"}
       },
     },
-    { $sort: { date: -1 } },
+    { $sort: { startDateTime: 1, endDateTime:1, createdAt:-1 } },
   ]);
 
   const modifiedResult =
     result?.length > 0
       ? result?.map((reservation) => ({
           _id: reservation._id,
+          scheduleId: reservation?.scheduleId,
+          diningId: reservation?.diningId,
           date: reservation.date,
           seats: reservation.seats,
-          totalDining: reservation?.totalDining,
-          dinings:reservation?.dinings,
-          diningIds:reservation?.diningIds,
+          diningName:reservation?.diningName,
           time:
             convertUTCtimeString(reservation.startDateTime) +
             " - " +
@@ -291,6 +307,7 @@ const getUserReservationsByDateService = async (
   restaurantId: string,
   date: string
 ) => {
+
   const restaurant = await RestaurantModel.findById(restaurantId);
   if (!restaurant) {
     throw new AppError(404, "Restaurant Not Found");
@@ -309,7 +326,7 @@ const getUserReservationsByDateService = async (
     };
   }
 
-  const result = await ReservationModel.aggregate([
+  const result = await CalendarModel.aggregate([
     {
       $match: {
         restaurantId: new ObjectId(restaurantId),
@@ -329,14 +346,41 @@ const getUserReservationsByDateService = async (
     {
       $project: {
         _id: 1,
-        seats: 1,
+        scheduleId:1,
         startDateTime: "$schedule.startDateTime",
         endDateTime: "$schedule.endDateTime",
+        createdAt: 1
       },
     },
     {
       $match: {
         ...filterQuery,
+      },
+    },
+    {
+      $group: {
+        _id: "$scheduleId"
+      }
+    },
+      {
+      $lookup: {
+        from: "schedules",
+        localField: "_id", //scheduleId
+        foreignField: "_id",
+        as: "schedule",
+      },
+    },
+    {
+      $unwind: "$schedule",
+    },
+    {
+      $project: {
+        _id: 0,
+        scheduleId:"$_id",
+        restaurantId: "$schedule.restaurantId",
+        startDateTime: "$schedule.startDateTime",
+        endDateTime: "$schedule.endDateTime",
+        createdAt: 1
       },
     },
     {
@@ -350,7 +394,8 @@ const getUserReservationsByDateService = async (
   const modifiedResult =
     result?.length > 0
       ? result?.map((reservation) => ({
-          _id: reservation._id,
+          scheduleId: reservation?.scheduleId,
+          restaurantId: reservation.restaurantId,
           date: reservation.date,
           time:
             convertUTCtimeString(reservation.startDateTime) +
@@ -362,44 +407,77 @@ const getUserReservationsByDateService = async (
   return modifiedResult;
 };
 
-const getSingleReservationService = async (reservationId: string) => {
-  const result = await ReservationModel.aggregate([
+const getDiningsByRestaurantIdAndScheduleIdService = async (
+  restaurantId: string,
+  scheduleId: string
+) => {
+
+  const restaurant = await RestaurantModel.findById(restaurantId);
+  if (!restaurant) {
+    throw new AppError(404, "Restaurant Not Found");
+  }
+
+   // //check schedule
+    const schedule = await ScheduleModel.findOne({
+        restaurantId,
+        _id: scheduleId
+    });
+
+    if(!schedule){
+        throw new AppError(404, "Schedule not found");
+    }
+
+  const result = await CalendarModel.aggregate([
     {
       $match: {
-        _id: new ObjectId(reservationId),
-      }
+        restaurantId: new ObjectId(restaurantId),
+        scheduleId: new ObjectId(scheduleId),
+      },
     },
     {
       $lookup: {
         from: "dinings",
-        localField: "dinings",
+        localField: "diningId",
         foreignField: "_id",
-        as: "dinings",
-      },
+        as: "dining"
+      }
+    },
+    {
+      $unwind: "$dining"
     },
     {
       $project: {
-        _id: 1,
-        seats: 1,
-        dinings: {
-          $map: {
-            input: "$dinings",
-            as: "dining",
-            in: {
-              diningId: "$$dining._id", // Extract _id as diningId
-              diningName: "$$dining.name", // Extract name as diningName
-            },
-          },
-        }
+        _id: 0,
+        //scheduleId:1,
+        diningId:1,
+        diningName: "$dining.name",
       },
     },
-  ])
-  if (result.length ===0) {
-    throw new AppError(404, "Reservation Not Found");
+    { $sort: { startDateTime: 1, endDateTime:1 } },
+  ]);
+
+  return result;
+};
+
+const getSeatsByDiningIdService = async (diningId: string) => {
+  const dining = await DiningModel.findById(diningId);
+  if (!dining) {
+    throw new AppError(404, "dining Not Found");
   }
 
-  return result[0];
+  // //check reservation
+  const reservation = await CalendarModel.findOne({
+    diningId,
+    restaurantId: dining.restaurantId,
+  }).select("seats -_id");
+
+  if (!reservation) {
+    throw new AppError(404, "reservation not found with this diningId");
+  }
+
+  return reservation;
 };
+
 
 const updateReservationService = async (
   loginUserId: string,
@@ -459,8 +537,9 @@ export {
   createReservationService,
   getReservationsService,
   getReservationsByDateService,
+  getDiningsByRestaurantIdAndScheduleIdService,
+  getSeatsByDiningIdService,
   getUserReservationsByDateService,
-  getSingleReservationService,
   updateReservationService,
   deleteReservationService,
 };

@@ -5,13 +5,28 @@ export interface IReservation {
   scheduleId: Types.ObjectId;
   ownerId: Types.ObjectId;
   restaurantId: Types.ObjectId;
-  dinings: Types.ObjectId[]
+  diningId: Types.ObjectId
+  seats?: number;
+};
+
+
+export interface ICalendar {
+  scheduleId: Types.ObjectId;
+  ownerId: Types.ObjectId;
+  restaurantId: Types.ObjectId;
+  diningId: Types.ObjectId
   seats?: number;
 };
 
 export interface IReservationPayload {
-  scheduleIds: Types.ObjectId[];
-  dinings: Types.ObjectId[];
+  scheduleId: Types.ObjectId;
+  diningId: Types.ObjectId;
+  seats?: number;
+};
+
+export interface ICalendarPayload {
+  scheduleId: Types.ObjectId;
+  diningId: Types.ObjectId;
   seats?: number;
 };
 

@@ -1,54 +1,64 @@
-import express from 'express';
-import ReservationController from './Reservation.controller';
-import validationMiddleware from '../../middlewares/validationMiddleware';
-import { createReservationValidationSchema, updateReservationValidationSchema } from './Reservation.validation';
-import AuthMiddleware from '../../middlewares/AuthMiddleware';
-import { UserRole } from '../User/user.constant';
+import express from "express";
+import ReservationController from "./Reservation.controller";
+import validationMiddleware from "../../middlewares/validationMiddleware";
+import {
+  createReservationValidationSchema,
+  updateReservationValidationSchema,
+} from "./Reservation.validation";
+import AuthMiddleware from "../../middlewares/AuthMiddleware";
+import { UserRole } from "../User/user.constant";
 
 const router = express.Router();
 
 router.post(
-  '/create-reservation',
+  "/create-reservation",
   AuthMiddleware(UserRole.owner),
   validationMiddleware(createReservationValidationSchema),
-  ReservationController.createReservation,
-);
-
-router.get(
-  '/get-single-reservation/:reservationId',
-  AuthMiddleware(UserRole.user),
-  ReservationController.getSingleReservation,
+  ReservationController.createReservation
 );
 
 router.patch(
-  '/update-reservation/:reservationId',
+  "/update-reservation/:reservationId",
   AuthMiddleware("owner"),
   validationMiddleware(updateReservationValidationSchema),
-  ReservationController.updateReservation,
+  ReservationController.updateReservation
 );
 
 router.delete(
-  '/delete-reservation/:reservationId',
+  "/delete-reservation/:reservationId",
   AuthMiddleware("owner"),
-  ReservationController.deleteReservation,
+  ReservationController.deleteReservation
 );
 
 router.get(
-  '/get-reservations',
-   AuthMiddleware(UserRole.owner),
-  ReservationController.getReservations,
+  "/get-reservations",
+  AuthMiddleware(UserRole.owner),
+  ReservationController.getReservations
 );
 
 router.get(
-  '/get-reservations-by-date/:date',
-   AuthMiddleware(UserRole.owner),
-  ReservationController.getReservationsByDate,
+  "/get-reservations-by-date/:date",
+  AuthMiddleware(UserRole.owner),
+  ReservationController.getReservationsByDate
 );
 
 router.get(
-  '/get-user-reservations-by-date/:restaurantId/:date',
-   AuthMiddleware(UserRole.user),
-  ReservationController.getUserReservationsByDate,
+  "/get-user-reservations-by-date/:restaurantId/:date",
+  AuthMiddleware(UserRole.user),
+  ReservationController.getUserReservationsByDate
 );
+
+router.get(
+  "/get-dinings-by-restaurantId-and-scheduleId/:restaurantId/:scheduleId",
+  AuthMiddleware(UserRole.user),
+  ReservationController.getDiningsByRestaurantIdAndScheduleId
+);
+
+router.get(
+  "/get-seats-by-diningId/:diningId",
+  AuthMiddleware(UserRole.user),
+  ReservationController.getSeatsByDiningId
+);
+
 const ReservationRoutes = router;
 export default ReservationRoutes;

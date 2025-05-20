@@ -20,7 +20,8 @@ export interface IBooking {
 
 
 export interface IBookingPayload {
-    reservationId: Types.ObjectId;
+    restaurantId: Types.ObjectId;
+    scheduleId: Types.ObjectId;
     diningId: Types.ObjectId;
     amount: number;
     guest: number;

@@ -1,20 +1,20 @@
 import { Types } from "mongoose";
 import { z } from "zod";
 export const createReservationValidationSchema = z.object({
-  scheduleIds: z
-    .array(
-      z.string().refine((id) => Types.ObjectId.isValid(id), {
-        message: "Each scheduleId must be a valid ObjectId",
-      })
-    )
-    .min(1, "At least one scheduleId is required"),
-  dinings: z
-    .array(
-      z.string().refine((id) => Types.ObjectId.isValid(id), {
-        message: "Each diningId must be a valid ObjectId",
-      })
-    )
-    .min(1, "At least one diningId is required"),
+   scheduleId: z
+    .string({
+      required_error: "scheduleId is required!",
+    })
+    .refine((id) => Types.ObjectId.isValid(id), {
+      message: "scheduleId must be a valid ObjectId",
+    }),
+  diningId: z
+    .string({
+      required_error: "diningId is required!",
+    })
+    .refine((id) => Types.ObjectId.isValid(id), {
+      message: "diningId must be a valid ObjectId",
+    }),
   seats: z
     .number({
       required_error: "Seats are required",

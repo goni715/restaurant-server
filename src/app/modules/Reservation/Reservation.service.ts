@@ -110,23 +110,6 @@ const getReservationsService = async (
         ownerId: new ObjectId(loginUserId),
       },
     },
-     {
-      $group: {
-        _id: {
-          scheduleId: "$scheduleId",
-          diningId: "$diningId",
-        },
-        seats: { $sum: "$seats" },
-      },
-    },
-     {
-      $project: {
-        _id:0,
-        scheduleId: "$_id.scheduleId",
-        diningId: "$_id.diningId",
-        seats:1,
-      }
-    },
     {
       $lookup: {
         from: "schedules",
@@ -168,6 +151,11 @@ const getReservationsService = async (
       $addFields: {
         date: { $dateToString: { format: "%Y-%m-%d", date: "$startDateTime" } },
       },
+    },
+    {
+      $sort: {
+        startDateTime:1, endDateTime:1
+      }
     },
     { $skip: skip },
     { $limit: Number(limit) },

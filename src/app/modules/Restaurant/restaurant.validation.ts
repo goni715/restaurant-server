@@ -14,8 +14,16 @@ export const createRestaurantValidationSchema = z.object({
   longitude: z.preprocess((val) => Number(val), z.number().min(-180, { message: "Longitude must be >= -180" }).max(180, { message: "Longitude must be <= 180" })),
   //latitude: z.preprocess((val) => Number(val), z.number().min(-90).max(90)),
   latitude: z.preprocess((val) => Number(val), z.number().min(-90, { message: "Longitude must be >= -90" }).max(90, { message: "Longitude must be <= 90" })),
-  keywords: z.array(z.string()).optional(),
-  features: z.array(z.string()).optional(),
+  features: z.preprocess((val) => {
+    if(typeof val === "string"){
+      return [val.toString()]
+    }
+     if (Array.isArray(val)) {
+      return val;
+    }
+    return []
+  }, z.array(z.string()).min(1, { message: "At least one feature is required" })),
+  //features: z.array(z.string()).min(1, { message: "At least one feature is required" }),
   discount: z.string().optional(),
   paymentRequired: z.preprocess(
     (val) => {
@@ -32,8 +40,7 @@ export const createRestaurantValidationSchema = z.object({
 export const updateRestaurantValidationSchema = z.object({
   name: z.string().min(1, "Name is required").optional(),
   address: z.string().min(1, "Location is required").optional(),
-  keywords: z.array(z.string()).optional().optional(),
-  features: z.array(z.string()).optional(),
+  features: z.array(z.string()),
   discount: z.string().optional(),
   longitude: z.preprocess((val) => Number(val), z.number().min(-180, { message: "Longitude must be >= -180" }).max(180, { message: "Longitude must be <= 180" }).optional()).optional(),
   latitude: z.preprocess((val) => Number(val), z.number().min(-90, { message: "Longitude must be >= -90" }).max(90, { message: "Longitude must be <= 90" }).optional()).optional(),

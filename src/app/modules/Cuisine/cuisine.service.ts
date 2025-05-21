@@ -24,7 +24,8 @@ const createCuisineService = async (req:Request, name: string) => {
     let image="";
     if(req.file) {
         //for local machine file path
-        image = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`; //for local machine
+        image = await uploadImage(req);
+       // image = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`; //for local machine
     }
 
     const result = await CuisineModel.create({

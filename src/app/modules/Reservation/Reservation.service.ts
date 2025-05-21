@@ -186,6 +186,43 @@ const getReservationsService = async (
         ownerId: new ObjectId(loginUserId),
       },
     },
+     {
+      $lookup: {
+        from: "schedules",
+        localField: "scheduleId",
+        foreignField: "_id",
+        as: "schedule",
+      },
+    },
+    {
+      $unwind: "$schedule",
+    },
+     {
+      $lookup: {
+        from: "dinings",
+        localField: "diningId",
+        foreignField: "_id",
+        as: "dining"
+      }
+    },
+    {
+      $unwind: "$dining"
+    },
+    {
+      $project: {
+        scheduleId: "$scheduleId",
+        diningId: "$diningId",
+        seats:1,
+        startDateTime: "$schedule.startDateTime",
+        endDateTime: "$schedule.endDateTime",
+        diningName: "$dining.name"
+      }
+     },
+    {
+      $match: {
+        ...filterQuery
+      }
+    },
     { $count: "totalCount" },
   ]);
 
@@ -202,7 +239,6 @@ const getReservationsService = async (
     data: modifiedResult,
   };
 };
-
 
 
 const getReservationsByScheduleIdAndDiningIdService = async (

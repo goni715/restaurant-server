@@ -502,34 +502,36 @@ const getSingleRestaurantService = async (restaurantId: string) => {
         totalReview: { $size: "$reviews" },
       },
     },
-    {
+      {
       $project: {
-        _id: 1,
+        _id:1,
         ownerId: 1,
         name: 1,
-        restaurantImg:1,
-        website: 1,
-        location: 1,
-        address: 1,
+        slug: 1,
         keywords: 1,
-        ratings: 1,
-        totalReview: 1,
-        price: 1,
         features: 1,
-        paymentRequired:1,
-        bookingFeePerGuest:1,
-        cancellationPercentage: 1,
         discount: 1,
+        ratings: 1,
+        totalReview:1,
+        restaurantImg: 1,
+        location: 1,
+        coordinates: "$location.coordinates",
+        address: 1,
+        paymentRequired: 1,
+        bookingFeePerGuest: 1,
+        cancellationPercentage: 1,
         status: 1,
+        approved: 1,
         createdAt: 1,
         updatedAt: 1,
-        ownerName: "$owner.fullName",
-        ownerEmail: "$owner.email",
-        ownerPhone: "$owner.phone",
-        ownerImg: "$owner.profileImg",
-        ownerAddress: "$owner.address",
       },
     },
+    {
+      $addFields: {
+        longitude: { $max: "$coordinates" },
+        latitude: { $min: "$coordinates" }
+      }
+    }
   ]);
   if (restaurant.length === 0) {
     throw new AppError(404, "Restaurant Not Found");

@@ -31,6 +31,10 @@ const createBookingWithoutPaymentService = async (
     throw new AppError(404, "Restaurant Not Found");
   }
 
+  if(restaurant.paymentRequired){
+    throw new AppError(403, "You have to pay for booking this restaurant");
+  }
+
    // //check schedule
     const schedule = await ScheduleModel.findOne({
         _id: scheduleId,
@@ -151,6 +155,10 @@ const createBookingWithPaymentService = async (
     throw new AppError(404, "Restaurant Not Found");
   }
 
+  if(!restaurant?.paymentRequired){
+    throw new AppError(403, "You have not to pay for booking");
+  }
+
    // //check schedule
     const schedule = await ScheduleModel.findOne({
         _id: scheduleId,
@@ -229,10 +237,12 @@ const cancellationCharge = getPercentageValue(amount, restaurant.cancellationPer
       //create the payment
       const transactionId = new ObjectId().toString();
       await PaymentModel.create({
-          bookingId: newBooking[0]?._id,
-          amount,
-          transactionId,
-          status: "paid"
+        ownerId: restaurant?.ownerId,
+        restaurantId: restaurant?._id,
+        bookingId: newBooking[0]?._id,
+        amount,
+        transactionId,
+        status: "paid"
       })
 
     //database-process-03

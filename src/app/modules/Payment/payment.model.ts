@@ -5,8 +5,19 @@ import { IPayment } from "./payment.interface";
 
 const paymentSchema = new Schema<IPayment>(
   {
+    ownerId: {
+      type: Schema.Types.ObjectId,
+      required: true,
+      ref: "Owner",
+    },
+    restaurantId: {
+      type: Schema.Types.ObjectId,
+      required: true,
+      ref: "Restaurant",
+    },
     bookingId: {
       type: Schema.Types.ObjectId,
+      unique: true,
       required: true,
       ref: "Booking",
     },

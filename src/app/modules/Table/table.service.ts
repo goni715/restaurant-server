@@ -223,11 +223,19 @@ const getTablesService = async (loginUserId: string,  query: TTableQuery) => {
         ...filterQuery
       }
     },
-    {
+     {
+      $addFields: {
+        date: { $dateToString: { format: "%Y-%m-%d", date: "$startDateTime" } },
+        startTime: { $dateToString: { format: "%H:%M", date: "$startDateTime" } },
+        endTime: { $dateToString: { format: "%H:%M", date: "$endDateTime" } },
+      },
+    },
+     {
       $sort: {
-        startDateTime:-1,
-        endDateTime:-1
-    }
+        date:-1,
+        startTime:1,
+        endTime:1
+      }
     },
     { $skip: skip },
     { $limit: Number(limit) }

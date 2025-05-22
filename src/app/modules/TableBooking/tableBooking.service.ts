@@ -523,6 +523,21 @@ const getTableBookingsByBookingIdService = async (
         tableData: [
          {
            $project: {bookedSeats:1, tableName:1}
+         },
+         {
+          $addFields: {
+            tableNumber: {
+            $toInt:  {
+              $arrayElemAt: [
+                { $split: ["$tableName", "-"]}, 1
+              ]
+            }
+          }
+          }
+         },{
+          $sort:{
+            tableNumber:1
+          }
          }
         ],
         totalBookedSeats: [

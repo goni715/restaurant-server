@@ -9,6 +9,8 @@ import DiningModel from "../Dining/dining.model";
 import TableBookingModel from "../TableBooking/tableBooking.model";
 
 
+
+
 const createTableService = async (loginUserId: string, payload: ITablePayload) => {
     const { totalTable, seats, diningId, scheduleId } = payload;
 
@@ -19,7 +21,7 @@ const createTableService = async (loginUserId: string, payload: ITablePayload) =
         throw new AppError(404, "Restaurant not found");
     }
 
-    // //check schedule
+    //check schedule
     const schedule = await ScheduleModel.findOne({
         ownerId: loginUserId,
         _id: scheduleId
@@ -217,14 +219,14 @@ const getTablesService = async (loginUserId: string,  query: TTableQuery) => {
       }
      },
     {
-      $sort: {
-        startDateTime:-1,
-        endDateTime:-1
-      }
-    },
-    {
       $match: {
         ...filterQuery
+      }
+    },
+     {
+      $sort: {
+        startDateTime:-1,
+        endDateTime:1
       }
     },
     { $skip: skip },

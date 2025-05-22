@@ -59,7 +59,7 @@ const createReservationService = async (
      })
 
     if(calendar){
-      throw new AppError(409, "Reservation is already exist")
+      throw new AppError(409, "Booking Schedule is already exist")
     }
 
      const result = await ReservationModel.create({
@@ -520,6 +520,7 @@ const deleteReservationService = async (
   //check associate with booking
   const associateWithBooking = await BookingModel.findOne({
     scheduleId: reservation.scheduleId,
+    diningId: reservation?.diningId,
     ownerId: reservation.ownerId,
     restaurantId: reservation.restaurantId,
   });

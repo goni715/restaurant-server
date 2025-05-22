@@ -26,6 +26,7 @@ const createDiningService = async (loginUserId:string, name: string) => {
         ownerId: loginUserId,
         restaurantId: restaurant._id
     });
+
     if(dining){
         throw new AppError(409, 'This dining is already existed');
     }

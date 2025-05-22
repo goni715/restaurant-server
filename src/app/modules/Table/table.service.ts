@@ -223,11 +223,11 @@ const getTablesService = async (loginUserId: string,  query: TTableQuery) => {
         ...filterQuery
       }
     },
-     {
+    {
       $sort: {
         startDateTime:-1,
-        endDateTime:1
-      }
+        endDateTime:-1
+    }
     },
     { $skip: skip },
     { $limit: Number(limit) }
@@ -241,9 +241,9 @@ const getTablesService = async (loginUserId: string,  query: TTableQuery) => {
         ownerId: new ObjectId(loginUserId),
       },
     },
-    {
+   {
       $group: {
-        _id: {
+         _id: {
           scheduleId: "$scheduleId",
           diningId: "$diningId",
         },
@@ -292,7 +292,7 @@ const getTablesService = async (loginUserId: string,  query: TTableQuery) => {
         endDateTime: "$schedule.endDateTime",
         diningName: "$dining.name"
       }
-    },
+     },
     {
       $match: {
         ...filterQuery

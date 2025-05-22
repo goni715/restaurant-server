@@ -324,7 +324,7 @@ const getTableBookingsService = async (
         ownerId: new ObjectId(loginUserId),
       },
     },
-    {
+   {
       $group: {
         _id: "$bookingId",
         bookedSeats: {
@@ -350,6 +350,7 @@ const getTableBookingsService = async (
         bookedSeats:1,
         userId: "$booking.userId",
         scheduleId: "$booking.scheduleId",
+        diningId: "$booking.diningId",
         token: "$booking.token"
       }
     },
@@ -375,6 +376,17 @@ const getTableBookingsService = async (
     {
       $unwind: "$schedule",
     },
+     {
+      $lookup: {
+        from: "dinings",
+        localField: "diningId",
+        foreignField: "_id",
+        as: "dining"
+      }
+    },
+    {
+      $unwind: "$dining"
+    },
     {
       $project: {
         bookingId: 1,
@@ -383,7 +395,9 @@ const getTableBookingsService = async (
         fullName: "$user.fullName",
         email: "$user.email",
         phone: "$user.phone",
+        diningName: "$dining.name",
         startDateTime: "$schedule.startDateTime",
+        endDateTime: "$schedule.startDateTime",
       }
     },
     {

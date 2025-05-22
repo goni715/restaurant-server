@@ -112,9 +112,6 @@ const getSlotsService = async (loginUserId: string, query:TSlotQuery) => {
                 ownerId: new ObjectId(loginUserId)
             }
         },
-        {
-            $sort: { startDateTime:1, endDateTime:1}
-        },
         { $count: "totalCount" }
     ]);
 

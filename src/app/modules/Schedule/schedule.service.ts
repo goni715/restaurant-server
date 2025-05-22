@@ -157,17 +157,28 @@ const getSchedulesService = async (
   ]);
 
   // total count of matching users
-  const totalReviewResult = await ScheduleModel.aggregate([
+  const totalScheduleResult = await ScheduleModel.aggregate([
     {
       $match: {
         restaurantId: new ObjectId(restaurant._id),
         ...filterQuery,
       },
     },
+     {
+      $addFields: {
+        date: { $dateToString: { format: "%Y-%m-%d", date: "$startDateTime" } },
+      },
+    },
+    {
+      $group: {
+        _id: "$date",
+        count: { $sum: 1 },
+      },
+    },
     { $count: "totalCount" },
   ]);
 
-  const totalCount = totalReviewResult[0]?.totalCount || 0;
+  const totalCount = totalScheduleResult[0]?.totalCount || 0;
   const totalPages = Math.ceil(totalCount / Number(limit));
 
   return {

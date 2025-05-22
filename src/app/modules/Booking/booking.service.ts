@@ -394,7 +394,7 @@ const getBookingsService = async (
     {
       $match: { restaurantId: new ObjectId(restaurant._id) },
     },
-    {
+   {
       $lookup: {
         from: "users",
         localField: "userId",
@@ -405,23 +405,50 @@ const getBookingsService = async (
     {
       $unwind: "$user",
     },
+    {
+      $lookup: {
+        from: "schedules",
+        localField: "scheduleId",
+        foreignField: "_id",
+        as: "schedule"
+      }
+    },
+    {
+      $unwind: "$schedule"
+    },
      {
+      $lookup: {
+        from: "dinings",
+        localField: "diningId",
+        foreignField: "_id",
+        as: "dining"
+      }
+    },
+    {
+      $unwind: "$dining"
+    },
+    {
       $project: {
         _id: "$_id",
         userId: "$userId",
         customerName: "$user.fullName",
         customerEmail: "$user.email",
-        customerPhone: "$user.phone", 
+        customerPhone: "$user.phone",
+        customerImg: "$user.profileImg",
+        token: "$token",
         startDateTime: "$schedule.startDateTime",
         endDateTime: "$schedule.endDateTime",
+        diningName: "$dining.name",
         amount: "$amount",
         guest: "$guest",
         cancellationCharge: "$cancellationCharge",
         status: "$status",
         paymentStatus: "$paymentStatus",
+        // createdAt: "$createdAt",
+        // updatedAt: "$updatedAt",
       },
     },
-    {
+     {
       $match: {
         ...filterQuery,
         ...searchQuery,

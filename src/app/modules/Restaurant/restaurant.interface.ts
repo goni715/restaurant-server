@@ -7,7 +7,6 @@ export interface IRestaurant {
     ownerId: Types.ObjectId;
     name: string;
     slug: string;
-    keywords?: string[],
     features?: string[];
     ratings?: number;
     restaurantImg?: string;

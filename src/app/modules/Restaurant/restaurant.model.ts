@@ -21,13 +21,9 @@ const restaurantSchema = new Schema<IRestaurant>({
         unique: true,
         trim: true
     },
-    keywords: {
-        type: [String],
-        default: []
-    },
     features: {
         type: [String],
-        default: []
+        required:true
     },
     discount: {
         type: String,

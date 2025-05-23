@@ -14,6 +14,8 @@ export default {
     smtp_username: process.env.SMTP_USERNAME,
     smtp_password: process.env.SMTP_PASSWORD,
     smtp_from: process.env.SMTP_FROM,
+    super_admin_email: process.env.SUPER_ADMIN_EMAIL,
+    super_admin_password: process.env.SUPER_ADMIN_PASSWORD,
     administrator_default_password: process.env.ADMINISTRATOR_DEFAULT_PASSWORD,
     owner_default_password: process.env.OWNER_DEFAULT_PASSWORD,
     aws_access_key_id: process.env.AWS_ACCESS_KEY_ID,

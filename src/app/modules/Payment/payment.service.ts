@@ -37,7 +37,7 @@ const getTotalIncomeService = async (loginUserId: string) => {
     },
   ]);
 
-  const total = result?.length === 0 ? result[0]?.total : 0;
+  const total = result?.length > 0 ? result[0]?.total : 0;
   return {
     total
   };

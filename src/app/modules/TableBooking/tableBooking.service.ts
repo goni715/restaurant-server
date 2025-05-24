@@ -274,7 +274,7 @@ const getTableBookingsService = async (
         phone: "$user.phone",
         diningName: "$dining.name",
         startDateTime: "$schedule.startDateTime",
-        endDateTime: "$schedule.startDateTime",
+        endDateTime: "$schedule.endDateTime",
       }
     },
     {

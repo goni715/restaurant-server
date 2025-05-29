@@ -618,7 +618,7 @@ const getMyBookingsService = async (
       },
     },
     {
-      $sort: { createdAt: -1, startDateTime: -1 }, //after projection
+      $sort: { createdAt: -1, date: -1 }, //after projection
     },
     { $skip: skip },
     { $limit: Number(limit) },

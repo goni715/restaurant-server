@@ -331,7 +331,6 @@ const getUserRestaurantsService = async (query: TUserRestaurantQuery) => {
         name: 1,
         location: 1,
         address:1,
-        keywords: 1,
         features: 1,
         restaurantImg:1,
         cancellationCharge: 1,
@@ -347,7 +346,7 @@ const getUserRestaurantsService = async (query: TUserRestaurantQuery) => {
         ownerAddress: "$owner.address",
       },
     },
-    { $sort: { [sortBy]: sortDirection } },
+    { $sort: { ratings:-1 } },
     { $skip: skip },
     { $limit: Number(limit) },
   ]);
@@ -552,16 +551,54 @@ const findNearbyRestaurantsService = async (query: INearbyQuery) => {
     throw new AppError(400, "Longitude and latitude are required");
   }
 
-  const result = await RestaurantModel.find({
-    location: {
-      $geoWithin: {
-        $centerSphere: [
-          [Number(longitude), Number(latitude)], // [longitude, latitude]
-          Number(radius) / earthRadiusInKm, // Convert radius to radians
-        ],
+  const result = await RestaurantModel.aggregate([
+    {
+      $match: {
+        location: {
+          $geoWithin: {
+            $centerSphere: [
+              [Number(longitude), Number(latitude)], // [longitude, latitude]
+              Number(radius) / earthRadiusInKm, // Convert radius to radians
+            ],
+          },
+        },
+        status: "active",
+        approved: "accepted"
       },
     },
-  });
+     {
+      $lookup: {
+        from: "reviews",
+        localField: "_id",
+        foreignField: "restaurantId",
+        as: "reviews",
+      },
+    },
+    {
+      $addFields: {
+        totalReview: { $size: "$reviews" },
+      },
+    },
+    {
+      $project: {
+        _id: 1,
+        name: 1,
+        location: 1,
+        address:1,
+        keywords: 1,
+        features: 1,
+        restaurantImg:1,
+        discount: 1,
+        ratings: "$ratings",
+        totalReview: "$totalReview",
+      },
+    },
+    {
+      $sort: {
+        ratings:-1
+      }
+    }
+  ]);
   return result;
 };
 

@@ -12,7 +12,6 @@ const router = express.Router();
 router.post(
   "/create-cuisine",
   AuthMiddleware(UserRole.super_admin, UserRole.administrator),
-  isAccess("restaurant"),
   upload.single('file'),
   validationMiddleware(createCuisineValidationSchema),
   CuisineController.createCuisine
@@ -30,7 +29,6 @@ router.get(
 router.patch(
   "/update-cuisine/:cuisineId",
   AuthMiddleware(UserRole.super_admin, UserRole.administrator),
-  isAccess("restaurant"),
   upload.single('file'),
   validationMiddleware(updateCuisineValidationSchema),
   CuisineController.updateCuisine
@@ -38,7 +36,6 @@ router.patch(
 router.delete(
   "/delete-cuisine/:cuisineId",
   AuthMiddleware(UserRole.super_admin, UserRole.administrator),
-  isAccess("restaurant"),
   CuisineController.deleteCuisine
 );
 

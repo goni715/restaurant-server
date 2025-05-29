@@ -613,6 +613,11 @@ const getMyBookingsService = async (
       },
     },
     {
+      $addFields: {
+        date: { $dateToString: { format: "%Y-%m-%d", date: "$startDateTime" } },
+      },
+    },
+    {
       $sort: { createdAt: -1, startDateTime: -1 }, //after projection
     },
     { $skip: skip },

@@ -1,7 +1,7 @@
 import config from "../../config";
 import catchAsync from "../../utils/catchAsync";
 import sendResponse from "../../utils/sendResponse";
-import { changePasswordService, changeStatusService, deleteMyAccountService, forgotPassCreateNewPassService, forgotPassSendOtpService, forgotPassVerifyOtpService,  loginOwnerService,  loginSuperAdminService, loginUserService, refreshTokenService } from "./auth.service";
+import { changePasswordService, changeStatusService, deleteMyAccountService, forgotPassCreateNewPassService, forgotPassSendOtpService, forgotPassVerifyOtpService,  loginOwnerService,  loginSuperAdminService, loginUserService, refreshTokenService, socialLoginService } from "./auth.service";
 
 
 
@@ -165,28 +165,29 @@ const refreshToken = catchAsync(async (req, res) => {
 
 
 
-// const oAuthLogin = catchAsync(async (req, res) => {
-//   const result = await oAuthLoginService(req.body);
-//   const { role, accessToken, refreshToken} = result;
+const socialLogin = catchAsync(async (req, res) => {
+  const result = await socialLoginService(req.body);
+  //const { role, accessToken, refreshToken} = result;
   
-//   res.cookie("refreshToken", refreshToken, {
-//     httpOnly: true,  
-//     secure: config.node_env === "production", 
-//     maxAge: 7 * 24 * 60 * 60 * 1000, // Expires in 7 day
-//     sameSite: "strict", // Prevents CSRF attacks
-//   });
+  res.cookie("refreshToken", refreshToken, {
+    httpOnly: true,  
+    secure: config.node_env === "production", 
+    maxAge: 7 * 24 * 60 * 60 * 1000, // Expires in 7 day
+    sameSite: "strict", // Prevents CSRF attacks
+  });
  
-//   sendResponse(res, {
-//     statusCode: 200,
-//     success: true,
-//     message: "User is logged in successfully",
-//     data: {
-//       role,
-//       accessToken,
-//       refreshToken
-//     }
-//   })
-//  })
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "User is logged in successfully",
+    // data: {
+    //   "role",
+    //   "accessToken",
+    //   "refreshToken"
+    // }
+    data: result
+  })
+ })
  
 
  const AuthController = {
@@ -200,6 +201,7 @@ const refreshToken = catchAsync(async (req, res) => {
   changeStatus,
   deleteMyAccount,
   refreshToken,
+  socialLogin
 }
 
 export default AuthController;

@@ -17,11 +17,12 @@ const userSchema = new Schema<IUser>({
     },
     phone: {
         type: String,
-        required: [true, 'phone is required'],
-        trim: true
+        trim: true,
+        default:""
     },
     address: {
         type: String,
+        trim: true,
         default: ''
     },
     password: {

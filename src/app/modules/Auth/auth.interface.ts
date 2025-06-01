@@ -24,3 +24,13 @@ export interface OAuth {
     provider: 'google' | 'apple';
     idToken: string;
 }
+
+export type TSocialLoginPayload = {
+  email: string;
+  fcmToken: string;
+  provider: 'GOOGLE' | 'APPLE';
+  image: string;
+  fullName: string;
+  phoneNumber: string;
+  address: string;
+};

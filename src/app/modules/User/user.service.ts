@@ -25,8 +25,10 @@ const createUserService = async (req:Request, payload: IUser) => {
     role: "user"
   });
 
-  result.password=""
-  return result;
+  return {
+    fullName: result?.fullName,
+    email: result?.email
+  };
 }
 
 

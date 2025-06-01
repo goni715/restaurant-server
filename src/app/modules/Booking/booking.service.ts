@@ -22,7 +22,7 @@ const createBookingWithoutPaymentService = async (
   payload: IBookingPayload
 ) => {
   const { restaurantId, scheduleId, diningId, guest } = payload;
-   //check restaurant
+  //check restaurant
   const restaurant = await RestaurantModel.findOne({
     _id: restaurantId,
   });
@@ -31,57 +31,51 @@ const createBookingWithoutPaymentService = async (
     throw new AppError(404, "Restaurant Not Found");
   }
 
-  if(restaurant.paymentRequired){
+  if (restaurant.paymentRequired) {
     throw new AppError(403, "You have to pay for booking this restaurant");
   }
 
-   // //check schedule
-    const schedule = await ScheduleModel.findOne({
-        _id: scheduleId,
-        restaurantId,
-        ownerId: restaurant.ownerId
-    });
+  // //check schedule
+  const schedule = await ScheduleModel.findOne({
+    _id: scheduleId,
+    restaurantId,
+    ownerId: restaurant.ownerId,
+  });
 
-    if(!schedule){
-        throw new AppError(404, "Schedule not found");
-    }
+  if (!schedule) {
+    throw new AppError(404, "Schedule not found");
+  }
 
-    //check dining
-    const dining = await DiningModel.findOne({
-      ownerId: restaurant.ownerId,
-      _id: diningId,
-      restaurantId: restaurant._id
-    })
-     if(!dining){
-      throw new AppError(404, 'This dining not found');
-     }
+  //check dining
+  const dining = await DiningModel.findOne({
+    ownerId: restaurant.ownerId,
+    _id: diningId,
+    restaurantId: restaurant._id,
+  });
+  if (!dining) {
+    throw new AppError(404, "This dining not found");
+  }
 
-
-     //check reservation
-  const reservation = await ReservationModel.findOne(
-    {
-      scheduleId: new ObjectId(scheduleId),
-      diningId: new ObjectId(diningId),
-    }
-  )
+  //check reservation
+  const reservation = await ReservationModel.findOne({
+    scheduleId: new ObjectId(scheduleId),
+    diningId: new ObjectId(diningId),
+  });
   if (!reservation) {
     throw new AppError(404, "Reservation Not Found");
   }
 
-
- //check availableSeats
+  //check availableSeats
   const availableSeats = Number(reservation?.seats);
-  if(availableSeats < guest) {
+  if (availableSeats < guest) {
     throw new AppError(
       400,
       "There are no available seats at this moment or schedule"
     );
   }
 
-
   //generate token
   const token = Math.floor(100000 + Math.random() * 900000);
-
 
   //check you have already booked the 10 seats // you can maximum 10 seats for one day
   // const booking = await BookingModel.aggregate([
@@ -101,20 +95,25 @@ const createBookingWithoutPaymentService = async (
 
   //transaction & rollback
   const session = await mongoose.startSession();
-  try{
+  try {
     session.startTransaction();
 
     //database-process-01
     //create the booking
-    const newBooking = await BookingModel.create([{
-    userId: loginUserId,
-    scheduleId: reservation?.scheduleId,
-    diningId,
-    restaurantId: reservation?.restaurantId,
-    ownerId: reservation?.ownerId,
-    token,
-    guest
-    }], { session });
+    const newBooking = await BookingModel.create(
+      [
+        {
+          userId: loginUserId,
+          scheduleId: reservation?.scheduleId,
+          diningId,
+          restaurantId: reservation?.restaurantId,
+          ownerId: reservation?.ownerId,
+          token,
+          guest,
+        },
+      ],
+      { session }
+    );
 
     //database-process-02
     //update the reservation seats
@@ -132,21 +131,20 @@ const createBookingWithoutPaymentService = async (
     await session.commitTransaction();
     await session.endSession();
     return newBooking[0];
-  }catch(err:any){
+  } catch (err: any) {
     await session.abortTransaction();
     await session.endSession();
-    throw new Error(err)
+    throw new Error(err);
   }
 };
-
 
 const createBookingWithPaymentService = async (
   loginUserId: string,
   payload: IBookingPayload
 ) => {
-    const { restaurantId, scheduleId, diningId, guest, amount } = payload;
+  const { restaurantId, scheduleId, diningId, guest, amount } = payload;
 
-   //check restaurant
+  //check restaurant
   const restaurant = await RestaurantModel.findOne({
     _id: restaurantId,
   });
@@ -155,47 +153,43 @@ const createBookingWithPaymentService = async (
     throw new AppError(404, "Restaurant Not Found");
   }
 
-  if(!restaurant?.paymentRequired){
+  if (!restaurant?.paymentRequired) {
     throw new AppError(403, "You have not to pay for booking");
   }
 
-   // //check schedule
-    const schedule = await ScheduleModel.findOne({
-        _id: scheduleId,
-        restaurantId,
-        ownerId: restaurant.ownerId
-    });
+  // //check schedule
+  const schedule = await ScheduleModel.findOne({
+    _id: scheduleId,
+    restaurantId,
+    ownerId: restaurant.ownerId,
+  });
 
-    if(!schedule){
-        throw new AppError(404, "Schedule not found");
-    }
+  if (!schedule) {
+    throw new AppError(404, "Schedule not found");
+  }
 
-    //check dining
-    const dining = await DiningModel.findOne({
-      ownerId: restaurant.ownerId,
-      _id: diningId,
-      restaurantId: restaurant._id
-    })
-     if(!dining){
-      throw new AppError(404, 'This dining not found');
-     }
+  //check dining
+  const dining = await DiningModel.findOne({
+    ownerId: restaurant.ownerId,
+    _id: diningId,
+    restaurantId: restaurant._id,
+  });
+  if (!dining) {
+    throw new AppError(404, "This dining not found");
+  }
 
-
-     //check reservation
-  const reservation = await ReservationModel.findOne(
-    {
-      scheduleId: new ObjectId(scheduleId),
-      diningId: new ObjectId(diningId),
-    }
-  )
+  //check reservation
+  const reservation = await ReservationModel.findOne({
+    scheduleId: new ObjectId(scheduleId),
+    diningId: new ObjectId(diningId),
+  });
   if (!reservation) {
     throw new AppError(404, "Reservation Not Found");
   }
 
-
- //check availableSeats
+  //check availableSeats
   const availableSeats = Number(reservation?.seats);
-  if(availableSeats < guest) {
+  if (availableSeats < guest) {
     throw new AppError(
       400,
       "There are no available seats at this moment or schedule"
@@ -205,12 +199,15 @@ const createBookingWithPaymentService = async (
   //generate token
   const token = Math.floor(100000 + Math.random() * 900000);
 
-//calculation of canCellationCharge
-const cancellationCharge = getPercentageValue(amount, restaurant.cancellationPercentage as number)
+  //calculation of canCellationCharge
+  const cancellationCharge = getPercentageValue(
+    amount,
+    restaurant.cancellationPercentage as number
+  );
 
   //transaction & rollback
   const session = await mongoose.startSession();
-  try{
+  try {
     session.startTransaction();
 
     //database-process-01
@@ -227,23 +224,23 @@ const cancellationCharge = getPercentageValue(amount, restaurant.cancellationPer
           guest,
           amount,
           paymentStatus: "paid",
-          cancellationCharge
+          cancellationCharge,
         },
       ],
       { session }
     );
 
     //   //database-process-03
-      //create the payment
-      const transactionId = new ObjectId().toString();
-      await PaymentModel.create({
-        ownerId: restaurant?.ownerId,
-        restaurantId: restaurant?._id,
-        bookingId: newBooking[0]?._id,
-        amount,
-        transactionId,
-        status: "paid"
-      })
+    //create the payment
+    const transactionId = new ObjectId().toString();
+    await PaymentModel.create({
+      ownerId: restaurant?.ownerId,
+      restaurantId: restaurant?._id,
+      bookingId: newBooking[0]?._id,
+      amount,
+      transactionId,
+      status: "paid",
+    });
 
     //database-process-03
     //update the reservation seats
@@ -261,13 +258,12 @@ const cancellationCharge = getPercentageValue(amount, restaurant.cancellationPer
     await session.commitTransaction();
     await session.endSession();
     return newBooking[0];
-  }catch(err:any){
+  } catch (err: any) {
     await session.abortTransaction();
     await session.endSession();
-    throw new Error(err)
+    throw new Error(err);
   }
 };
-
 
 const getBookingsService = async (
   loginUserId: string,
@@ -287,7 +283,6 @@ const getBookingsService = async (
 
   // 2. Set up pagination
   const skip = (Number(page) - 1) * Number(limit);
-
 
   //4. setup searching
   let searchQuery: any = {};
@@ -343,22 +338,22 @@ const getBookingsService = async (
         from: "schedules",
         localField: "scheduleId",
         foreignField: "_id",
-        as: "schedule"
-      }
+        as: "schedule",
+      },
     },
     {
-      $unwind: "$schedule"
+      $unwind: "$schedule",
     },
-     {
+    {
       $lookup: {
         from: "dinings",
         localField: "diningId",
         foreignField: "_id",
-        as: "dining"
-      }
+        as: "dining",
+      },
     },
     {
-      $unwind: "$dining"
+      $unwind: "$dining",
     },
     {
       $project: {
@@ -381,7 +376,7 @@ const getBookingsService = async (
         // updatedAt: "$updatedAt",
       },
     },
-     {
+    {
       $match: {
         ...filterQuery,
         ...searchQuery,
@@ -404,7 +399,7 @@ const getBookingsService = async (
     {
       $match: { restaurantId: new ObjectId(restaurant._id) },
     },
-   {
+    {
       $lookup: {
         from: "users",
         localField: "userId",
@@ -420,22 +415,22 @@ const getBookingsService = async (
         from: "schedules",
         localField: "scheduleId",
         foreignField: "_id",
-        as: "schedule"
-      }
+        as: "schedule",
+      },
     },
     {
-      $unwind: "$schedule"
+      $unwind: "$schedule",
     },
-     {
+    {
       $lookup: {
         from: "dinings",
         localField: "diningId",
         foreignField: "_id",
-        as: "dining"
-      }
+        as: "dining",
+      },
     },
     {
-      $unwind: "$dining"
+      $unwind: "$dining",
     },
     {
       $project: {
@@ -458,7 +453,7 @@ const getBookingsService = async (
         // updatedAt: "$updatedAt",
       },
     },
-     {
+    {
       $match: {
         ...filterQuery,
         ...searchQuery,
@@ -470,29 +465,28 @@ const getBookingsService = async (
   const totalCount = totalBookingResult[0]?.totalCount || 0;
   const totalPages = Math.ceil(totalCount / Number(limit));
 
-   const modifiedResult =
-     result?.length > 0
-       ? result?.map((booking) => ({
-           _id: booking?._id,
-           userId: booking?.userId,
-           customerName: booking?.customerName,
-           customerEmail: booking?.customerEmail,
-           customerPhone: booking?.customerPhone,
-           customerImg: booking?.customerImg,
-           diningName: booking?.diningName,
-           token: booking?.token,
-           amount: booking?.amount,
-           guest: booking?.guest,
-           cancellationCharge: booking?.cancellationCharge,
-           paymentStatus: booking?.paymentStatus,
-           date: booking?.date,
-           time:
-             convertUTCtimeString(booking.startDateTime) +
-             " - " +
-             convertUTCtimeString(booking.endDateTime),
-         }))
-       : [];
-
+  const modifiedResult =
+    result?.length > 0
+      ? result?.map((booking) => ({
+          _id: booking?._id,
+          userId: booking?.userId,
+          customerName: booking?.customerName,
+          customerEmail: booking?.customerEmail,
+          customerPhone: booking?.customerPhone,
+          customerImg: booking?.customerImg,
+          diningName: booking?.diningName,
+          token: booking?.token,
+          amount: booking?.amount,
+          guest: booking?.guest,
+          cancellationCharge: booking?.cancellationCharge,
+          paymentStatus: booking?.paymentStatus,
+          date: booking?.date,
+          time:
+            convertUTCtimeString(booking.startDateTime) +
+            " - " +
+            convertUTCtimeString(booking.endDateTime),
+        }))
+      : [];
 
   return {
     meta: {
@@ -564,29 +558,96 @@ const getMyBookingsService = async (
       },
     },
     {
+      $lookup: {
+        from: "schedules",
+        localField: "scheduleId",
+        foreignField: "_id",
+        as: "schedule",
+      },
+    },
+    {
+      $unwind: "$schedule",
+    },
+    {
+      $lookup: {
+        from: "dinings",
+        localField: "diningId",
+        foreignField: "_id",
+        as: "dining",
+      },
+    },
+    {
+      $unwind: "$dining",
+    },
+    {
+      $lookup: {
+        from: "reviews",
+        localField: "_id",
+        foreignField: "bookingId",
+        as: "reviews",
+      },
+    },
+    {
+      $addFields: {
+        totalReview: { $size: "$reviews" },
+      },
+    },
+    {
       $project: {
         _id: "$_id",
         restaurantId: "$restaurant._id",
         restaurantName: "$restaurant.name",
-        restaurantImg:"$restaurant.restaurantImg",
-        restaurantLocation:"$restaurant.location",
-        restaurantAddress:"$restaurant.address",
+        restaurantImg: "$restaurant.restaurantImg",
+        restaurantAddress: "$restaurant.address",
         token: "$token",
-        startDateTime: "$startDateTime",
-        endDateTime: "$endDateTime",
+        startDateTime: "$schedule.startDateTime",
+        endDateTime: "$schedule.endDateTime",
+        diningName: "$dining.name",
         amount: "$amount",
         guest: "$guest",
         cancellationCharge: "$cancellationCharge",
         status: "$status",
         paymentStatus: "$paymentStatus",
+        totalReview: "$totalReview",
+        createdAt: 1,
       },
     },
     {
-      $sort: { date: -1 }, //after projection
+      $addFields: {
+        date: { $dateToString: { format: "%Y-%m-%d", date: "$startDateTime" } },
+      },
+    },
+    {
+      $sort: { createdAt: -1, date: -1 }, //after projection
     },
     { $skip: skip },
     { $limit: Number(limit) },
   ]);
+
+  const modifiedResult =
+    result?.length > 0
+      ? result?.map((booking) => ({
+          _id: booking?._id,
+          userId: booking?.userId,
+          restaurantId: booking?.restaurantId,
+          restaurantName: booking?.restaurantName,
+          restaurantImg: booking?.restaurantImg,
+          restaurantAddress: booking?.restaurantAddress,
+          diningName: booking?.diningName,
+          token: booking?.token,
+          amount: booking?.amount,
+          guest: booking?.guest,
+          cancellationCharge: booking?.cancellationCharge,
+          paymentStatus: booking?.paymentStatus,
+          status: booking?.status,
+          date: booking?.date,
+          time:
+            convertUTCtimeString(booking.startDateTime) +
+            " - " +
+            convertUTCtimeString(booking.endDateTime),
+          review: booking?.totalReview === 1 ? true : false,
+        }))
+      : [];
 
   // total count
   const totalBookingResult = await BookingModel.aggregate([
@@ -623,7 +684,7 @@ const getMyBookingsService = async (
       totalPages,
       total: totalCount,
     },
-    data: result,
+    data: modifiedResult,
   };
 };
 
@@ -632,10 +693,6 @@ const updateBookingStatusService = async (
   bookingId: string,
   status: TBookingStatus
 ) => {
-  console.log({
-    loginUserId,
-    bookingId,
-  });
 
   const booking = await BookingModel.findOne({
     _id: bookingId,
@@ -690,39 +747,38 @@ const getSingleBookingService = async (
     {
       $unwind: "$schedule",
     },
-     {
+    {
       $lookup: {
         from: "dinings",
         localField: "diningId",
         foreignField: "_id",
-        as: "dining"
-      }
+        as: "dining",
+      },
     },
     {
-      $unwind: "$dining"
+      $unwind: "$dining",
     },
     {
-       $lookup: {
+      $lookup: {
         from: "tablebookings",
         localField: "_id",
         foreignField: "bookingId",
-        as: "tableBooking"
-      }
+        as: "tableBooking",
+      },
     },
     {
-  $addFields: {
-    tableBookedGuests: {
-      $sum: {
-        $map: {
-          input: "$tableBooking",
-          as: "tb",
-          in: "$$tb.guest"
-        }
-      }
-    }
-  }
-},
-
+      $addFields: {
+        tableBookedGuests: {
+          $sum: {
+            $map: {
+              input: "$tableBooking",
+              as: "tb",
+              in: "$$tb.guest",
+            },
+          },
+        },
+      },
+    },
 
     {
       $project: {
@@ -730,8 +786,8 @@ const getSingleBookingService = async (
         userId: 1,
         restaurantId: 1,
         ownerId: 1,
-        scheduleId:1,
-        diningId:1,
+        scheduleId: 1,
+        diningId: 1,
         diningName: "$dining.name",
         startDateTime: "$schedule.startDateTime",
         endDateTime: "$schedule.endDateTime",
@@ -742,7 +798,7 @@ const getSingleBookingService = async (
         customerName: "$user.fullName",
         customerEmail: "$user.email",
         customerPhone: "$user.phone",
-        tableBookedGuests: 1
+        tableBookedGuests: 1,
       },
     },
     {
@@ -756,7 +812,8 @@ const getSingleBookingService = async (
     throw new AppError(404, "Booking Not Found");
   }
 
-  const { startDateTime, guest, tableBookedGuests, endDateTime, ...rest } = booking[0];
+  const { startDateTime, guest, tableBookedGuests, endDateTime, ...rest } =
+    booking[0];
 
   const modifiedResult = {
     ...rest,

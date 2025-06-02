@@ -26,7 +26,7 @@ export const createUserValidationSchema = z.object({
       required_error: "password is required",
     })
     .min(6, "Password minimum 6 characters long")
-    .min(60, "Password maximum 6 characters long")
+    .max(60, "Password maximum 60 characters long")
     .trim()
 });
 

@@ -5,7 +5,9 @@ export const loginValidationSchema = z.object({
     .string({
       required_error: "email is required",
     })
-    .email(),
+    .email({
+      message: "Invalid email address"
+    }),
   password: z
     .string({
       required_error: "Password is required",

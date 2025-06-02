@@ -1,9 +1,8 @@
 import { NextFunction, Request, Response } from "express";
 import { ZodError, ZodTypeAny } from "zod";
 
-//const validationMiddleware = (schema: ZodObject<any> | ZodEffects<any>) => {
 const validationMiddleware = (schema: ZodTypeAny) => {
-  return async (req: Request, res: Response, next: NextFunction) => {
+  return async (req: Request, res: Response, next: NextFunction) : Promise<any> => {
     try {
       const parsedData = await schema.parseAsync({
         ...req.body,
@@ -30,6 +29,8 @@ const validationMiddleware = (schema: ZodTypeAny) => {
           error: formattedErrors,
         });
       }
+
+      next(error)
     }
   };
 };

@@ -13,6 +13,7 @@ import isValidDate from "../../utils/isValidDate";
 import convertUTCtimeString from "../../utils/convertUTCtimeString";
 import BookingModel from "../Booking/booking.model";
 import DiningModel from "../Dining/dining.model";
+import { Types } from "mongoose";
 
 
 const createReservationService = async (
@@ -351,6 +352,10 @@ const getUserReservationsByDateService = async (
   date: string
 ) => {
 
+  if(!Types.ObjectId.isValid(restaurantId)){
+    throw new AppError(400, "restaurantId must be a valid ObjectId")
+  }
+
   const restaurant = await RestaurantModel.findById(restaurantId);
   if (!restaurant) {
     throw new AppError(404, "Restaurant Not Found");
@@ -455,6 +460,14 @@ const getDiningsByRestaurantIdAndScheduleIdService = async (
   scheduleId: string
 ) => {
 
+  if(!Types.ObjectId.isValid(restaurantId)){
+    throw new AppError(400, "restaurantId must be a valid ObjectId")
+  }
+
+  if(!Types.ObjectId.isValid(scheduleId)){
+    throw new AppError(400, "scheduleId must be a valid ObjectId")
+  }
+
   const restaurant = await RestaurantModel.findById(restaurantId);
   if (!restaurant) {
     throw new AppError(404, "Restaurant Not Found");
@@ -503,12 +516,16 @@ const getDiningsByRestaurantIdAndScheduleIdService = async (
 };
 
 const getSeatsByDiningIdService = async (diningId: string) => {
+   if(!Types.ObjectId.isValid(diningId)){
+    throw new AppError(400, "diningId must be a valid ObjectId")
+  }
+
   const dining = await DiningModel.findById(diningId);
   if (!dining) {
     throw new AppError(404, "dining Not Found");
   }
 
-  // //check reservation
+  //check reservation
   const reservation = await ReservationModel.findOne({
     diningId,
     restaurantId: dining.restaurantId,

@@ -13,13 +13,37 @@ import { xssSanitizer } from "./app/middlewares/xssSanitizer";
 
 const app: Application = express();
 
-app.use(cors())
+// Enhanced CORS configuration
+const corsOptions = {
+  origin: [
+    'http://localhost:3000',
+    'http://localhost:3001', 
+    'http://127.0.0.1:3000',
+    // Add your frontend domain here
+    'https://yourdomain.com'
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: [
+    'Origin',
+    'X-Requested-With',
+    'Content-Type',
+    'Accept',
+    'Authorization',
+    'Cache-Control',
+    'Pragma'
+  ],
+  preflightContinue: false,
+  optionsSuccessStatus: 204
+};
+
+app.use(cors(corsOptions));
 app.use(cookieParser())
 
 //prvent http paramater polution
-// app.use(hpp({
-//     whitelist: ["skills"]  //Allow these duplicate parameters
-// }))
+app.use(hpp({
+    whitelist: ["skills"]  //Allow these duplicate parameters
+}))
 app.use(morgan('dev'))
 
 app.get('/', (req:Request, res:Response) => {
@@ -36,7 +60,7 @@ app.use(bodyParser.json())
 
 
 // Data sanitization against XSS
-// app.use(xssSanitizer)
+app.use(xssSanitizer)
 
 
 //application routes

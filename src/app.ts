@@ -1,4 +1,4 @@
-import express, { Application, Request, Response } from "express";
+import express, { Application, Request, Response, NextFunction } from "express";
 import cors from 'cors';
 import router from "./app/routes";
 import morgan from "morgan";
@@ -7,12 +7,19 @@ import globalErrorHandler from "./app/middlewares/globalErrorHandler";
 import bodyParser from "body-parser";
 import cookieParser from 'cookie-parser';
 import path from "path";
+import hpp from "hpp";
+import { xssSanitizer } from "./app/middlewares/xssSanitizer";
 
 
 const app: Application = express();
 
 app.use(cors())
 app.use(cookieParser())
+
+//prvent http paramater polution
+app.use(hpp({
+    whitelist: ["skills"]  //Allow these duplicate parameters
+}))
 app.use(morgan('dev'))
 
 app.get('/', (req:Request, res:Response) => {
@@ -26,6 +33,10 @@ app.use(bodyParser.urlencoded({ extended: false }))
 
 // parse application/json
 app.use(bodyParser.json())
+
+
+// Data sanitization against XSS
+app.use(xssSanitizer)
 
 
 //application routes

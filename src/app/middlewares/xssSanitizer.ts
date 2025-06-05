@@ -17,9 +17,26 @@ function sanitizeInput(obj: any): any {
   return sanitized;
 }
 
-export function xssSanitizer(req: Request, res: Response, next: NextFunction) {
-  if (req.body) req.body = sanitizeInput(req.body);
-  if (req.query) req.query = sanitizeInput(req.query);
-  if (req.params) req.params = sanitizeInput(req.params);
+// export function xssSanitizer(req: Request, res: Response, next: NextFunction) {
+//   if (req.body) req.body = sanitizeInput(req.body);
+//   if (req.query) req.query = sanitizeInput(req.query);
+//   if (req.params) req.params = sanitizeInput(req.params);
+//   next();
+// }
+
+
+
+export const xssSanitizer = (req: Request, _res: Response, next: NextFunction) => {
+  if (req.body) {
+    // Don't modify headers or response objects
+    // Only sanitize the body content
+    for (const [key, value] of Object.entries(req.body)) {
+      if (typeof value === 'string') {
+        req.body[key] = xss(value);
+      }
+    }
+  }
+  
+  // Don't modify query parameters that might be needed for CORS
   next();
-}
+};

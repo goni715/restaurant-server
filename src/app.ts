@@ -14,24 +14,17 @@ import hpp from "hpp";
 const app: Application = express();
 
 
-//app.use(cors());
-app.use(
-  cors({
-    //origin: process.env.ALLOWED_ORIGINS?.split(",") || ["http://localhost:3000"],
-    origin: "*",
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
-    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
-  }),
-)
+app.use(cors());
+// app.use(
+//   cors({
+//     //origin: process.env.ALLOWED_ORIGINS?.split(",") || ["http://localhost:3000"],
+//     origin: "*",
+//     credentials: true,
+//     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+//     allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+//   }),
+// )
 
-// Data sanitization against XSS
-app.use(xssSanitizer)
-app.use(
-  hpp({
-    whitelist: ["skills"], // Allow these duplicate parameters
-  }),
-)
 
 app.use(cookieParser())
 

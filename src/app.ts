@@ -53,7 +53,7 @@ app.use(globalErrorHandler);
 
 
 //route not found
-app.use('*', notFound)
+app.use(notFound)
 
 
 export default app;

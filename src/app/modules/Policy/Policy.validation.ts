@@ -5,12 +5,12 @@ export const createPolicyValidationSchema = z.object({
     errorMap: () => ({ message: "{VALUE} is not supported" }),
   }),
   content: z
-    .string({
-      required_error: "Content is required!",
-    })
+    .string()
     .min(1, { message: "Content must not be empty." })
     .refine(
-      (val) => /^<([a-z]+)([^<]+)*(?:>(.*)<\/\1>|\s+\/>)$/i.test(val.trim()) || val.includes("<"),
+      (val) =>
+        /^<([a-z]+)([^<]+)*(?:>(.*)<\/\1>|\s+\/>)$/i.test(val.trim()) ||
+        val.includes("<"),
       {
         message: "Content must be valid HTML.",
       }
@@ -18,15 +18,18 @@ export const createPolicyValidationSchema = z.object({
 });
 
 export const updatePolicyValidationSchema = z.object({
- content: z
+  content: z
     .string({
       required_error: "Content is required!",
     })
     .min(1, { message: "Content must not be empty." })
     .refine(
-      (val) => /^<([a-z]+)([^<]+)*(?:>(.*)<\/\1>|\s+\/>)$/i.test(val.trim()) || val.includes("<"),
+      (val) =>
+        /^<([a-z]+)([^<]+)*(?:>(.*)<\/\1>|\s+\/>)$/i.test(val.trim()) ||
+        val.includes("<"),
       {
         message: "Content must be valid HTML.",
       }
-    ).optional()
+    )
+    .optional(),
 });

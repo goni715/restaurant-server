@@ -17,9 +17,9 @@ app.use(cors())
 app.use(cookieParser())
 
 //prvent http paramater polution
-app.use(hpp({
-    whitelist: ["skills"]  //Allow these duplicate parameters
-}))
+// app.use(hpp({
+//     whitelist: ["skills"]  //Allow these duplicate parameters
+// }))
 app.use(morgan('dev'))
 
 app.get('/', (req:Request, res:Response) => {
@@ -36,7 +36,7 @@ app.use(bodyParser.json())
 
 
 // Data sanitization against XSS
-app.use(xssSanitizer)
+// app.use(xssSanitizer)
 
 
 //application routes

@@ -362,7 +362,7 @@ const getUserReservationsByDateService = async (
   }
 
   if (!isValidDate(date)) {
-    throw new AppError(400, "Provide Valid Date");
+    throw new AppError(400, "Please, Provide 'yyyy-MM-dd' format date");
   }
 
   let filterQuery = {};

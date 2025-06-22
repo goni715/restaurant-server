@@ -6,9 +6,7 @@ import {
   INearbyQuery,
   IRestaurant,
   IRestaurantPayload,
-  TApprovedStatus,
   TRestaurantQuery,
-  TRestaurantStatus,
   TUserRestaurantQuery,
 } from "./restaurant.interface";
 import RestaurantModel from "./restaurant.model";
@@ -25,8 +23,6 @@ import ReviewModel from "../Review/review.model";
 import MenuReviewModel from "../MenuReview/menuReview.model";
 import ScheduleModel from "../Schedule/schedule.model";
 import BookingModel from "../Booking/booking.model";
-import UserModel from "../User/user.model";
-import { INotification } from "../Notification/notification.interface";
 import NotificationModel from "../Notification/notification.model";
 import ObjectId from "../../utils/ObjectId";
 import uploadImage from "../../utils/uploadImage";
@@ -243,7 +239,7 @@ const getRestaurantsService = async (query: TRestaurantQuery) => {
   };
 };
 
-const getUserRestaurantsService = async (query: TUserRestaurantQuery) => {
+const getUserRestaurantsService = async (loginUserId: string, query: TUserRestaurantQuery) => {
   // 1. Extract query parameters
   const {
     searchTerm,
@@ -290,22 +286,6 @@ const getUserRestaurantsService = async (query: TUserRestaurantQuery) => {
       },
     },
     {
-      $lookup: {
-        from: "menus", // Menu collection
-        localField: "_id",
-        foreignField: "restaurantId",
-        as: "menus",
-      },
-    },
-    {
-      $lookup: {
-        from: "cuisines", // Cuisine collection
-        localField: "menus.cuisineId",
-        foreignField: "_id",
-        as: "cuisine",
-      },
-    },
-    {
       $match: {
         ...searchQuery, // Apply search query
         ...filterQuery, // Apply filters
@@ -320,8 +300,31 @@ const getUserRestaurantsService = async (query: TUserRestaurantQuery) => {
       },
     },
     {
+  $lookup: {
+    from: "favourites",
+    let: { restaurantId: "$_id" }, //$$restaurantId হলো 👉 let দিয়ে parent ডকুমেন্ট থেকে বানানো লোকাল ভ্যারিয়েবল
+    pipeline: [
+      {
+        $match: {
+          $expr: {
+            $and: [
+              { $eq: ["$restaurantId", "$$restaurantId"] },
+              { $eq: ["$userId", new ObjectId(loginUserId)] }
+            ]
+          }
+        }
+      }
+    ],
+    as: "favourites",
+  }
+}
+,
+    {
       $addFields: {
         totalReview: { $size: "$reviews" },
+        isFavourite: {
+        $cond: [{ $gt: [{ $size: "$favourites" }, 0] }, true, false],
+      },
       },
     },
     {
@@ -337,6 +340,7 @@ const getUserRestaurantsService = async (query: TUserRestaurantQuery) => {
         discount: 1,
         ratings: 1,
         totalReview: 1,
+        isFavourite: 1,
         createdAt: 1,
         updatedAt: 1,
         ownerName: "$owner.fullName",

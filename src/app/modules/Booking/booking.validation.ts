@@ -1,36 +1,6 @@
 import { Types } from "mongoose";
 import { z } from "zod";
 
-const checkInTimeSchema = z
-  .string({
-    required_error: "Please select checkIn Time",
-  })
-  .min(1, { message: "Please select checkOut Time" })
-  .refine(
-    (value) => {
-      const regex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/; // 00-09 10-19 20-23
-      return regex.test(value); //return true or false
-    },
-    {
-      message: 'Invalid time format , expected "HH:MM" in 24 hours format',
-    }
-  );
-
-
-const checkOutTimeSchema = z
-  .string({
-    required_error: "Please select Check Out Time",
-  })
-  .min(1, { message: "Please select Check Out Time" })
-  .refine(
-    (value) => {
-      const regex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/; // 00-09 10-19 20-23
-      return regex.test(value); //return true or false
-    },
-    {
-      message: 'Invalid time format , expected "HH:MM" in 24 hours format',
-    }
-  );
 
 
   const dateSchema = z

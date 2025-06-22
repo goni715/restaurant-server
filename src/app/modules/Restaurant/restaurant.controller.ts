@@ -43,8 +43,9 @@ const findNearbyRestaurants = catchAsync(async (req, res) => {
 });
 
 const getUserRestaurants = catchAsync(async (req, res) => {
+  const loginUserId = req.headers.id;
   const validatedQuery = pickValidFields(req.query, UserRestaurantValidFields);
-  const result = await getUserRestaurantsService(validatedQuery);
+  const result = await getUserRestaurantsService(loginUserId as string,validatedQuery);
   sendResponse(res, {
     statusCode: 200,
     success: true,

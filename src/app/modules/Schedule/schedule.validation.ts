@@ -33,9 +33,9 @@ const endTimeSchema = z
 
 const startDateSchema = z
   .string({
-    required_error: "Please select Start Date",
+    required_error: "startDate is required",
   })
-  .min(1, { message: "Please select Start Date" })
+  .min(1, { message: "startDate is required" })
   .refine(
     (value) => {
       const dateRegex = /^20\d{2}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/; // "2024-11-25"
@@ -66,9 +66,9 @@ const startDateSchema = z
 
 const endDateSchema = z
   .string({
-    required_error: "Please select End Date",
+    required_error: "endDate is required",
   })
-  .min(1, { message: "Please select End Date" })
+  .min(1, { message: "endDate is required" })
   .refine(
     (value) => {
       const dateRegex = /^20\d{2}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/; // "2024-11-24"
@@ -105,8 +105,12 @@ export const createScheduleSchema = z
       z.object({
         startTime: startTimeSchema,
         endTime: endTimeSchema,
-      })
-    ),
+      }),
+      {
+        invalid_type_error: "slot must be an array",
+        required_error: "slot must be at least one value"
+      }
+    ).min(1, { message: "slot must be at least one value" }),
   })
   .superRefine((values, ctx) => {
     const { startDate, endDate, slot } = values;
